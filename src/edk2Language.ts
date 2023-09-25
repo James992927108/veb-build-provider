@@ -267,7 +267,7 @@ export class Edk2VfrProvider implements vscode.DefinitionProvider {
 function openFileHandler(file: vscode.TextDocument) {
     /*
     let file_extension = file.uri.fsPath.substring(file.uri.fsPath.length - 4);
-	
+    
     if (file_extension.match('.git') || file_extension.match('.svn')) {
         // Should not parse another plugin...
         return;

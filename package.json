@@ -3,33 +3,14 @@
     "publisher": "AsusBios",
     "displayName": "Asus-Veb-Provider",
     "description": "This tools provider building project and creating treeview of veb module explorer for Asus.",
-    "version": "1.9.0",
+    "version": "1.9.1",
     "main": "./out/extension.js",
     "engines": {
-        "vscode": "^1.49.0"
+        "vscode": "^1.82.2"
     },
     "categories": [
         "Other",
         "Programming Languages"
-    ],
-    "activationEvents": [
-        "onView:fileExplorer",
-        "onCommand:extension.AsusBuildAll",
-        "onCommand:extension.AsusReBuild",
-        "onCommand:extension.AsusInitTask",
-        "onCommand:extension.AsusBuildSingleModule",
-        "onCommand:extension.AsusAitSync",
-        "onCommand:extension.AsusVebExcute",
-        "onCommand:formatter.Edk2Formatter",
-        "onCommand:AsusSnippetTools.DebugToAsusPrint",
-        "onCommand:AsusSnippetTools.AsusPrintToDebug",
-        "onCommand:other.KillGitProcess",
-        "onLanguage:edk2_fdf",
-        "onLanguage:edk2_dsc",
-        "onLanguage:edk2_dec",
-        "onLanguage:edk2_inf",
-        "onLanguage:edk2_vfr",
-        "onLanguage:edk2_uni"
     ],
     "contributes": {
         "viewsContainers": {

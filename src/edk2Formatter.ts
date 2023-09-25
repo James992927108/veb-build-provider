@@ -30,7 +30,7 @@ function writeBacktoFile(filepath: string, fileEncoding: string, fileString: str
         .then(() => {
             console.log('File created!');
         })
-        .catch(error => console.log(error));
+        .catch(error => console.log("error: ", error));
 
 }
 

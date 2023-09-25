@@ -45,7 +45,7 @@ function formatSdl(filepath: string, fileEncoding: string): Promise<any> {
 
             if (line.match(patternSpace) || line.match(patternTab)) {
                 var i = line.indexOf('=');
-                console.log(i);
+                // console.log("indexof \"=\" -> ",i);
                 if (i > -1) {
                     var element = [line.slice(0, i).trim(), line.slice(i + 2).trim()]; // i + 2 for remove "="
                     // console.log(element);

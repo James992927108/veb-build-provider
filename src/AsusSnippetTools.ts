@@ -13,35 +13,35 @@ class AsusSnippetTools {
         // 可以在构造函数中进行初始化操作
     }
 
-    processFile() {
+    DebugToAsusPrint() {
         const activeEditor = this.vscodeInstance.window.activeTextEditor;
 
         if (activeEditor) {
             let filePath = activeEditor.document.uri.fsPath;
             let fileEncoding = "utf8";
             console.log('filePath', filePath);
-            this.DebugToAsusPrint(filePath, fileEncoding).then((fileString) => {
+            this._DebugToAsusPrint(filePath, fileEncoding).then((fileString) => {
                 console.log('DebugToAsusPrint');
                 this.writeBacktoFile(filePath, fileEncoding, fileString);
             });
         }
     }
 
-    processFile1() {
+    AsusPrintToDebug() {
         const activeEditor = this.vscodeInstance.window.activeTextEditor;
 
         if (activeEditor) {
             let filePath = activeEditor.document.uri.fsPath;
             let fileEncoding = "utf8";
             console.log('filePath', filePath);
-            this.AsusPrintToDebug(filePath, fileEncoding).then((fileString) => {
+            this._AsusPrintToDebug(filePath, fileEncoding).then((fileString) => {
                 console.log('AsusPrintToDebug');
                 this.writeBacktoFile(filePath, fileEncoding, fileString);
             });
         }
     }
 
-    private DebugToAsusPrint(filepath: string, fileEncoding: string): Promise<any> {
+    private _DebugToAsusPrint(filepath: string, fileEncoding: string): Promise<any> {
         const line_counter = ((i = 0) => () => ++i)();
         return new Promise((resolve) => {
             /**
@@ -101,7 +101,7 @@ class AsusSnippetTools {
             });
         });
     }
-    private AsusPrintToDebug(filepath: string, fileEncoding: string): Promise<any> {
+    private _AsusPrintToDebug(filepath: string, fileEncoding: string): Promise<any> {
 
         const line_counter = ((i = 0) => () => ++i)();
         return new Promise((resolve) => {
@@ -130,7 +130,7 @@ class AsusSnippetTools {
 
             rl.on("line", (line: string, lineno = line_counter()) => {
                 //Remove header file 
-                if(lineno === 1){
+                if (lineno === 1) {
                     return;
                 }
                 const patternDebugString = new RegExp(/ASUSPRINT\s*\(/);
