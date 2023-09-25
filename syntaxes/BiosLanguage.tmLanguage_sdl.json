@@ -1,0 +1,61 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "source.sdl",
+	"patterns": [
+		{
+			"include": "#keywords_sdl"
+		}
+	],
+	"repository": {
+		"keywords_sdl": {
+			"patterns": [
+				{
+					"name": "entity.name.function.BiosLanguage",
+					"match": "\\b^(TOKEN|End|FFS_FILE|OUTPUTREGISTER|INFComponent|ELINK|MODULE|PATH|LibraryMapping|PcdMapping|FD_AREA|PCIDEVICE)\\b"
+				},
+				{
+					"begin": "\\b(Name|File|Index|INFComponent|Rule_Override|Parent|Arch|Skip_Packaging|Range|FD_AREA|FILE_Stmt|Template|Path|TargetFDF|InvokeOrder|GuidSpace|PcdType|Offset|Length|DataType|TargetDSC|Package|Value|Class|Instance|Override|ModuleTypes|Help|TokenType|Master|TargetH|TargetMAK|TargetEQU|Token)\\b",
+					"end": "=",
+					"name": "variable.function.constructor.BiosLanguage"
+				},
+				{
+					"begin": "\\[",
+					"end": "\\]",
+					"patterns": [
+						{
+							"name": "invalid.illegal.BiosLanguage",
+							"match": "[a-zA-Z0-9.]+"
+						}
+					]
+				},					
+				{	
+					"begin": " \"",
+					"end": "\"",
+					"name": "invalid.illegal.BiosLanguage",
+					"patterns": [			
+						{
+							"name": "entity.name.type.BiosLanguage",
+							"match": "."
+						}
+					]
+				},		
+				{	
+					"begin": " '",
+					"end": "'",
+					"name": "invalid.illegal.BiosLanguage",
+					"patterns": [			
+						{
+							"name": "entity.name.type.BiosLanguage",
+							"match": "."
+						}
+					]
+				},				
+				{	
+					"name": "entity.name.function.BiosLanguage",
+					"match": "\\b(Integer|Yes|Expression|Boolean|AfterParent)\\b"
+				}
+			]
+		}
+	},
+	"scopeName": "source.sdl"
+}

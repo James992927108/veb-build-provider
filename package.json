@@ -1,0 +1,454 @@
+{
+    "name": "asus-veb-provider",
+    "publisher": "AsusBios",
+    "displayName": "Asus-Veb-Provider",
+    "description": "This tools provider building project and creating treeview of veb module explorer for Asus.",
+    "version": "1.9.0",
+    "main": "./out/extension.js",
+    "engines": {
+        "vscode": "^1.49.0"
+    },
+    "categories": [
+        "Other",
+        "Programming Languages"
+    ],
+    "activationEvents": [
+        "onView:fileExplorer",
+        "onCommand:extension.AsusBuildAll",
+        "onCommand:extension.AsusReBuild",
+        "onCommand:extension.AsusInitTask",
+        "onCommand:extension.AsusBuildSingleModule",
+        "onCommand:extension.AsusAitSync",
+        "onCommand:extension.AsusVebExcute",
+        "onCommand:formatter.Edk2Formatter",
+        "onCommand:AsusSnippetTools.DebugToAsusPrint",
+        "onCommand:AsusSnippetTools.AsusPrintToDebug",
+        "onCommand:other.KillGitProcess",
+        "onLanguage:edk2_fdf",
+        "onLanguage:edk2_dsc",
+        "onLanguage:edk2_dec",
+        "onLanguage:edk2_inf",
+        "onLanguage:edk2_vfr",
+        "onLanguage:edk2_uni"
+    ],
+    "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "file-explorer",
+                    "title": "Module Explorer",
+                    "icon": "media/dep.svg"
+                }
+            ]
+        },
+        "views": {
+            "file-explorer": [
+                {
+                    "id": "fileExplorer",
+                    "name": "Module Explorer (components)"
+                }
+            ]
+        },
+        "commands": [
+            {
+                "command": "fileExplorer.openFile",
+                "title": "Open File"
+            },
+            {
+                "command": "rightclick.copyfilepath",
+                "title": "Copy File Path"
+            },
+            {
+                "command": "rightclick.openFile",
+                "title": "Open File"
+            },
+            {
+                "command": "rightclick.Locate",
+                "title": "Locate"
+            },
+            {
+                "command": "rightclick.openFolder",
+                "title": "Open File Location"
+            },
+            {
+                "title": "Refresh",
+                "command": "workbench.action.reloadWindow",
+                "icon": "media/refresh.svg"
+            },
+            {
+                "command": "extension.AsusBuildAll",
+                "title": "Asus Build All."
+            },
+            {
+                "command": "extension.AsusReBuild",
+                "title": "Asus ReBuild."
+            },
+            {
+                "command": "extension.AsusInitTask",
+                "title": "Asus initial task program."
+            },
+            {
+                "command": "extension.AsusBuildSingleModule",
+                "title": "Asus Build Single Module."
+            },
+            {
+                "command": "extension.AsusAitSync",
+                "title": "AsusAitModuleSync"
+            },
+            {
+                "command": "extension.AsusVebExcute",
+                "title": "AsusVebExcute"
+            },
+            {
+                "command": "formatter.Edk2Formatter",
+                "title": "Format Document"
+            },
+            {
+                "command": "AsusSnippetTools.DebugToAsusPrint",
+                "title": "Replace Debug to ASUSPRINT"
+            },
+            {
+                "command": "AsusSnippetTools.AsusPrintToDebug",
+                "title": "Replace Debug to ASUSPRINT"
+            },
+            {
+                "command": "other.KillGitProcess",
+                "title": "Kill git.exe process"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "extension.AsusBuildAll",
+                "key": "F9",
+                "mac": "F9"
+            },
+            {
+                "command": "extension.AsusInitTask",
+                "key": "F8",
+                "mac": "F8"
+            },
+            {
+                "command": "extension.AsusReBuild",
+                "key": "F7",
+                "mac": "F7"
+            },
+            {
+                "command": "extension.AsusBuildSingleModule",
+                "key": "Ctrl+F7",
+                "mac": "Ctrl+F7",
+                "when": "editorTextFocus&&resourceExtname == .inf"
+            },
+            {
+                "command": "extension.AsusAitSync",
+                "key": "ctrl+F12",
+                "mac": "ctrl+F12"
+            },
+            {
+                "command": "extension.AsusVebExcute",
+                "key": "ctrl+F11",
+                "mac": "ctrl+F11"
+            },
+            {
+                "command": "formatter.Edk2Formatter",
+                "key": "shift+alt+F",
+                "mac": "shift+alt+F",
+                "when": "resourceLangId == BiosLanguage_sdl || resourceLangId == edk2_uni"
+            },
+            {
+                "command": "AsusSnippetTools.DebugToAsusPrint",
+                "key": "alt+F1",
+                "mac": "alt+F1",
+                "when": "resourceLangId == c"
+            },
+            {
+                "command": "AsusSnippetTools.AsusPrintToDebug",
+                "key": "alt+shift+F1",
+                "mac": "alt+shift+F1",
+                "when": "resourceLangId == c"
+            },
+            {
+                "command": "editor.action.insertSnippet",
+                "key": "ctrl+f1",
+                "when": "resourceLangId == c || resourceLangId == cpp",
+                "args": {
+                    "langId": "c",
+                    "name": "debug_user_snippet"
+                }
+            },
+            {
+                "command": "editor.action.insertSnippet",
+                "key": "ctrl+f2",
+                "when": "resourceLangId == c || resourceLangId == cpp",
+                "args": {
+                    "langId": "c",
+                    "name": "debug_start_snippet"
+                }
+            },
+            {
+                "command": "editor.action.insertSnippet",
+                "key": "ctrl+f3",
+                "when": "resourceLangId == c || resourceLangId == cpp",
+                "args": {
+                    "langId": "c",
+                    "name": "debug_end_snippet"
+                }
+            },
+            {
+                "command": "other.KillGitProcess",
+                "key": "shift+F12",
+                "mac": "shift+F12"
+            }
+        ],
+        "languages": [
+            {
+                "id": "BiosLanguage_veb",
+                "extensions": [
+                    ".veb"
+                ],
+                "configuration": "./confs/language-configuration_veb.json"
+            },
+            {
+                "id": "BiosLanguage_sdl",
+                "extensions": [
+                    ".sdl"
+                ],
+                "configuration": "./confs/language-configuration_sdl.json"
+            },
+            {
+                "id": "edk2_dsc",
+                "extensions": [
+                    ".dsc"
+                ],
+                "configuration": "./confs/edk2_dsc.conf.json"
+            },
+            {
+                "id": "edk2_dec",
+                "extensions": [
+                    ".dec"
+                ],
+                "configuration": "./confs/edk2_dec.conf.json"
+            },
+            {
+                "id": "edk2_fdf",
+                "extensions": [
+                    ".fdf"
+                ],
+                "configuration": "./confs/edk2_fdf.conf.json"
+            },
+            {
+                "id": "edk2_inf",
+                "extensions": [
+                    ".inf"
+                ],
+                "configuration": "./confs/edk2_inf.conf.json"
+            },
+            {
+                "id": "edk2_uni",
+                "extensions": [
+                    ".uni"
+                ],
+                "configuration": "./confs/edk2_uni.conf.json"
+            },
+            {
+                "id": "edk2_vfr",
+                "extensions": [
+                    ".vfr",
+                    ".Vfr",
+                    ".hfr",
+                    ".sd"
+                ],
+                "configuration": "./confs/edk2_vfr.conf.json"
+            },
+            {
+                "id": "asm",
+                "aliases": [
+                    "x86 and x86_64 Assembly",
+                    "asm"
+                ],
+                "extensions": [
+                    ".asm",
+                    ".nasm",
+                    ".yasm",
+                    ".inc",
+                    ".s"
+                ],
+                "configuration": "./language-configuration_asm.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "BiosLanguage_veb",
+                "scopeName": "source.veb",
+                "path": "./syntaxes/BiosLanguage.tmLanguage_veb.json"
+            },
+            {
+                "language": "BiosLanguage_sdl",
+                "scopeName": "source.sdl",
+                "path": "./syntaxes/BiosLanguage.tmLanguage_sdl.json"
+            },
+            {
+                "language": "edk2_dsc",
+                "scopeName": "source.edk2_dsc",
+                "path": "./syntaxes/edk2_dsc.tmLanguage.json"
+            },
+            {
+                "language": "edk2_dec",
+                "scopeName": "source.edk2_dec",
+                "path": "./syntaxes/edk2_dec.tmLanguage.json"
+            },
+            {
+                "language": "edk2_fdf",
+                "scopeName": "source.edk2_fdf",
+                "path": "./syntaxes/edk2_fdf.tmLanguage.json"
+            },
+            {
+                "language": "edk2_inf",
+                "scopeName": "source.edk2_inf",
+                "path": "./syntaxes/edk2_inf.tmLanguage.json"
+            },
+            {
+                "language": "edk2_uni",
+                "scopeName": "source.edk2_uni",
+                "path": "./syntaxes/edk2_uni.tmLanguage.json"
+            },
+            {
+                "language": "edk2_vfr",
+                "scopeName": "source.edk2_vfr",
+                "path": "./syntaxes/edk2_vfr.tmLanguage.json"
+            },
+            {
+                "language": "asm",
+                "scopeName": "source.asm.x86_64",
+                "path": "./syntaxes/language-x86_64-assembly.tmLanguage"
+            }
+        ],
+        "snippets": [
+            {
+                "language": "c",
+                "path": "./snippets/edk2_c.snippet.json"
+            },
+            {
+                "language": "cpp",
+                "path": "./snippets/edk2_c.snippet.json"
+            }
+        ],
+        "menus": {
+            "view/item/context": [
+                {
+                    "when": "view == fileExplorer",
+                    "command": "rightclick.copyfilepath",
+                    "group": "9_cutcopypaste"
+                },
+                {
+                    "when": "view == fileExplorer",
+                    "command": "rightclick.openFolder",
+                    "group": "9_cutcopypaste"
+                },
+                {
+                    "when": "view == fileExplorer",
+                    "command": "rightclick.openFile",
+                    "group": "navigation"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "workbench.action.reloadWindow",
+                    "group": "navigation",
+                    "when": "view == fileExplorer"
+                }
+            ],
+            "editor/context": [
+                {
+                    "when": "editorTextFocus",
+                    "command": "rightclick.Locate",
+                    "group": "navigation"
+                },
+                {
+                    "when": "resourceExtname == .inf",
+                    "command": "extension.AsusBuildSingleModule",
+                    "group": "navigation"
+                },
+                {
+                    "when": "resourceLangId == edk2_uni",
+                    "command": "formatter.Edk2Formatter",
+                    "group": "navigation"
+                },
+                {
+                    "when": "resourceLangId == BiosLanguage_sdl",
+                    "command": "formatter.Edk2Formatter",
+                    "group": "navigation"
+                },
+                {
+                    "when": "resourceLangId == c",
+                    "command": "AsusSnippetTools.DebugToAsusPrint",
+                    "group": "navigation"
+                },
+                {
+                    "when": "resourceLangId == c",
+                    "command": "AsusSnippetTools.AsusPrintToDebug",
+                    "group": "navigation"
+                }
+            ],
+            "explorer/context": [
+                {
+                    "command": "extension.AsusBuildSingleModule",
+                    "group": "navigation",
+                    "when": "resourceExtname == .inf"
+                },
+                {
+                    "when": "resourceLangId == edk2_uni",
+                    "command": "formatter.Edk2Formatter"
+                },
+                {
+                    "when": "resourceLangId == BiosLanguage_sdl",
+                    "command": "formatter.Edk2Formatter"
+                }
+            ]
+        },
+        "configuration": {
+            "type": "object",
+            "title": "Asus veb provider",
+            "properties": {
+                "formatter.speceOnUni": {
+                    "type": "number",
+                    "default": 8,
+                    "minimum": 1,
+                    "description": "Provide space numbers between max length Token and LanguageCodes"
+                },
+                "formatter.spaceOnSdlBefore": {
+                    "type": "number",
+                    "default": 4,
+                    "minimum": 1,
+                    "description": "Provide space numbers before the string"
+                },
+                "formatter.spaceOnSdlAfter": {
+                    "type": "number",
+                    "default": 15,
+                    "minimum": 1,
+                    "description": "Provide space numbers after the string"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "yarn run compile",
+        "compile": "tsc -p ./",
+        "lint": "eslint src --ext ts",
+        "watch": "tsc -watch -p ./",
+        "pretest": "yarn run compile && yarn run lint",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.49.0",
+        "@types/glob": "^7.1.1",
+        "@types/mocha": "^7.0.2",
+        "@types/node": "^13.11.0",
+        "eslint": "^6.8.0",
+        "@typescript-eslint/parser": "^2.30.0",
+        "@typescript-eslint/eslint-plugin": "^2.30.0",
+        "glob": "^7.1.6",
+        "mocha": "^7.1.2",
+        "typescript": "^3.8.3",
+        "vscode-test": "^1.3.0"
+    }
+}

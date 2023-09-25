@@ -1,0 +1,60 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "source.veb",
+	"patterns": [
+		{
+			"include": "#keywords_veb"
+		}
+	],
+	"repository": {
+		"keywords_veb": {
+			"patterns": [
+				{
+					"begin": "\t",
+					"end": "=",
+					"patterns": [
+						{
+							"name": "variable.language.BiosLanguage_veb",
+							"match": "\\b(version|Build|BuildAll|Execute|BuildLog|BuildDir|BoardFlavor|ProjectType|CleanCmd|SourceControl)\\b"
+						}
+					]
+				},
+				{
+					"begin": "\\[",
+					"end": "\\]",
+					"patterns": [
+						{
+							"name": "invalid.illegal.BiosLanguage_veb",
+							"match": "[a-zA-Z0-9.]+"
+						}
+					]
+				},				
+				{	
+					"begin": "^\"",
+					"end": "\"=",
+					"patterns": [
+						{
+							"name": "variable.function.constructor.BiosLanguage_veb",
+							"match": "."
+						}
+					]
+				},				
+				{	
+					"begin": " \"",
+					"end": "\"",
+					"patterns": [			
+						{
+							"name": "entity.name.type.BiosLanguage_veb",
+							"match": "."
+						}
+					]
+				},
+				{
+					"name": "entity.name.function.BiosLanguage_veb",
+					"match": "\\b(Private)\\b"
+				}
+			]
+		}
+	},
+	"scopeName": "source.veb"
+}
