@@ -16,10 +16,10 @@ const util = require('util');
 
 let NumOfarray = 0;
 let MaxSizeofarray = 0;
-let BuildToolFileName = 'AsusBuildCommandList.ini';
+let BuildToolFileName = 'BuildCommandList.ini';
 // Task file define
 const Taskfile = '{\n\
-    "version": "3.0.2",\n\
+    "version": "1.0.0",\n\
     "tasks": \n\
     [\n\
         {\n\
@@ -28,39 +28,19 @@ const Taskfile = '{\n\
             "command": ""\n\
         },\n\
         {\n\
-            "label": "AsusBuildAllTask",\n\
+            "label": "VebBuildTask",\n\
             "type": "shell",\n\
             "command": "cmd /V /C \\"SET VEB=%s&&echo !VEB! &&%s 2>&1| %s Build.log\\""\n\
         },\n\
         {\n\
-            "label": "AsusReBuildAllTask",\n\
+            "label": "VebReBuildTask",\n\
             "type": "shell",\n\
             "command": "cmd /V /C \\"SET VEB=%s&&echo !VEB! &&%s 2>&1| %s Build.log\\""\n\
-        },\n\
-        {\n\
-            "label": "AsusBuildSingleModule",\n\
-            "type": "shell",\n\
-            "command": "cmd /V /C \\".vscode\\\\TargetModule.bat&&SET VEB=%s&&echo !VEB! &&%s 2>&1| %s Build.log\\""\n\
-        },\n\
-        {\n\
-            "label": "Asus Release Bios",\n\
-            "type": "shell",\n\
-            "command": "cmd /V /C \\"SET VEB=%s&&set PATH=%PATH%;C:\\\\Program Files\\\\7-Zip&&echo !VEB! &&%s 2>&1| %s Build.log\\""\n\
-        },\n\
-        {\n\
-            "label": "Asus Clean Command",\n\
-            "type": "shell",\n\
-            "command": "cmd /V /C \\"SET VEB=%s&&echo !VEB! &&set PATH=%PATH%;D:\\\\BIOS\\\\AmiAptio5Tools\\\\BuildTools&&SET AMIEFITOOLS=D:\\\\BIOS\\\\AmiAptio5Tools&&SET TOOLS_DIR=D:\\\\BIOS\\\\AmiAptio5Tools\\\\BuildTools&&SET ASUSBUILDTOOLS=D:\\\\BIOS\\\\AmiAptio5Tools&&%s 2>&1| %s Build.log\\""\n\
         },\n\
         {\n\
             "label": "------------------------------------External command------------------------------------------",\n\
             "type": "shell",\n\
             "command": ""\n\
-        },\n\
-        {\n\
-            "label": "AsusAitModuleSync",\n\
-            "type": "shell",\n\
-            "command": "ait subm %s --sync"\n\
         },\n\
         {\n\
             "label": "KillGitProcess",\n\
@@ -91,11 +71,10 @@ const TaskSample = '\
 
 async function BuildDefaulTask(folderpath: string, selection: string, TaskfileUpdate: unknown) {
     return new Promise(resolve => {
+        console.log("BuildDefaulTask Start");
         let fileStream = fs.createReadStream(path.join(folderpath, selection));
         let BuildCommand = [];
         let ReBuildCommand = [];
-        let ExecuteCommand = [];
-        let CleanCmdCommand = [];
         const extension = vscode.extensions.getExtension("AsusBios.asus-veb-provider");
         let extensionPath = "";
 
@@ -104,34 +83,23 @@ async function BuildDefaulTask(folderpath: string, selection: string, TaskfileUp
         } else {
             console.log("getExtension AsusBios.asus-veb-provider failed");
         }
-        console.log("BuildDefaulTask");
         fileStream.on('data', function (chunk) {
-            ReBuildCommand = chunk.toString().slice(chunk.toString().indexOf('Build'), chunk.toString().indexOf('BuildAll')).split('"')[1].replace(/\\/g, '\\\\');
-            BuildCommand = chunk.toString().slice(chunk.toString().indexOf('BuildAll'), chunk.toString().indexOf('Execute')).split('"')[1].replace(/\\/g, '\\\\');
-            ExecuteCommand = chunk.toString().slice(chunk.toString().indexOf('Execute'), chunk.toString().indexOf('BuildLog')).split('"')[1].replace(/\\/g, '\\\\');
-            CleanCmdCommand = chunk.toString().slice(chunk.toString().indexOf('CleanCmd'), chunk.toString().indexOf('[files]')).split('"')[1].replace(/\\/g, '\\\\');
+            BuildCommand = chunk.toString().slice(chunk.toString().indexOf('Build'), chunk.toString().indexOf('BuildAll')).split('"')[1].replace(/\\/g, '\\\\');
+            ReBuildCommand = chunk.toString().slice(chunk.toString().indexOf('BuildAll'), chunk.toString().indexOf('BuildLog')).split('"')[1].replace(/\\/g, '\\\\');
             fileStream.destroy();
         });
         fileStream.on('close', () => {
-            console.log('Build: %s\nrebuild: %s\nExecuteCommand: %s\nCleanCmdCommand: %s', BuildCommand, ReBuildCommand, ExecuteCommand, CleanCmdCommand);
             TaskfileUpdate = util.format(Taskfile,
-                selection.split('.')[0],
+                // BuildAllTask
+                selection.split('.')[0], // VEB=
                 BuildCommand,
                 extensionPath,
+                // ReBuildAllTask
                 selection.split('.')[0],
                 ReBuildCommand,
                 extensionPath,
-                selection.split('.')[0],
-                ReBuildCommand,
-                extensionPath,
-                selection.split('.')[0],
-                ExecuteCommand,
-                extensionPath,
-                selection.split('.')[0],
-                CleanCmdCommand,
-                extensionPath,
-                selection, // ait sync %s
             );
+            // console.log(TaskfileUpdate);
             resolve(TaskfileUpdate);
         });
     });
@@ -152,9 +120,10 @@ function AmendTaskByFile(folderpath, selection, TaskfileUpdate, project) {
         line = line.toString().replace(new RegExp("%project", "ig"), project.split('.')[0]);
         console.log(line);
         if (line.split(/:/)[0].replace(/[ |\t]/g, "") == "shell") {
-            console.log('shell');
+            // console.log('shell');
             TaskfileUpdate = TaskfileUpdate + util.format(TaskSampleShell, line.split(/:/)[1].replace(/[\t]/g, ""), line.split(/:/)[2]);
         } else {
+            // console.log('process');
             TaskfileUpdate = TaskfileUpdate + util.format(TaskSample, line.split(/:/)[1].replace(/[\t]/g, ""), line.split(/:/)[0].replace(/[ |\t]/g, ""), line.split(/:/)[2]);
         }
     });
@@ -257,12 +226,11 @@ function getFolderPath() {
             }
         }
     }
-
     console.log('Folderpath: %s', folderpath);
     return folderpath;
 }
 
-function handleAsusInitTask() {
+function handleInitTask() {
     let start = 0;
     let end = 0;
     let EXTENSION = '.veb';
@@ -306,67 +274,8 @@ function handleAsusInitTask() {
     });
 }
 
-function handleAsusReBuild() {
-    const folderpath = getFolderPath();
-    fs.exists(path.join(folderpath, ".vscode", "tasks.json"), exists => {
-        if (!exists) {
-            vscode.window.showErrorMessage("Asus Build fail: initialize the task.json by pressing the shortcut key (F8).");
-        } else {
-            fs.exists(path.join(folderpath, BuildToolFileName), exists1 => {
-                if (!exists1) {
-                    vscode.commands.executeCommand("workbench.action.tasks.runTask", "AsusReBuildAllTask");
-                } else {
-                    const CommandList: string[] = [];
-                    let TasksJson = fs.readFileSync(path.join(folderpath, ".vscode", "tasks.json"), "utf8");
-                    let arr = TasksJson.split(/\r?\n/);
-                    arr.forEach((line: string, idx: number) => {
-                        if (line.includes("label")) {
-                            console.log((idx + 1) + ':' + line);
-                            CommandList.push(line.split(/"/)[3]);
-                        }
-                    });
-                    console.log(CommandList);
-
-                    vscode.window.showQuickPick(CommandList, { placeHolder: 'select command from command list' }).then(selection => {
-                        // check selection is selected or not.
-                        if (!selection) {
-                            return;
-                        }
-                        vscode.commands.executeCommand("workbench.action.tasks.runTask", selection);
-                    });
-                }
-            });
-        }
-    });
-}
-
-function handleAsusBuildSingleModule() {
-    const folderpath = getFolderPath();
-    const activeEditor = vscode.window.activeTextEditor;
-    if (activeEditor) {
-        var currentlyOpenTabfilePath = activeEditor.document.fileName;
-        var currentlyOpenTabextname = path.extname(currentlyOpenTabfilePath);
-        if (currentlyOpenTabextname !== '.inf') {
-            vscode.window.showErrorMessage("請標記INF檔再進行 Asus Build Single Module");
-            vscode.window.showErrorMessage(path.basename(currentlyOpenTabfilePath) + " can't be builed");
-        } else {
-            fs.writeFile(path.join(folderpath, ".vscode", "TargetModule.bat"), 'set VEB_BUILD_MODULE=' + currentlyOpenTabfilePath, err => {
-                if (err) {
-                    console.error(err);
-                    vscode.window.showErrorMessage("Create task.json fail.");
-                } else {
-                    //console.log('YES! %s',TaskfileUpdate);
-                    vscode.window.showInformationMessage("Start to build module:  " + path.basename(currentlyOpenTabfilePath));
-                    vscode.commands.executeCommand("workbench.action.tasks.runTask", "AsusBuildSingleModule");
-                }
-            });
-        }
-    }
-}
-
 function checkAndExecuteTask(taskName: string, errorMessage: string) {
     const folderpath = getFolderPath();
-
     if (!folderpath) {
         vscode.window.showErrorMessage("Error folder is Empty");
         return;
@@ -377,25 +286,51 @@ function checkAndExecuteTask(taskName: string, errorMessage: string) {
         if (!exists) {
             vscode.window.showErrorMessage(errorMessage);
         } else {
-            vscode.commands.executeCommand("workbench.action.tasks.runTask", taskName);
+            // F7 need to check BuildCommandList.ini
+            if (taskName === "VebBuildTask") {
+                fs.exists(path.join(folderpath, BuildToolFileName), exists1 => {
+                    if (!exists1) {
+                        console.log("Not found BuildCommandList.ini");
+                        vscode.commands.executeCommand("workbench.action.tasks.runTask", "VebReBuildTask");
+                    } else {
+                        const CommandList: string[] = [];
+                        let TasksJson = fs.readFileSync(path.join(folderpath, ".vscode", "tasks.json"), "utf8");
+                        let arr = TasksJson.split(/\r?\n/);
+                        arr.forEach((line: string, idx: number) => {
+                            if (line.includes("label")) {
+                                console.log((idx + 1) + ':' + line);
+                                CommandList.push(line.split(/"/)[3]);
+                            }
+                        });
+                        console.log(CommandList);
+
+                        vscode.window.showQuickPick(CommandList, { placeHolder: 'select command from command list' }).then(selection => {
+                            // check selection is selected or not.
+                            if (!selection) {
+                                return;
+                            }
+                            vscode.commands.executeCommand("workbench.action.tasks.runTask", selection);
+                        });
+                    }
+                });
+            } else {
+                vscode.commands.executeCommand("workbench.action.tasks.runTask", taskName);
+            }
         }
     });
 }
 
-function handleAsusBuildAll() {
-    checkAndExecuteTask("AsusBuildAllTask", "handleAsusBuildAll fail: initialize the task.json by pressing the shortcut key (F8).");
+// F7
+function handleVebBuild() {
+    checkAndExecuteTask("VebBuildTask", "VebBuildTask fail: initialize the task.json by pressing the shortcut key (F8).");
 }
-
-function handleAsusAitSync() {
-    checkAndExecuteTask("AsusAitModuleSync", "handleAsusAitSync fail: initialize the task.json by pressing the shortcut key (F8).");
+// F9
+function handleVebReBuild() {
+    checkAndExecuteTask("VebReBuildTask", "VebReBuildTask fail: initialize the task.json by pressing the shortcut key (F8).");
 }
 
 function handleKillGitProcess() {
     checkAndExecuteTask("KillGitProcess", "handleKillGitProcess fail.");
-}
-
-function handleAsusVebExcute() {
-    checkAndExecuteTask("Asus Release Bios", "handleAsusVebExcute fail: initialize the task.json by pressing the shortcut key (F8).");
 }
 
 function registerCommand(context, commandName, callback) {
@@ -415,25 +350,15 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_dec' }, new Edk2DecProvider());
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_inf' }, new Edk2InfProvider());
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_vfr' }, new Edk2VfrProvider());
-    //
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with  registerCommand
-    // The commandId parameter must match the command field in package.json
 
-    // F8: Asus Build initialize task Command
-    registerCommand(context, 'extension.AsusInitTask', () => handleAsusInitTask());
-    // F9: Asus Build all Command
-    registerCommand(context, 'extension.AsusBuildAll', () => handleAsusBuildAll());
-    // F7: Asus ReBuild Command
-    registerCommand(context, 'extension.AsusReBuild', () => handleAsusReBuild());
-    // Ctrl + F7: Asus Build Single Module Command
-    registerCommand(context, 'extension.AsusBuildSingleModule', () => handleAsusBuildSingleModule());
-    // ctrl + F11: Asus Veb Excute
-    registerCommand(context, 'extension.AsusVebExcute', () => handleAsusVebExcute());
-    // Ctrl + F12: Asus Ait Sync
-    registerCommand(context, 'extension.AsusAitSync', () => handleAsusAitSync());
+    // F8: Build initialize task Command
+    registerCommand(context, 'extension.InitTask', () => handleInitTask());
+    // F7: Build Command
+    registerCommand(context, 'extension.VebBuild', () => handleVebBuild());
+    // F9: ReBuild Command
+    registerCommand(context, 'extension.VebReBuild', () => handleVebReBuild());
+
+    
     // Shift + Alt + F: Uni/Sdl Formatter Documentation
     registerCommand(context, 'formatter.Edk2Formatter', () => Edk2Formatter());
     // Alt + F1

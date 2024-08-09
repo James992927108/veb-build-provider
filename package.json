@@ -57,28 +57,16 @@
                 "icon": "media/refresh.svg"
             },
             {
-                "command": "extension.AsusBuildAll",
-                "title": "Asus Build All."
-            },
-            {
-                "command": "extension.AsusReBuild",
-                "title": "Asus ReBuild."
-            },
-            {
-                "command": "extension.AsusInitTask",
+                "command": "extension.InitTask",
                 "title": "Asus initial task program."
             },
             {
-                "command": "extension.AsusBuildSingleModule",
-                "title": "Asus Build Single Module."
+                "command": "extension.VebBuild",
+                "title": "Asus Build."
             },
             {
-                "command": "extension.AsusAitSync",
-                "title": "AsusAitModuleSync"
-            },
-            {
-                "command": "extension.AsusVebExcute",
-                "title": "AsusVebExcute"
+                "command": "extension.VebReBuild",
+                "title": "Asus ReBuild."
             },
             {
                 "command": "formatter.Edk2Formatter",
@@ -99,35 +87,19 @@
         ],
         "keybindings": [
             {
-                "command": "extension.AsusBuildAll",
-                "key": "F9",
-                "mac": "F9"
-            },
-            {
-                "command": "extension.AsusInitTask",
+                "command": "extension.InitTask",
                 "key": "F8",
                 "mac": "F8"
             },
             {
-                "command": "extension.AsusReBuild",
+                "command": "extension.VebBuild",
                 "key": "F7",
                 "mac": "F7"
             },
             {
-                "command": "extension.AsusBuildSingleModule",
-                "key": "Ctrl+F7",
-                "mac": "Ctrl+F7",
-                "when": "editorTextFocus&&resourceExtname == .inf"
-            },
-            {
-                "command": "extension.AsusAitSync",
-                "key": "ctrl+F12",
-                "mac": "ctrl+F12"
-            },
-            {
-                "command": "extension.AsusVebExcute",
-                "key": "ctrl+F11",
-                "mac": "ctrl+F11"
+                "command": "extension.VebReBuild",
+                "key": "F9",
+                "mac": "F9"
             },
             {
                 "command": "formatter.Edk2Formatter",
@@ -253,7 +225,7 @@
                     ".inc",
                     ".s"
                 ],
-                "configuration": "./language-configuration_asm.json"
+                "configuration": "./confs/language-configuration_asm.json"
             }
         ],
         "grammars": [
@@ -345,11 +317,6 @@
                     "group": "navigation"
                 },
                 {
-                    "when": "resourceExtname == .inf",
-                    "command": "extension.AsusBuildSingleModule",
-                    "group": "navigation"
-                },
-                {
                     "when": "resourceLangId == edk2_uni",
                     "command": "formatter.Edk2Formatter",
                     "group": "navigation"
@@ -371,11 +338,6 @@
                 }
             ],
             "explorer/context": [
-                {
-                    "command": "extension.AsusBuildSingleModule",
-                    "group": "navigation",
-                    "when": "resourceExtname == .inf"
-                },
                 {
                     "when": "resourceLangId == edk2_uni",
                     "command": "formatter.Edk2Formatter"
