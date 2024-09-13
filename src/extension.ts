@@ -30,12 +30,12 @@ const Taskfile = '{\n\
         {\n\
             "label": "VebBuildTask",\n\
             "type": "shell",\n\
-            "command": "cmd /V /C \\"SET VEB=%s&&echo !VEB! &&%s 2>&1| %s Build.log\\""\n\
+            "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s Build.log\\""\n\
         },\n\
         {\n\
             "label": "VebReBuildTask",\n\
             "type": "shell",\n\
-            "command": "cmd /V /C \\"SET VEB=%s&&echo !VEB! &&%s 2>&1| %s Build.log\\""\n\
+            "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s Build.log\\""\n\
         },\n\
         {\n\
             "label": "------------------------------------External command------------------------------------------",\n\
@@ -76,10 +76,12 @@ async function BuildDefaulTask(folderpath: string, selection: string, TaskfileUp
         let BuildCommand = [];
         let ReBuildCommand = [];
         const extension = vscode.extensions.getExtension("AsusBios.asus-veb-provider");
-        let extensionPath = "";
+        let teePath = "";
+        let PrepareEnvScriptPath = "";
 
         if (extension !== undefined) {
-            extensionPath = path.join(extension.extensionPath, "Tool", "tee.exe").replace(/\\/g, '\\\\');
+            teePath = path.join(extension.extensionPath, "Tool", "tee.exe").replace(/\\/g, '\\\\');
+            PrepareEnvScriptPath = path.join(extension.extensionPath, "Tool", "PrepareEnvScript.bat").replace(/\\/g, '\\\\');
         } else {
             console.log("getExtension AsusBios.asus-veb-provider failed");
         }
@@ -92,12 +94,14 @@ async function BuildDefaulTask(folderpath: string, selection: string, TaskfileUp
             TaskfileUpdate = util.format(Taskfile,
                 // BuildAllTask
                 selection.split('.')[0], // VEB=
+                PrepareEnvScriptPath,
                 BuildCommand,
-                extensionPath,
+                teePath,
                 // ReBuildAllTask
                 selection.split('.')[0],
+                PrepareEnvScriptPath,
                 ReBuildCommand,
-                extensionPath,
+                teePath,
             );
             // console.log(TaskfileUpdate);
             resolve(TaskfileUpdate);
@@ -119,7 +123,7 @@ function AmendTaskByFile(folderpath, selection, TaskfileUpdate, project) {
     array.forEach(line => {
         line = line.toString().replace(new RegExp("%project", "ig"), project.split('.')[0]);
         console.log(line);
-        if (line.split(/:/)[0].replace(/[ |\t]/g, "") == "shell") {
+        if (line.split(/:/)[0].replace(/[ |\t]/g, "") === "shell") {
             // console.log('shell');
             TaskfileUpdate = TaskfileUpdate + util.format(TaskSampleShell, line.split(/:/)[1].replace(/[\t]/g, ""), line.split(/:/)[2]);
         } else {
@@ -358,7 +362,7 @@ export function activate(context: vscode.ExtensionContext) {
     // F9: ReBuild Command
     registerCommand(context, 'extension.VebReBuild', () => handleVebReBuild());
 
-    
+
     // Shift + Alt + F: Uni/Sdl Formatter Documentation
     registerCommand(context, 'formatter.Edk2Formatter', () => Edk2Formatter());
     // Alt + F1
