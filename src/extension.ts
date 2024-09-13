@@ -14,6 +14,11 @@ const path = require('path');
 const fs = require('fs');
 const util = require('util');
 
+enum ShowType {
+    InformationMessage = 0,
+    QuickPick = 1,
+}
+
 let NumOfarray = 0;
 let MaxSizeofarray = 0;
 let BuildToolFileName = 'BuildCommandList.ini';
@@ -136,8 +141,6 @@ function AmendTaskByFile(folderpath, selection, TaskfileUpdate, project) {
     });
 }
 
-
-//showType: 0 = showInformationMessage Type, 1 = showQuickPick Type.
 function CreateBuildtask(folderpath: string, targetFiles: string | any[], start: number, end: number, showType: number) {
     console.log("CreateBuildtask Start");
     console.log('Show Veb array from (%d) to (%d)', start, end);
@@ -261,19 +264,19 @@ function handleInitTask() {
                     start = index * TempDynamicArraySize;
                     end = (index + 1) * TempDynamicArraySize;
                 }
-                CreateBuildtask(folderpath, targetFiles, start, end, 0);
+                CreateBuildtask(folderpath, targetFiles, start, end, ShowType.InformationMessage);
             }
         } else if (MaxSizeofarray !== 0) {
             for (let index = 0; index < targetFiles.length / MaxSizeofarray; index++) {
                 start = end = 0;
                 start = index * MaxSizeofarray;
                 end = (index + 1) * MaxSizeofarray;
-                CreateBuildtask(folderpath, targetFiles, start, end, 0);
+                CreateBuildtask(folderpath, targetFiles, start, end, ShowType.InformationMessage);
             }
         } else {
             start = 0;
             end = targetFiles.length;
-            CreateBuildtask(folderpath, targetFiles, start, end, 1);
+            CreateBuildtask(folderpath, targetFiles, start, end, ShowType.QuickPick);
         }
     });
 }
