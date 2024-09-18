@@ -8,7 +8,7 @@ import * as util from 'util';
  * @param filePath 
  */
 
-class AsusSnippetTools {
+class SnippetTools {
     constructor(private vscodeInstance: typeof vscode) {
         // 可以在构造函数中进行初始化操作
     }
@@ -169,4 +169,4 @@ class AsusSnippetTools {
     }
 }
 
-export default AsusSnippetTools;
+export default SnippetTools;

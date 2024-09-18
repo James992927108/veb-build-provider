@@ -1,9 +1,9 @@
 {
-    "name": "asus-veb-provider",
-    "publisher": "AsusBios",
-    "displayName": "Asus-Veb-Provider",
-    "description": "This tools provider building project and creating treeview of veb module explorer for Asus.",
-    "version": "1.9.1",
+    "name": "veb-build-provider",
+    "publisher": "iei_bios",
+    "displayName": "veb-build-provider",
+    "description": "This tools provider building project veb module explorer.",
+    "version": "1.0.0",
     "main": "./out/extension.js",
     "engines": {
         "vscode": "^1.82.2"
@@ -17,7 +17,7 @@
             "activitybar": [
                 {
                     "id": "file-explorer",
-                    "title": "Module Explorer",
+                    "title": "Veb module explorer",
                     "icon": "media/dep.svg"
                 }
             ]
@@ -26,7 +26,7 @@
             "file-explorer": [
                 {
                     "id": "fileExplorer",
-                    "name": "Module Explorer (components)"
+                    "name": "Veb list (components)"
                 }
             ]
         },
@@ -58,15 +58,15 @@
             },
             {
                 "command": "extension.InitTask",
-                "title": "Asus initial task program."
+                "title": "Veb initial task program."
             },
             {
                 "command": "extension.VebBuild",
-                "title": "Asus Build."
+                "title": "Veb Build."
             },
             {
                 "command": "extension.VebReBuild",
-                "title": "Asus ReBuild."
+                "title": "Veb ReBuild."
             },
             {
                 "command": "formatter.Edk2Formatter",
@@ -350,7 +350,7 @@
         },
         "configuration": {
             "type": "object",
-            "title": "Asus veb provider",
+            "title": "veb-build-provider",
             "properties": {
                 "formatter.speceOnUni": {
                     "type": "number",

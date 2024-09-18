@@ -7,8 +7,8 @@ This is the README for your extension "asus-veb-provider". After writing up a br
 1. 排版
 ### 1.9.0
 1. 新增
-AsusSnippetTools.DebugToAsusPrint alt+F1
-AsusSnippetTools.AsusPrintToDebug alt+shift+F1
+SnippetTools.DebugToAsusPrint alt+F1
+SnippetTools.AsusPrintToDebug alt+shift+F1
 2. 新增 KillGitProcess shift+F12
 ait sync 完 git沒有被自動被系統釋放，常駐在後台時，可以手動刪除
 3. Snippet

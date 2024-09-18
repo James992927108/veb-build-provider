@@ -6,12 +6,12 @@ import { Edk2DecProvider } from './edk2Language';
 import { Edk2InfProvider } from './edk2Language';
 import { Edk2VfrProvider } from './edk2Language';
 import Edk2Formatter from "./edk2Formatter";
-import AsusSnippetTools from "./AsusSnippetTools";
+import SnippetTools from "./SnippetTools";
 
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 const util = require('util');
 
 enum ShowType {
@@ -19,8 +19,6 @@ enum ShowType {
     QuickPick = 1,
 }
 
-let NumOfarray = 0;
-let MaxSizeofarray = 0;
 let BuildToolFileName = 'BuildCommandList.ini';
 // Task file define
 const Taskfile = '{\n\
@@ -80,15 +78,13 @@ async function BuildDefaulTask(folderpath: string, selection: string, TaskfileUp
         let fileStream = fs.createReadStream(path.join(folderpath, selection));
         let BuildCommand = [];
         let ReBuildCommand = [];
-        const extension = vscode.extensions.getExtension("AsusBios.asus-veb-provider");
+        const extension = vscode.extensions.getExtension("iei_bios.veb-build-provider");
         let teePath = "";
-        let PrepareEnvScriptPath = "";
-
+        let sourcePrepareScriptPath = path.join(folderpath, ".vscode", "PrepareEnvScript.bat").replace(/\\/g, '\\\\');
         if (extension !== undefined) {
             teePath = path.join(extension.extensionPath, "Tool", "tee.exe").replace(/\\/g, '\\\\');
-            PrepareEnvScriptPath = path.join(extension.extensionPath, "Tool", "PrepareEnvScript.bat").replace(/\\/g, '\\\\');
         } else {
-            console.log("getExtension AsusBios.asus-veb-provider failed");
+            console.log("getExtension iei_bios.veb-build-provider failed");
         }
         fileStream.on('data', function (chunk) {
             BuildCommand = chunk.toString().slice(chunk.toString().indexOf('Build'), chunk.toString().indexOf('BuildAll')).split('"')[1].replace(/\\/g, '\\\\');
@@ -99,12 +95,12 @@ async function BuildDefaulTask(folderpath: string, selection: string, TaskfileUp
             TaskfileUpdate = util.format(Taskfile,
                 // BuildAllTask
                 selection.split('.')[0], // VEB=
-                PrepareEnvScriptPath,
+                sourcePrepareScriptPath,
                 BuildCommand,
                 teePath,
                 // ReBuildAllTask
                 selection.split('.')[0],
-                PrepareEnvScriptPath,
+                sourcePrepareScriptPath,
                 ReBuildCommand,
                 teePath,
             );
@@ -141,6 +137,29 @@ function AmendTaskByFile(folderpath, selection, TaskfileUpdate, project) {
     });
 }
 
+function copyPrepareEnvScript(folderpath) {
+    const asusVebExtension = vscode.extensions.getExtension("iei_bios.veb-build-provider");
+    
+    if (!asusVebExtension) {
+        console.error("Fail to get iei_bios.veb-build-provider");
+        return;
+    }
+
+    const sourceScriptPath = path.join(asusVebExtension.extensionPath, "Tool", "PrepareEnvScript.bat");
+    const targetFolderPath = path.join(folderpath, ".vscode");
+    const targetScriptPath = path.join(targetFolderPath, "PrepareEnvScript.bat");
+
+    try {
+        if (!fs.existsSync(targetFolderPath)) {
+            fs.mkdirSync(targetFolderPath, { recursive: true });
+        }
+        fs.copyFileSync(sourceScriptPath, targetScriptPath);
+        console.log('copy PrepareEnvScript.bat to ${targetScriptPath} success');
+    } catch (error) {
+        console.error('copy PrepareEnvScript.bat error：${error.message}');
+    }
+}
+
 function CreateBuildtask(folderpath: string, targetFiles: string | any[], start: number, end: number, showType: number) {
     console.log("CreateBuildtask Start");
     console.log('Show Veb array from (%d) to (%d)', start, end);
@@ -156,6 +175,7 @@ function CreateBuildtask(folderpath: string, targetFiles: string | any[], start:
                 const buildTaskUpdate = await BuildDefaulTask(folderpath, selection, TaskfileUpdate);
                 const amendTaskUpdate = await AmendTaskByFile(folderpath, BuildToolFileName, buildTaskUpdate, selection);
                 TaskfileUpdate = amendTaskUpdate;
+                TaskfileUpdate = TaskfileUpdate + "\t]\n}";
                 // Create Task file
                 fs.exists(path.join(folderpath, ".vscode"), exists => {
                     if (!exists) {
@@ -167,53 +187,22 @@ function CreateBuildtask(folderpath: string, targetFiles: string | any[], start:
                             }
                         });
                     }
-                    TaskfileUpdate = TaskfileUpdate + "\t]\n}";
-                    console.log("CreateBuildtask -> writeFile Start\n");
-                    fs.writeFile(path.join(folderpath, ".vscode", "tasks.json"), TaskfileUpdate, err => {
-                        if (err) {
-                            console.error(err);
-                            vscode.window.showErrorMessage("Create task.json fail.");
-                        } else {
-                            //console.log('YES! %s',TaskfileUpdate);
-                            vscode.window.showInformationMessage("Create task.json Success.");
-                        }
-                    });
-                });
-            });
-    }
-    else {
-        vscode.window.showInformationMessage('Start Build for ?', ...targetFiles.slice(start, end))
-            .then(async selection => {
-                // check selection is selected or not.
-                if (!selection) {
-                    return;
-                }
-                // make Task content
-                let TaskfileUpdate: unknown = [];
-                TaskfileUpdate = await BuildDefaulTask(folderpath, selection, TaskfileUpdate);
+                    // 將 PrepareEnvScript.bat 複製到 .vscode 資料夾下
+                    copyPrepareEnvScript(folderpath);
 
-                // Create Task file
-                fs.exists(path.join(folderpath, ".vscode"), exists => {
-                    if (!exists) {
-                        console.log(".vscode not exists and create it.");
-                        fs.mkdir(path.join(folderpath, ".vscode"), err => {
-                            if (err) {
-                                console.log("makdir .vscode fail.");
-                                return;
-                            }
-                        });
-                    }
+                    console.log("CreateBuildtask -> writeFile tasks.json Start\n");
                     fs.writeFile(path.join(folderpath, ".vscode", "tasks.json"), TaskfileUpdate, err => {
                         if (err) {
                             console.error(err);
-                            vscode.window.showErrorMessage("Create task.json fail.");
+                            vscode.window.showErrorMessage("Create tasks.json fail.");
                         } else {
-                            //console.log('YES! %s',TaskfileUpdate);
-                            vscode.window.showInformationMessage("Create task.json Success.");
+                            vscode.window.showInformationMessage("Create tasks.json Success.");
                         }
                     });
                 });
             });
+    }else {
+        vscode.window.showInformationMessage('!!! Not support yet !!!');
     }
 }
 
@@ -251,33 +240,9 @@ function handleInitTask() {
         let targetFiles = files.filter(function (file) {
             return path.extname(file).toLowerCase() === EXTENSION;
         });
+        console.log('targetFiles.length = %d', targetFiles.length);
 
-        if (NumOfarray !== 0) {
-            for (let index = 0; index < NumOfarray; index++) {
-                start = end = 0;
-                let TempDynamicArraySize = Math.ceil(targetFiles.length / NumOfarray);
-                if (index === NumOfarray - 1) {
-                    start = index * TempDynamicArraySize;
-                    end = targetFiles.length;
-
-                } else {
-                    start = index * TempDynamicArraySize;
-                    end = (index + 1) * TempDynamicArraySize;
-                }
-                CreateBuildtask(folderpath, targetFiles, start, end, ShowType.InformationMessage);
-            }
-        } else if (MaxSizeofarray !== 0) {
-            for (let index = 0; index < targetFiles.length / MaxSizeofarray; index++) {
-                start = end = 0;
-                start = index * MaxSizeofarray;
-                end = (index + 1) * MaxSizeofarray;
-                CreateBuildtask(folderpath, targetFiles, start, end, ShowType.InformationMessage);
-            }
-        } else {
-            start = 0;
-            end = targetFiles.length;
-            CreateBuildtask(folderpath, targetFiles, start, end, ShowType.QuickPick);
-        }
+        CreateBuildtask(folderpath, targetFiles, start = 0, end = targetFiles.length, ShowType.QuickPick);
     });
 }
 
@@ -329,11 +294,11 @@ function checkAndExecuteTask(taskName: string, errorMessage: string) {
 
 // F7
 function handleVebBuild() {
-    checkAndExecuteTask("VebBuildTask", "VebBuildTask fail: initialize the task.json by pressing the shortcut key (F8).");
+    checkAndExecuteTask("VebBuildTask", "VebBuildTask fail: initialize the tasks.json by pressing the shortcut key (F8).");
 }
 // F9
 function handleVebReBuild() {
-    checkAndExecuteTask("VebReBuildTask", "VebReBuildTask fail: initialize the task.json by pressing the shortcut key (F8).");
+    checkAndExecuteTask("VebReBuildTask", "VebReBuildTask fail: initialize the tasks.json by pressing the shortcut key (F8).");
 }
 
 function handleKillGitProcess() {
@@ -369,9 +334,9 @@ export function activate(context: vscode.ExtensionContext) {
     // Shift + Alt + F: Uni/Sdl Formatter Documentation
     registerCommand(context, 'formatter.Edk2Formatter', () => Edk2Formatter());
     // Alt + F1
-    registerCommand(context, 'AsusSnippetTools.DebugToAsusPrint', () => new AsusSnippetTools(vscode).DebugToAsusPrint());
+    registerCommand(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
     // Alt + shift + F1
-    registerCommand(context, 'AsusSnippetTools.AsusPrintToDebug', () => new AsusSnippetTools(vscode).AsusPrintToDebug());
+    registerCommand(context, 'SnippetTools.AsusPrintToDebug', () => new SnippetTools(vscode).AsusPrintToDebug());
     // shift + F12
     registerCommand(context, 'other.KillGitProcess', () => handleKillGitProcess());
 
