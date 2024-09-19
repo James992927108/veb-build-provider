@@ -8,21 +8,37 @@ let projectPath: string = ""; // 存project的路徑，例如:D:\BIOS\CometLake\
 let vebCifFile: string[] = []; // 存Veb裡所有的cif檔的路徑(不包含project路徑)
 let allCifFile: string[] = []; // 存veb檔[files]底下全部的cif檔案(文字檔轉成單一string)
 let openedCifPosition: number[] = []; // 存已經被加到treeview上的cif陣列位置，已利後續將其不再加到treeview上
-let allTreesNode: myTreeNode[] = [];
+let allTreesNode: MyTreeNode[] = [];
 let orphanCif: string[] = [], orphanName: string[] = [];
 let missingFile: string[] = [];
 missingFile.push("-----------------Missing File Log-----------------");
-export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
+
+/**
+ * 匹配指定的正則並返回匹配項的索引
+ * @param data - 要在其中進行匹配的字串
+ * @param pattern - 正則表達式
+ * @param startPosition - 查找開始的索引
+ * @returns 如果匹配到則返回匹配字串的索引，否則返回 -1
+ */
+function getMatchIndex(data: string, pattern: RegExp, startPosition: number = 0): number {
+    const matchResult = data.match(pattern);
+    if (matchResult && matchResult[0]) {
+        return data.indexOf(matchResult[0], startPosition);
+    }
+    return -1; // 如果沒有匹配到，返回 -1
+}
+
+export class MyTreeProvider implements vscode.TreeDataProvider<MyTreeNode>
 {
-    public static tree: myTreeNode[] = []; //第一層tree node
-    public static files: myTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object
-    public static infFiles: myTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (inf資料專用)
-    public static infSourcesFiles: myTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (inf的[Sources]資料專用)
-    public static infSourcesFiles1: myTreeFilesNode[] = []; //myTreeNode底下的Files屬性object (inf的[Sources]資料專用)
-    public static infBinariesFile: myTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (inf的[Binaries]資料專用)
-    public static infBinariesFile1: myTreeFilesNode[] = []; //myTreeNode底下的Files屬性object (inf的[Binaries]資料專用)
-    public static cifFiles: myTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (cif資料專用)
-    public static decFiles: myTreeFilesNode[] = [];
+    public static tree: MyTreeNode[] = []; //第一層tree node
+    public static files: MyTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object
+    public static infFiles: MyTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (inf資料專用)
+    public static infSourcesFiles: MyTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (inf的[Sources]資料專用)
+    public static infSourcesFiles1: MyTreeFilesNode[] = []; //myTreeNode底下的Files屬性object (inf的[Sources]資料專用)
+    public static infBinariesFile: MyTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (inf的[Binaries]資料專用)
+    public static infBinariesFile1: MyTreeFilesNode[] = []; //myTreeNode底下的Files屬性object (inf的[Binaries]資料專用)
+    public static cifFiles: MyTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (cif資料專用)
+    public static decFiles: MyTreeFilesNode[] = [];
 
     public static lastOpenedFile: string | undefined;
     public static lastOpenedDate: Date | undefined;
@@ -41,7 +57,7 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
         });
         vscode.commands.registerCommand('rightclick.Locate', (resource) => {
             let sameCount: number = 0, position: number = 0;
-            let sameNode: myTreeNode[] = [];
+            let sameNode: MyTreeNode[] = [];
             let currentFilePath = resource.fsPath;
             for (let i = 0; i < allTreesNode.length; i++) {
                 if (allTreesNode[i].Path === currentFilePath) {
@@ -54,12 +70,12 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
                 let nodeResource: string[] = [];
                 for (let i = 0; i < sameNode.length; i++) {
                     if (sameNode[i].resource) {
-                        nodeResource[i] = sameNode[i].resource.label;
+                        nodeResource[i] = (sameNode[i].resource as MyTreeNode).label;
                     }
                 }
                 vscode.window.showQuickPick(nodeResource, { placeHolder: 'Which component name ?' }).then(value => {
                     for (let i = 0; i < sameNode.length; i++) {
-                        if (value === sameNode[i].resource.label) {
+                        if (value === (sameNode[i].resource as MyTreeNode).label) {
                             treeView.reveal(sameNode[i], { select: true, focus: true, expand: true });
                         }
                     }
@@ -80,7 +96,7 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
                 let dataVeb = fs.readFileSync(editorPath, 'utf-8');
                 let exist: boolean = true;
                 let index: number = 0;
-                let searchPointFiles = dataVeb.indexOf(dataVeb.match(/\[files]/i));
+                let searchPointFiles = getMatchIndex(dataVeb, /\[files]/i, 0);
                 let searchPointEnd = dataVeb.length - 1;
                 let tmpDataVeb: string[] = [];
 
@@ -225,10 +241,10 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
         return result;
     }
 
-    private static _onDidChangeTreeData: vscode.EventEmitter<myTreeNode | undefined> = new vscode.EventEmitter<myTreeNode | undefined>();
-    readonly onDidChangeTreeData: vscode.Event<myTreeNode | undefined> = MyTreeProvider._onDidChangeTreeData.event;
+    private static _onDidChangeTreeData: vscode.EventEmitter<MyTreeNode | undefined> = new vscode.EventEmitter<MyTreeNode | undefined>();
+    readonly onDidChangeTreeData: vscode.Event<MyTreeNode | undefined> = MyTreeProvider._onDidChangeTreeData.event;
 
-    public getTreeItem(element: myTreeNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    public getTreeItem(element: MyTreeNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
         /*
             !Condition Token 判斷寫在這
         */
@@ -298,26 +314,26 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
         return treeItem;
     }
 
-    getParent(element: myTreeNode): vscode.ProviderResult<any> {
+    getParent(element: MyTreeNode): vscode.ProviderResult<any> {
         return element.resource;
     }
 
-    getChildren(element: myTreeNode): vscode.ProviderResult<any[]> {
-        let trees: myTreeNode[] = [];
+    getChildren(element: MyTreeNode): vscode.ProviderResult<any[]> {
+        let trees: MyTreeNode[] = [];
         if (element === undefined) {
             if (MyTreeProvider.tree !== undefined) {
                 for (let i = 0; i < MyTreeProvider.tree.length; i++) {
                     if (MyTreeProvider.tree[i].kind !== myTreeKind.veb) {
                         let currentElement = MyTreeProvider.tree[i];
                         let treeLabel = currentElement.label;
-                        let temp: myTreeNode = new myTreeNode(treeLabel, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.files[i], currentElement.Path, myTreeKind.cif, currentElement.LocalRoot, currentElement.RefName, currentElement.category, currentElement.resource);
+                        let temp: MyTreeNode = new MyTreeNode(treeLabel, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.files[i], currentElement.Path, myTreeKind.cif, currentElement.LocalRoot, currentElement.RefName, currentElement.category, currentElement.resource);
                         trees.push(temp);
                         allTreesNode.push(temp);
                     }
                     else {
                         let currentElement = MyTreeProvider.tree[i];
                         let treeLabel = currentElement.label;
-                        let temp: myTreeNode = new myTreeNode(treeLabel, vscode.TreeItemCollapsibleState.None, [], currentElement.Path, myTreeKind.veb, '', '', '', currentElement.resource);
+                        let temp: MyTreeNode = new MyTreeNode(treeLabel, vscode.TreeItemCollapsibleState.None, [], currentElement.Path, myTreeKind.veb, '', '', '', currentElement.resource);
                         trees.push(temp);
                     }
                 }
@@ -350,7 +366,7 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
                             }
                         }
                         let filePath = projectPath + element.Files[i].fileRoot;
-                        let reviewnode: myTreeNode = new myTreeNode(fileName, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.cifFiles[outerCifFilesCount], filePath, myTreeKind.cif, localRoot, refName, category, element);
+                        let reviewnode: MyTreeNode = new MyTreeNode(fileName, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.cifFiles[outerCifFilesCount], filePath, myTreeKind.cif, localRoot, refName, category, element);
                         trees.push(reviewnode);
                         allTreesNode.push(reviewnode);
                         outerCifFilesCount++;
@@ -358,13 +374,13 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
                     else if (element.Files[i].fileState === 10) { // files in .dec
                         let fileName = currentElement.fileName.replace(new RegExp("/", "ig"), "\\");
                         let filePath = projectPath + localRoot + fileName;
-                        let reviewnode: myTreeNode;
+                        let reviewnode: MyTreeNode;
                         if (!fs.existsSync(filePath)) {
                             pushToMissingFile(filePath);
-                            reviewnode = new myTreeNode(fileName.split('\\')[fileName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], filePath, myTreeKind.error, localRoot, refName, '', element);
+                            reviewnode = new MyTreeNode(fileName.split('\\')[fileName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], filePath, myTreeKind.error, localRoot, refName, '', element);
                         }
                         else {
-                            reviewnode = new myTreeNode(fileName.split('\\')[fileName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], filePath, myTreeKind.files, localRoot, refName, '', element);
+                            reviewnode = new MyTreeNode(fileName.split('\\')[fileName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], filePath, myTreeKind.files, localRoot, refName, '', element);
                         }
                         trees.push(reviewnode);
                         allTreesNode.push(reviewnode);
@@ -420,19 +436,19 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
                             }
                             let decFilePath = projectPath + localRoot + fileName;
                             handleDec(decFilePath, localRoot);
-                            let reviewnode: myTreeNode = new myTreeNode(fileName, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.decFiles, decFilePath, myTreeKind.dec, localRoot, refName, '', element);
+                            let reviewnode: MyTreeNode = new MyTreeNode(fileName, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.decFiles, decFilePath, myTreeKind.dec, localRoot, refName, '', element);
                             trees.push(reviewnode);
                             allTreesNode.push(reviewnode);
                         }
                         else {
                             let filePath = projectPath + localRoot + fileName;
-                            let reviewnode: myTreeNode;
+                            let reviewnode: MyTreeNode;
                             if (!fs.existsSync(filePath)) {
                                 pushToMissingFile(filePath);
-                                reviewnode = new myTreeNode(fileName.split('\\')[fileName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], filePath, myTreeKind.error, localRoot, refName, '', element);
+                                reviewnode = new MyTreeNode(fileName.split('\\')[fileName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], filePath, myTreeKind.error, localRoot, refName, '', element);
                             }
                             else {
-                                reviewnode = new myTreeNode(fileName.split('\\')[fileName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], filePath, myTreeKind.files, localRoot, refName, '', element);
+                                reviewnode = new MyTreeNode(fileName.split('\\')[fileName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], filePath, myTreeKind.files, localRoot, refName, '', element);
                             }
                             trees.push(reviewnode);
                             allTreesNode.push(reviewnode);
@@ -449,7 +465,7 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
                                 {refName = refName.substring(0, refName.lastIndexOf('\\', refName.indexOf(".inf") + 1)) + '\\';}
                             else
                                 {refName = "";}
-                            let reviewnode: myTreeNode = new myTreeNode('INF-' + baseName, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.infFiles[i], infPath, myTreeKind.inf, localRoot, refName, '', element);
+                            let reviewnode: MyTreeNode = new MyTreeNode('INF-' + baseName, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.infFiles[i], infPath, myTreeKind.inf, localRoot, refName, '', element);
                             trees.push(reviewnode);
                             allTreesNode.push(reviewnode);
                         }
@@ -470,14 +486,14 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
                     else if (element.Files[i].fileState === 3) { // sources in .inf
                         let infSourceName = currentElement.fileName;
                         let infSourcePath = projectPath + currentElement.fileRoot + infSourceName;
-                        let reviewnode: myTreeNode;
+                        let reviewnode: MyTreeNode;
                         if (!fs.existsSync(infSourcePath)) {
-                            reviewnode = new myTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.error, localRoot, refName, '', element);
+                            reviewnode = new MyTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.error, localRoot, refName, '', element);
                             if (infSourceName.charAt(0) !== '$')
                                 {pushToMissingFile(infSourcePath);}
                         }
                         else {
-                            reviewnode = new myTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.files, localRoot, refName, '', element);
+                            reviewnode = new MyTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.files, localRoot, refName, '', element);
                         }
                         trees.push(reviewnode);
                         allTreesNode.push(reviewnode);
@@ -485,22 +501,22 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
                     else if (element.Files[i].fileState === 4) { // Ia32, X64, ... in .inf 
                         let infSourceFolderName = currentElement.fileName;
                         handleINFSource(element.Path, element.Files[i].fileName);
-                        let reviewnode: myTreeNode = new myTreeNode(infSourceFolderName, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.infSourcesFiles1, element.Path, myTreeKind.inf, localRoot, refName, '', element);
+                        let reviewnode: MyTreeNode = new MyTreeNode(infSourceFolderName, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.infSourcesFiles1, element.Path, myTreeKind.inf, localRoot, refName, '', element);
                         trees.push(reviewnode);
-                        let cleanNode: myTreeNode = new myTreeNode('', vscode.TreeItemCollapsibleState.Collapsed, [], '', myTreeKind.inf, '', '', '');
+                        let cleanNode: MyTreeNode = new MyTreeNode('', vscode.TreeItemCollapsibleState.Collapsed, [], '', myTreeKind.inf, '', '', '');
                         allTreesNode.push(cleanNode);
                     }
                     else if (element.Files[i].fileState === 5) { //sources in Ia32, X64, ... in .inf
                         let infSourceName = currentElement.fileName;
                         let infSourcePath = projectPath + localRoot + element.RefName + infSourceName;
-                        let reviewnode: myTreeNode;
+                        let reviewnode: MyTreeNode;
                         if (!fs.existsSync(infSourcePath)) {
-                            reviewnode = new myTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.error, localRoot, refName, '', element.resource);
+                            reviewnode = new MyTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.error, localRoot, refName, '', element.resource);
                             if (infSourceName.charAt(0) !== '$')
                                 {pushToMissingFile(infSourcePath);}
                         }
                         else {
-                            reviewnode = new myTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.files, localRoot, refName, '', element.resource);
+                            reviewnode = new MyTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.files, localRoot, refName, '', element.resource);
                         }
                         trees.push(reviewnode);
                         allTreesNode.push(reviewnode);
@@ -508,14 +524,14 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
                     else if (element.Files[i].fileState === 6) { //Binaries in .inf
                         let infSourceName = currentElement.fileName;
                         let infSourcePath = projectPath + currentElement.fileRoot + infSourceName;
-                        let reviewnode: myTreeNode;
+                        let reviewnode: MyTreeNode;
                         if (!fs.existsSync(infSourcePath)) {
-                            reviewnode = new myTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.error, localRoot, refName, '', element.resource);
+                            reviewnode = new MyTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.error, localRoot, refName, '', element.resource);
                             if (infSourceName.charAt(0) !== '$')
                                 {pushToMissingFile(infSourcePath);}
                         }
                         else {
-                            reviewnode = new myTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.files, localRoot, refName, '', element.resource);
+                            reviewnode = new MyTreeNode(infSourceName.split('\\')[infSourceName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infSourcePath, myTreeKind.files, localRoot, refName, '', element.resource);
                         }
                         trees.push(reviewnode);
                         allTreesNode.push(reviewnode);
@@ -523,22 +539,22 @@ export class MyTreeProvider implements vscode.TreeDataProvider<myTreeNode>
                     else if (element.Files[i].fileState === 8) { // Ia32, X64, ... in .inf 
                         let infBinariesFolderName = currentElement.fileName;
                         handleINFBinaries(element.Path, element.Files[i].fileName);
-                        let reviewnode: myTreeNode = new myTreeNode(infBinariesFolderName, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.infBinariesFile1, element.Path, myTreeKind.inf, localRoot, refName, '', element);
+                        let reviewnode: MyTreeNode = new MyTreeNode(infBinariesFolderName, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.infBinariesFile1, element.Path, myTreeKind.inf, localRoot, refName, '', element);
                         trees.push(reviewnode);
-                        let cleanNode: myTreeNode = new myTreeNode('', vscode.TreeItemCollapsibleState.Collapsed, [], '', myTreeKind.inf, '', '', '');
+                        let cleanNode: MyTreeNode = new MyTreeNode('', vscode.TreeItemCollapsibleState.Collapsed, [], '', myTreeKind.inf, '', '', '');
                         allTreesNode.push(cleanNode);
                     }
                     else if (element.Files[i].fileState === 9) {
                         let infBinariesName = currentElement.fileName;
                         let infBinariesPath = projectPath + localRoot + element.RefName + infBinariesName;
-                        let reviewnode: myTreeNode;
+                        let reviewnode: MyTreeNode;
                         if (!fs.existsSync(infBinariesPath)) {
-                            reviewnode = new myTreeNode(infBinariesName.split('\\')[infBinariesName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infBinariesPath, myTreeKind.error, localRoot, refName, '', element.resource);
+                            reviewnode = new MyTreeNode(infBinariesName.split('\\')[infBinariesName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infBinariesPath, myTreeKind.error, localRoot, refName, '', element.resource);
                             if (infBinariesName.charAt(0) !== '$')
                                 {pushToMissingFile(infBinariesPath);}
                         }
                         else {
-                            reviewnode = new myTreeNode(infBinariesName.split('\\')[infBinariesName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infBinariesPath, myTreeKind.files, localRoot, refName, '', element.resource);
+                            reviewnode = new MyTreeNode(infBinariesName.split('\\')[infBinariesName.split('\\').length - 1], vscode.TreeItemCollapsibleState.None, [], infBinariesPath, myTreeKind.files, localRoot, refName, '', element.resource);
                         }
                         trees.push(reviewnode);
                         allTreesNode.push(reviewnode);
@@ -593,7 +609,7 @@ export function listVeb() {
             folderFilesUri[i] = vscode.Uri.parse('file:///' + file);
         }
         for (let i = 0; i < folderFilesUri.length; i++) {
-            MyTreeProvider.tree.push(new myTreeNode(folderFiles[i], vscode.TreeItemCollapsibleState.None, [], folderFilesUri[i].path, myTreeKind.veb, '', '', '', folderFilesUri[i]));
+            MyTreeProvider.tree.push(new MyTreeNode(folderFiles[i], vscode.TreeItemCollapsibleState.None, [], folderFilesUri[i].path, myTreeKind.veb, '', '', '', folderFilesUri[i]));
         }
     }
 }
@@ -601,9 +617,9 @@ export function listVeb() {
 export function specifyCif(elementAllCifFile: string[], elementCifPath: string, count: number) {
     let cifFile = fs.readFileSync(elementCifPath, 'utf-8'); //讀取element2 cif檔案資料
     let RefName: string;
-    let searchPointRefName = cifFile.indexOf(cifFile.match(/\RefName/i));
+    let searchPointRefName = getMatchIndex(cifFile, /\RefName/i, 0);
     let searchPointCommaRefName = cifFile.indexOf("[");
-    let searchPointEndComponent = cifFile.indexOf(cifFile.match(/\<endComponent>/i));
+    let searchPointEndComponent = getMatchIndex(cifFile, /\<endComponent>/i, 0);
     if (searchPointCommaRefName === -1) {
         RefName = cifFile.substring(searchPointRefName + 7, searchPointEndComponent).replace(/[\n\r]/g, '').replace(new RegExp('"', 'g'), '').replace(new RegExp('=', 'g'), '').split('#')[0].trim();
     }
@@ -611,9 +627,9 @@ export function specifyCif(elementAllCifFile: string[], elementCifPath: string, 
         RefName = cifFile.substring(searchPointRefName + 7, searchPointCommaRefName).replace(/[\n\r]/g, '').replace(new RegExp('"', 'g'), '').replace(new RegExp('=', 'g'), '').split('#')[0].trim();
     }
     for (let j = 0; j < elementAllCifFile.length; j++) {
-        let searchPointParts = elementAllCifFile[j].indexOf(elementAllCifFile[j].match(/\[parts]/i));
+        let searchPointParts = getMatchIndex(elementAllCifFile[j], /\[parts]/i, 0);
         let searchPointLeftParts = elementAllCifFile[j].indexOf('[', searchPointParts + 1);
-        let searchPointPartsEndComponent = elementAllCifFile[j].indexOf(elementAllCifFile[j].match(/\<endComponent>/i));
+        let searchPointPartsEndComponent = getMatchIndex(elementAllCifFile[j], /\<endComponent>/i, 0);
         let splitData: string[] = [];
         if (searchPointParts !== -1) {
             if (searchPointLeftParts !== -1) {
@@ -634,11 +650,11 @@ export function specifyCif(elementAllCifFile: string[], elementCifPath: string, 
 
 export function getLocalRefName(elementAllCifFile: string[], count: number): string[] {
     let LocalRoot: string = "", RefName: string = "";
-    let searchPointLocalRoot = elementAllCifFile[count].indexOf(elementAllCifFile[count].match(/\LocalRoot/i));
-    let searchPointRefName = elementAllCifFile[count].indexOf(elementAllCifFile[count].match(/\RefName/i));
+    let searchPointLocalRoot = getMatchIndex(elementAllCifFile[count], /\LocalRoot/i, 0);
+    let searchPointRefName = getMatchIndex(elementAllCifFile[count], /\RefName/i, 0);
     let searchPointCommaRefName = elementAllCifFile[count].indexOf('"', searchPointRefName);
     let searchPointCommaRefNameComma = elementAllCifFile[count].indexOf('"', searchPointCommaRefName + 1);
-    let searchPointName = elementAllCifFile[count].indexOf(elementAllCifFile[count].match(/\Name/i));
+    let searchPointName = getMatchIndex(elementAllCifFile[count], /\Name/i, 0);
     let searchPointCommaName = elementAllCifFile[count].indexOf('"', searchPointName);
     let searchPointCommaNameComma = elementAllCifFile[count].indexOf('"', searchPointCommaName + 1);
     let name = elementAllCifFile[count].substring(searchPointCommaName + 1, searchPointCommaNameComma);
@@ -651,21 +667,40 @@ export function getLocalRefName(elementAllCifFile: string[], count: number): str
     return tmpLocalRef;
 }
 
+// 定義提取 RefName 的函數
+function extractRefName(text: string, pattern: RegExp): string {
+    const match = text.match(pattern);
+
+    if (match) {
+        const refStartIndex = text.indexOf(match[0]) + match[0].length;
+        const refEndIndex = text.indexOf('\n', refStartIndex);
+        const rawValue = text.substring(refStartIndex, refEndIndex);
+
+        return rawValue
+            .replace(/"/g, '') // 移除雙引號
+            .replace(/=/g, '') // 移除等號
+            .split('#')[0]     // 取井號前的內容
+            .trim();           // 去除首尾空白
+    }
+
+    return ''; // 如果沒有匹配項，返回空字串
+}
+
 export function handleParts(elementAllCifFile: string, count: number, index: number): any {
     let filesSoureceFile: string[] = [], partsSoureceFile: string[] = [], INF1SourcesFiles: string[] = [];
-    let searchPointFiles = elementAllCifFile.indexOf(elementAllCifFile.match(/\[files]/i));
-    let searchPointParts = elementAllCifFile.indexOf(elementAllCifFile.match(/\[parts]/i));
+    let searchPointFiles = getMatchIndex(elementAllCifFile, /\[files]/i, 0);
+    let searchPointParts = getMatchIndex(elementAllCifFile, /\[parts]/i, 0);
     let searchPointINF = elementAllCifFile.indexOf("[INF]");
-    let searchPointEndComponent = elementAllCifFile.indexOf(elementAllCifFile.match(/\<endComponent>/i));
-    let searchPointLocalRoot = elementAllCifFile.indexOf(elementAllCifFile.match(/\LocalRoot/i));
+    let searchPointEndComponent = getMatchIndex(elementAllCifFile, /\<endComponent>/i, 0);
+    let searchPointLocalRoot = getMatchIndex(elementAllCifFile, /\LocalRoot/i, 0);
     let searchPointCommaLocalRoot = elementAllCifFile.indexOf('"', searchPointLocalRoot);
     let searchPointCommaLocalRootComma = elementAllCifFile.indexOf('"', searchPointCommaLocalRoot + 1);
-    //let searchPointCategory = elementAllCifFile.indexOf("category");
-    let searchPointCategory = elementAllCifFile.indexOf(elementAllCifFile.match(/\Category/i));
+    let searchPointCategory = getMatchIndex(elementAllCifFile, /\Category/i, 0);
     let searchPointN = elementAllCifFile.indexOf('\n', searchPointCategory);
     let category = elementAllCifFile.substring(searchPointCategory + 8, searchPointN).replace(/[\n\r]/g, '').replace(new RegExp('=', 'g'), '').split('#')[0].trim();
     let localRoot = elementAllCifFile.substring(searchPointCommaLocalRoot + 1, searchPointCommaLocalRootComma).split('#')[0].replace(new RegExp("/", "ig"), "\\");
-    let RefName = elementAllCifFile.substring(elementAllCifFile.indexOf(elementAllCifFile.match(/\RefName/i)) + 7, elementAllCifFile.indexOf('\n', elementAllCifFile.indexOf(elementAllCifFile.match(/\RefName/i)))).replace(new RegExp('"', 'g'), '').replace(new RegExp('=', 'g'), '').split('#')[0].trim();
+    // let RefName = elementAllCifFile.substring(elementAllCifFile.indexOf(elementAllCifFile.match()) + 7, elementAllCifFile.indexOf('\n', elementAllCifFile.indexOf(elementAllCifFile.match(/\RefName/i)))).replace(new RegExp('"', 'g'), '').replace(new RegExp('=', 'g'), '').split('#')[0].trim();
+    const RefName = extractRefName(elementAllCifFile, /\RefName/i);
     let searchPointEnd: number = elementAllCifFile.indexOf('[');
     let underfilesBlock: string = "", underpartsBlock: string = "";
     let underINFblock: string = "";
@@ -699,9 +734,32 @@ export function handleParts(elementAllCifFile: string, count: number, index: num
             partsSoureceFile = commnaInsideFunction(underpartsBlock);
         }
 
-        for (let j = 0; j < orphanName.length; j++)
-            {if (orphanName[j] === RefName)
-                {partsSoureceFile.push(orphanCif[j].substring(orphanCif[j].indexOf(orphanCif[j].match(/\Refname/i)) + 7, orphanCif[j].indexOf('\n', orphanCif[j].indexOf(orphanCif[j].match(/\Refname/i)))).replace(new RegExp('"', 'g'), '').replace(new RegExp('=', 'g'), '').split('#')[0].trim());}}
+        // for (let j = 0; j < orphanName.length; j++)
+        //     {if (orphanName[j] === RefName)
+        //         {partsSoureceFile.push(orphanCif[j].substring(orphanCif[j].indexOf(orphanCif[j].match(/\Refname/i)) + 7, orphanCif[j].indexOf('\n', orphanCif[j].indexOf(orphanCif[j].match(/\Refname/i)))).replace(new RegExp('"', 'g'), '').replace(new RegExp('=', 'g'), '').split('#')[0].trim());}}
+        
+        orphanName.forEach((name, j) => {
+            if (name === RefName) {
+                const cifLine = orphanCif[j];
+                const refMatch = cifLine.match(/\Refname/i);
+        
+                if (refMatch) {
+                    const refStartIndex = cifLine.indexOf(refMatch[0]) + 7; // 7 是因為 'Refname' 長度
+                    const refEndIndex = cifLine.indexOf('\n', refStartIndex);
+                    const rawValue = cifLine.substring(refStartIndex, refEndIndex);
+                    
+                    // 清理字串
+                    const cleanedValue = rawValue
+                        .replace(/"/g, '') // 移除雙引號
+                        .replace(/=/g, '') // 移除等號
+                        .split('#')[0]     // 取井號前的內容
+                        .trim();            // 去除首尾空白
+                    
+                    partsSoureceFile.push(cleanedValue);
+                }
+            }
+        });
+        
         for (let i = 0; i < partsSoureceFile.length; i++) {
             for (let j = 0; j < allCifFile.length; j++) {
                 let matchResult = allCifFile[j].match(/\RefName/i);
@@ -788,7 +846,8 @@ export function handleINF(elementLocalRoot: any, elementInfName: any, count: num
     let splitData: string[] = [], soureceFile: string[] = [];
     MyTreeProvider.infFiles[count] = [];
     while (endPoint !== -1) {
-        searchPointSources = dataInf.indexOf(dataInf.match(/\[sources/i), searchPointSourcesRight);
+        // searchPointSources = dataInf.indexOf(dataInf.match(/\[sources/i), searchPointSourcesRight);
+        let searchPointSources = getMatchIndex(dataInf, /\[sources/i, searchPointSourcesRight);
         if (searchPointSources === -1)
             {break;}
         searchPointSourcesRight = dataInf.indexOf(']', searchPointSources);
@@ -873,7 +932,7 @@ export function handleINF(elementLocalRoot: any, elementInfName: any, count: num
     }
     endPoint = 0;
     while (endPoint !== -1) {
-        searchPointBinaries = dataInf.indexOf(dataInf.match(/\[binaries/i), searchPointBinariesRight);
+        searchPointBinaries = getMatchIndex(dataInf, /\[binaries/i, searchPointBinariesRight);
         if (searchPointBinaries === -1)
             {break;}
         searchPointBinariesRight = dataInf.indexOf(']', searchPointBinaries);
@@ -1169,11 +1228,33 @@ export function handleCif(elementCifPath: any, elementVebCifFile: any, index: nu
             partsList = commnaInsideFunction(splitData);
         }
 
-        for (let j = 0; j < orphanName.length; j++){
-            if (orphanName[j] === refName){
-                partsList.push(orphanCif[j].substring(orphanCif[j].indexOf(orphanCif[j].match(/\RefName/i)) + 7, orphanCif[j].indexOf('\n', orphanCif[j].indexOf(orphanCif[j].match(/\RefName/i)))).replace(new RegExp('"', 'g'), '').replace(new RegExp('=', 'g'), '').split('#')[0].trim());
+        // for (let j = 0; j < orphanName.length; j++){
+        //     if (orphanName[j] === refName){
+        //         partsList.push(orphanCif[j].substring(orphanCif[j].indexOf(orphanCif[j].match(/\RefName/i)) + 7, orphanCif[j].indexOf('\n', orphanCif[j].indexOf(orphanCif[j].match(/\RefName/i)))).replace(new RegExp('"', 'g'), '').replace(new RegExp('=', 'g'), '').split('#')[0].trim());
+        //     }
+        // }
+        orphanName.forEach((name, index) => {
+            if (name === refName) {
+                const cifLine = orphanCif[index];
+                const refMatch = cifLine.match(/\RefName/i);
+        
+                if (refMatch) {
+                    const refStartIndex = cifLine.indexOf(refMatch[0]) + 7; // 7 是因為 'RefName' 的長度
+                    const refEndIndex = cifLine.indexOf('\n', refStartIndex);
+                    const rawValue = cifLine.substring(refStartIndex, refEndIndex);
+        
+                    // 清理字串
+                    const cleanedValue = rawValue
+                        .replace(/"/g, '') // 移除雙引號
+                        .replace(/=/g, '') // 移除等號
+                        .split('#')[0]     // 取井號前的內容
+                        .trim();           // 去除首尾空白
+        
+                    partsList.push(cleanedValue);
+                }
             }
-        }
+        });
+
         for (let i = 0; i < partsList.length; i++) {
             for (let j = 0; j < allCifFile.length; j++) {
                 let matchResult = allCifFile[j].match(/\RefName/i);
@@ -1202,7 +1283,7 @@ export function handleCif(elementCifPath: any, elementVebCifFile: any, index: nu
         for (let i = 0; i < infList.length; i++)
             {MyTreeProvider.files[index].push({ fileName: infList[i], fileState: 2, fileRoot: localRoot });}
     }
-    MyTreeProvider.tree.push(new myTreeNode(name, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.files[index], elementCifPath, myTreeKind.cif, localRoot, refName, category, resourceUri));
+    MyTreeProvider.tree.push(new MyTreeNode(name, vscode.TreeItemCollapsibleState.Collapsed, MyTreeProvider.files[index], elementCifPath, myTreeKind.cif, localRoot, refName, category, resourceUri));
     return 0;
 }
 
@@ -1215,23 +1296,23 @@ export enum myTreeKind {
     error
 }
 
-export interface myTreeFilesNode {
+export interface MyTreeFilesNode {
     fileName: string; //name, but in .cif is refname
     fileState: number; //in .cif{files:0, parts:1, INF:2} in .inf{sources files:3 , sources folders:4, sources folders files:5, Binaries: 6, Binaries folders:8, Binaries folders files: 9} .veb : 7
     fileRoot: string;
 }
 
-export class myTreeNode extends vscode.TreeItem {
+export class MyTreeNode extends vscode.TreeItem {
     constructor(
         public readonly label: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-        public readonly Files: myTreeFilesNode[],
+        public readonly Files: MyTreeFilesNode[],
         public readonly Path: string,
         public readonly kind: myTreeKind,
         public readonly LocalRoot: string,
         public readonly RefName: string,
         public readonly category: string,
-        public readonly resource?: myTreeNode | vscode.Uri
+        public readonly resource?: MyTreeNode | vscode.Uri
     ) {
         super(label, collapsibleState);
     }

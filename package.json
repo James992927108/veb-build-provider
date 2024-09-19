@@ -73,12 +73,12 @@
                 "title": "Format Document"
             },
             {
-                "command": "AsusSnippetTools.DebugToAsusPrint",
+                "command": "SnippetTools.DebugToAsusPrint",
                 "title": "Replace Debug to ASUSPRINT"
             },
             {
-                "command": "AsusSnippetTools.AsusPrintToDebug",
-                "title": "Replace Debug to ASUSPRINT"
+                "command": "SnippetTools.AsusPrintToDebug",
+                "title": "Replace ASUSPRINT to Debug"
             },
             {
                 "command": "other.KillGitProcess",
@@ -108,13 +108,13 @@
                 "when": "resourceLangId == BiosLanguage_sdl || resourceLangId == edk2_uni"
             },
             {
-                "command": "AsusSnippetTools.DebugToAsusPrint",
+                "command": "SnippetTools.DebugToAsusPrint",
                 "key": "alt+F1",
                 "mac": "alt+F1",
                 "when": "resourceLangId == c"
             },
             {
-                "command": "AsusSnippetTools.AsusPrintToDebug",
+                "command": "SnippetTools.AsusPrintToDebug",
                 "key": "alt+shift+F1",
                 "mac": "alt+shift+F1",
                 "when": "resourceLangId == c"
@@ -328,12 +328,12 @@
                 },
                 {
                     "when": "resourceLangId == c",
-                    "command": "AsusSnippetTools.DebugToAsusPrint",
+                    "command": "SnippetTools.DebugToAsusPrint",
                     "group": "navigation"
                 },
                 {
                     "when": "resourceLangId == c",
-                    "command": "AsusSnippetTools.AsusPrintToDebug",
+                    "command": "SnippetTools.AsusPrintToDebug",
                     "group": "navigation"
                 }
             ],
