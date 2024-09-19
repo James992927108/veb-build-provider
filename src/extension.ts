@@ -78,13 +78,13 @@ async function BuildDefaulTask(folderpath: string, selection: string, TaskfileUp
         let fileStream = fs.createReadStream(path.join(folderpath, selection));
         let BuildCommand = [];
         let ReBuildCommand = [];
-        const extension = vscode.extensions.getExtension("iei_bios.veb-build-provider");
+        const extension = vscode.extensions.getExtension("ieibios.veb-build-provider");
         let teePath = "";
         let sourcePrepareScriptPath = path.join(folderpath, ".vscode", "PrepareEnvScript.bat").replace(/\\/g, '\\\\');
         if (extension !== undefined) {
             teePath = path.join(extension.extensionPath, "Tool", "tee.exe").replace(/\\/g, '\\\\');
         } else {
-            console.log("getExtension iei_bios.veb-build-provider failed");
+            console.log("getExtension ieibios.veb-build-provider failed");
         }
         fileStream.on('data', function (chunk) {
             BuildCommand = chunk.toString().slice(chunk.toString().indexOf('Build'), chunk.toString().indexOf('BuildAll')).split('"')[1].replace(/\\/g, '\\\\');
@@ -137,26 +137,34 @@ function AmendTaskByFile(folderpath, selection, TaskfileUpdate, project) {
     });
 }
 
-function copyPrepareEnvScript(folderpath) {
-    const asusVebExtension = vscode.extensions.getExtension("iei_bios.veb-build-provider");
+function copyPrepareEnvScript(folderpath: string) {
+    const vebExtension = vscode.extensions.getExtension("ieibios.veb-build-provider");
     
-    if (!asusVebExtension) {
-        console.error("Fail to get iei_bios.veb-build-provider");
+    if (!vebExtension) {
+        console.error("Fail to get ieibios.veb-build-provider");
         return;
     }
 
-    const sourceScriptPath = path.join(asusVebExtension.extensionPath, "Tool", "PrepareEnvScript.bat");
+    const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", "PrepareEnvScript.bat");
     const targetFolderPath = path.join(folderpath, ".vscode");
     const targetScriptPath = path.join(targetFolderPath, "PrepareEnvScript.bat");
 
     try {
+        // Create target directory if it doesn't exist
         if (!fs.existsSync(targetFolderPath)) {
             fs.mkdirSync(targetFolderPath, { recursive: true });
         }
-        fs.copyFileSync(sourceScriptPath, targetScriptPath);
-        console.log('copy PrepareEnvScript.bat to ${targetScriptPath} success');
+        
+        // Check if the file already exists at the target location
+        if (fs.existsSync(targetScriptPath)) {
+            console.log('PrepareEnvScript.bat already exists at ' + targetScriptPath);
+        } else {
+            fs.copyFileSync(sourceScriptPath, targetScriptPath);
+            console.log('Copied PrepareEnvScript.bat to ' + targetScriptPath + ' successfully');
+        }
     } catch (error) {
-        console.error('copy PrepareEnvScript.bat error：${error.message}');
+        const err = error as Error;  // Type assertion to Error
+        console.error('Error copying PrepareEnvScript.bat: ' + err.message);
     }
 }
 
