@@ -3,7 +3,7 @@
     "publisher": "ieibios",
     "displayName": "veb-build-provider",
     "description": "This tools provider building project veb module explorer.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "main": "./out/extension.js",
     "engines": {
         "vscode": "^1.82.2"
