@@ -22,19 +22,7 @@
                 }
             ]
         },
-        "views": {
-            "file-explorer": [
-                {
-                    "id": "fileExplorer",
-                    "name": "Veb list (components)"
-                }
-            ]
-        },
         "commands": [
-            {
-                "command": "fileExplorer.openFile",
-                "title": "Open File"
-            },
             {
                 "command": "rightclick.copyfilepath",
                 "title": "Copy File Path"
@@ -277,30 +265,6 @@
             }
         ],
         "menus": {
-            "view/item/context": [
-                {
-                    "when": "view == fileExplorer",
-                    "command": "rightclick.copyfilepath",
-                    "group": "9_cutcopypaste"
-                },
-                {
-                    "when": "view == fileExplorer",
-                    "command": "rightclick.openFolder",
-                    "group": "9_cutcopypaste"
-                },
-                {
-                    "when": "view == fileExplorer",
-                    "command": "rightclick.openFile",
-                    "group": "navigation"
-                }
-            ],
-            "view/title": [
-                {
-                    "command": "workbench.action.reloadWindow",
-                    "group": "navigation",
-                    "when": "view == fileExplorer"
-                }
-            ],
             "editor/context": [
                 {
                     "when": "editorTextFocus",

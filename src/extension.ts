@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { MyTreeProvider } from './TreeProvider';
 import { Edk2FdfProvider } from './edk2Language';
 import { Edk2DscProvider } from './edk2Language';
 import { Edk2DecProvider } from './edk2Language';
@@ -343,9 +342,6 @@ function registerCommand(context, commandName, callback) {
  * @param {vscode.ExtensionContext} context
  */
 export function activate(context: vscode.ExtensionContext) {
-    // tree provider
-    MyTreeProvider.initMyTreeList();
-
     // Edk2 language provider
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_fdf' }, new Edk2FdfProvider());
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_dsc' }, new Edk2DscProvider());
