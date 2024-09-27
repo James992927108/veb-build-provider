@@ -45,14 +45,6 @@ const Taskfile = '{\n\
             "type": "shell",\n\
             "command": ""\n\
         },\n\
-        {\n\
-            "label": "KillGitProcess",\n\
-            "type": "shell",\n\
-            "command": "taskkill /F /IM  git.exe",\n\
-            "presentation": {\n\
-                "reveal": "always"\n\
-            },\n\
-        },\n\
 ';
 
 const TaskSampleShell = '\
@@ -311,10 +303,6 @@ function handleVebReBuild() {
     checkAndExecuteTask("VebReBuildTask", "VebReBuildTask fail: initialize the tasks.json by pressing the shortcut key (F8).");
 }
 
-function handleKillGitProcess() {
-    checkAndExecuteTask("KillGitProcess", "handleKillGitProcess fail.");
-}
-
 function registerCommand(context, commandName, callback) {
     const disposable = vscode.commands.registerCommand(commandName, callback);
     context.subscriptions.push(disposable);
@@ -347,9 +335,7 @@ export function activate(context: vscode.ExtensionContext) {
     registerCommand(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
     // Alt + shift + F1
     registerCommand(context, 'SnippetTools.AsusPrintToDebug', () => new SnippetTools(vscode).AsusPrintToDebug());
-    // shift + F12
-    registerCommand(context, 'other.KillGitProcess', () => handleKillGitProcess());
-
+    
 }
 exports.activate = activate;
 

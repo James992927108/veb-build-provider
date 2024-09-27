@@ -79,10 +79,6 @@
             {
                 "command": "SnippetTools.AsusPrintToDebug",
                 "title": "Replace ASUSPRINT to Debug"
-            },
-            {
-                "command": "other.KillGitProcess",
-                "title": "Kill git.exe process"
             }
         ],
         "keybindings": [
@@ -145,11 +141,6 @@
                     "langId": "c",
                     "name": "debug_end_snippet"
                 }
-            },
-            {
-                "command": "other.KillGitProcess",
-                "key": "shift+F12",
-                "mac": "shift+F12"
             }
         ],
         "languages": [
