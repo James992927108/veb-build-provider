@@ -19,7 +19,7 @@ enum ShowType {
     QuickPick = 1,
 }
 
-let BuildToolFileName = 'BuildCommandList.ini';
+
 // Task file define
 const Taskfile = '{\n\
     "version": "1.0.0",\n\
@@ -78,14 +78,16 @@ async function BuildDefaulTask(folderpath: string, selection: string, TaskfileUp
         let fileStream = fs.createReadStream(path.join(folderpath, selection));
         let BuildCommand = [];
         let ReBuildCommand = [];
-        const extension = vscode.extensions.getExtension("ieibios.veb-build-provider");
-        let teePath = "";
-        let sourcePrepareScriptPath = path.join(folderpath, ".vscode", "PrepareEnvScript.bat").replace(/\\/g, '\\\\');
-        if (extension !== undefined) {
-            teePath = path.join(extension.extensionPath, "Tool", "tee.exe").replace(/\\/g, '\\\\');
-        } else {
-            console.log("getExtension ieibios.veb-build-provider failed");
+
+        const vebExtension = vscode.extensions.getExtension("ieibios.veb-build-provider");
+        if (!vebExtension) {
+            console.error("Fail to get ieibios.veb-build-provider");
+            return;
         }
+    
+        let teePath = path.join(vebExtension.extensionPath, "Tool", "tee.exe").replace(/\\/g, '\\\\');
+        let sourcePrepareScriptPath = path.join(folderpath, ".vscode", "PrepareEnvScript.bat").replace(/\\/g, '\\\\');
+
         fileStream.on('data', function (chunk) {
             BuildCommand = chunk.toString().slice(chunk.toString().indexOf('Build'), chunk.toString().indexOf('BuildAll')).split('"')[1].replace(/\\/g, '\\\\');
             ReBuildCommand = chunk.toString().slice(chunk.toString().indexOf('BuildAll'), chunk.toString().indexOf('BuildLog')).split('"')[1].replace(/\\/g, '\\\\');
@@ -110,34 +112,37 @@ async function BuildDefaulTask(folderpath: string, selection: string, TaskfileUp
     });
 }
 
-function AmendTaskByFile(folderpath, selection, TaskfileUpdate, project) {
+function AmendTaskByFile(folderpath, TaskfileUpdate, project) {
     console.log("AmendTaskByFile Start");
-    var array;
+    let array;
+    const BuildToolFileName = 'BuildCommandList.ini';
     try {
-        array = fs.readFileSync(path.join(folderpath, selection)).toString().split(/\r?\n/);
+        array = fs.readFileSync(path.join(folderpath, ".vscode", BuildToolFileName)).toString().split(/\r?\n/);
     } catch (err) {
         console.log("AmendTaskByFile -> readFileSync Error");
         return new Promise(resolve => {
             resolve(TaskfileUpdate);
         });
     }
+
     array.forEach(line => {
         line = line.toString().replace(new RegExp("%project", "ig"), project.split('.')[0]);
         console.log(line);
+
+        // 根據 line 的內容更新 TaskfileUpdate
         if (line.split(/:/)[0].replace(/[ |\t]/g, "") === "shell") {
-            // console.log('shell');
-            TaskfileUpdate = TaskfileUpdate + util.format(TaskSampleShell, line.split(/:/)[1].replace(/[\t]/g, ""), line.split(/:/)[2]);
+            TaskfileUpdate += util.format(TaskSampleShell, line.split(/:/)[1].replace(/[\t]/g, ""), line.split(/:/)[2]);
         } else {
-            // console.log('process');
-            TaskfileUpdate = TaskfileUpdate + util.format(TaskSample, line.split(/:/)[1].replace(/[\t]/g, ""), line.split(/:/)[0].replace(/[ |\t]/g, ""), line.split(/:/)[2]);
+            TaskfileUpdate += util.format(TaskSample, line.split(/:/)[1].replace(/[\t]/g, ""), line.split(/:/)[0].replace(/[ |\t]/g, ""), line.split(/:/)[2]);
         }
     });
+
     return new Promise(resolve => {
         resolve(TaskfileUpdate);
     });
 }
 
-function copyPrepareEnvScript(folderpath: string) {
+function copyPrepareEnvScript(folderpath: string, filename: string) {
     const vebExtension = vscode.extensions.getExtension("ieibios.veb-build-provider");
     
     if (!vebExtension) {
@@ -145,9 +150,9 @@ function copyPrepareEnvScript(folderpath: string) {
         return;
     }
 
-    const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", "PrepareEnvScript.bat");
+    const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", filename);
     const targetFolderPath = path.join(folderpath, ".vscode");
-    const targetScriptPath = path.join(targetFolderPath, "PrepareEnvScript.bat");
+    const targetScriptPath = path.join(targetFolderPath, filename);
 
     try {
         // Create target directory if it doesn't exist
@@ -157,14 +162,14 @@ function copyPrepareEnvScript(folderpath: string) {
         
         // Check if the file already exists at the target location
         if (fs.existsSync(targetScriptPath)) {
-            console.log('PrepareEnvScript.bat already exists at ' + targetScriptPath);
+            console.log(filename + ' already exists at ' + targetScriptPath);
         } else {
             fs.copyFileSync(sourceScriptPath, targetScriptPath);
-            console.log('Copied PrepareEnvScript.bat to ' + targetScriptPath + ' successfully');
+            console.log('Copied ' + filename + ' to ' + targetScriptPath + ' successfully');
         }
     } catch (error) {
         const err = error as Error;  // Type assertion to Error
-        console.error('Error copying PrepareEnvScript.bat: ' + err.message);
+        console.error('Error copying ' + filename + ': ' + err.message);
     }
 }
 
@@ -178,10 +183,14 @@ function CreateBuildtask(folderpath: string, targetFiles: string | any[], start:
                 if (!selection) {
                     return;
                 }
+                // 將 PrepareEnvScript.bat 複製到 .vscode 資料夾下
+                copyPrepareEnvScript(folderpath, 'PrepareEnvScript.bat');
+                copyPrepareEnvScript(folderpath, 'BuildCommandList.ini');
+
                 // make Task content
                 let TaskfileUpdate: unknown = [];
                 const buildTaskUpdate = await BuildDefaulTask(folderpath, selection, TaskfileUpdate);
-                const amendTaskUpdate = await AmendTaskByFile(folderpath, BuildToolFileName, buildTaskUpdate, selection);
+                const amendTaskUpdate = await AmendTaskByFile(folderpath, buildTaskUpdate, selection);
                 TaskfileUpdate = amendTaskUpdate;
                 TaskfileUpdate = TaskfileUpdate + "\t]\n}";
                 // Create Task file
@@ -195,8 +204,6 @@ function CreateBuildtask(folderpath: string, targetFiles: string | any[], start:
                             }
                         });
                     }
-                    // 將 PrepareEnvScript.bat 複製到 .vscode 資料夾下
-                    copyPrepareEnvScript(folderpath);
 
                     console.log("CreateBuildtask -> writeFile tasks.json Start\n");
                     fs.writeFile(path.join(folderpath, ".vscode", "tasks.json"), TaskfileUpdate, err => {
@@ -266,34 +273,29 @@ function checkAndExecuteTask(taskName: string, errorMessage: string) {
         if (!exists) {
             vscode.window.showErrorMessage(errorMessage);
         } else {
+            console.log(taskName);
             // F7 need to check BuildCommandList.ini
             if (taskName === "VebBuildTask") {
-                fs.exists(path.join(folderpath, BuildToolFileName), exists1 => {
-                    if (!exists1) {
-                        console.log("Not found BuildCommandList.ini");
-                        vscode.commands.executeCommand("workbench.action.tasks.runTask", "VebReBuildTask");
-                    } else {
-                        const CommandList: string[] = [];
-                        let TasksJson = fs.readFileSync(path.join(folderpath, ".vscode", "tasks.json"), "utf8");
-                        let arr = TasksJson.split(/\r?\n/);
-                        arr.forEach((line: string, idx: number) => {
-                            if (line.includes("label")) {
-                                console.log((idx + 1) + ':' + line);
-                                CommandList.push(line.split(/"/)[3]);
-                            }
-                        });
-                        console.log(CommandList);
-
-                        vscode.window.showQuickPick(CommandList, { placeHolder: 'select command from command list' }).then(selection => {
-                            // check selection is selected or not.
-                            if (!selection) {
-                                return;
-                            }
-                            vscode.commands.executeCommand("workbench.action.tasks.runTask", selection);
-                        });
+                const CommandList: string[] = [];
+                let TasksJson = fs.readFileSync(path.join(folderpath, ".vscode", "tasks.json"), "utf8");
+                let arr = TasksJson.split(/\r?\n/);
+                arr.forEach((line: string, idx: number) => {
+                    if (line.includes("label")) {
+                        console.log((idx + 1) + ':' + line);
+                        CommandList.push(line.split(/"/)[3]);
                     }
                 });
+                console.log(CommandList);
+
+                vscode.window.showQuickPick(CommandList, { placeHolder: 'select command from command list' }).then(selection => {
+                    // check selection is selected or not.
+                    if (!selection) {
+                        return;
+                    }
+                    vscode.commands.executeCommand("workbench.action.tasks.runTask", selection);
+                });
             } else {
+                // F9
                 vscode.commands.executeCommand("workbench.action.tasks.runTask", taskName);
             }
         }
