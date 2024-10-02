@@ -1,347 +1,290 @@
 import * as vscode from 'vscode';
-import { Edk2FdfProvider } from './edk2Language';
-import { Edk2DscProvider } from './edk2Language';
-import { Edk2DecProvider } from './edk2Language';
-import { Edk2InfProvider } from './edk2Language';
-import { Edk2VfrProvider } from './edk2Language';
+import * as path from 'path';
+import * as util from 'util';
+import * as fs from 'fs/promises';
+import { Edk2FdfProvider, Edk2DscProvider, Edk2DecProvider, Edk2InfProvider, Edk2VfrProvider } from './edk2Language';
 import Edk2Formatter from "./edk2Formatter";
 import SnippetTools from "./SnippetTools";
 
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
+// Constants
+const EXTENSION_ID = "ieibios.veb-build-provider";
+const VSCODE_FOLDER = ".vscode";
+const TASKS_JSON = "tasks.json";
+const VEB_EXTENSION = '.veb';
+const PREPARE_ENV_SCRIPT = 'PrepareEnvScript.bat';
+const BUILD_COMMAND_LIST = 'BuildCommandList.ini';
 
+// Enums
 enum ShowType {
     InformationMessage = 0,
     QuickPick = 1,
 }
 
+// Task file templates
+const Taskfile = `{
+    "version": "1.0.0",
+    "tasks": 
+    [
+        {
+            "label": "------------------------------------Internal command------------------------------------------",
+            "type": "shell",
+            "command": ""
+        },
+        {
+            "label": "VebBuildTask",
+            "type": "shell",
+            "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s Build.log\\""
+        },
+        {
+            "label": "VebReBuildTask",
+            "type": "shell",
+            "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s Build.log\\""
+        },
+        {
+            "label": "------------------------------------External command------------------------------------------",
+            "type": "shell",
+            "command": ""
+        },
+`;
 
-// Task file define
-const Taskfile = '{\n\
-    "version": "1.0.0",\n\
-    "tasks": \n\
-    [\n\
-        {\n\
-            "label": "------------------------------------Internal command------------------------------------------",\n\
-            "type": "shell",\n\
-            "command": ""\n\
-        },\n\
-        {\n\
-            "label": "VebBuildTask",\n\
-            "type": "shell",\n\
-            "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s Build.log\\""\n\
-        },\n\
-        {\n\
-            "label": "VebReBuildTask",\n\
-            "type": "shell",\n\
-            "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s Build.log\\""\n\
-        },\n\
-        {\n\
-            "label": "------------------------------------External command------------------------------------------",\n\
-            "type": "shell",\n\
-            "command": ""\n\
-        },\n\
-';
+const TaskSampleShell = `
+        {
+            "label": "%s",
+            "type": "shell",
+            "command": "cmd /V /C \\"%s\\""
+        },
+`;
 
-const TaskSampleShell = '\
-        {\n\
-            "label": "%s",\n\
-            "type": "shell",\n\
-            "command": "cmd /V /C \\"%s\\""\n\
-        },\n\
-';
-const TaskSample = '\
-        {\n\
-            "label": "%s",\n\
-            "type": "%s",\n\
-            "command": "%s"\n\
-        },\n\
-';
+const TaskSample = `
+        {
+            "label": "%s",
+            "type": "%s",
+            "command": "%s"
+        },
+`;
 
-async function BuildDefaultTask(folderpath: string, selection: string, TaskfileUpdate: unknown) {
+// Helper functions
+function handleError(error: Error, message: string) {
+    console.error(`${message}: ${error.message}`);
+    vscode.window.showErrorMessage(`${message}: ${error.message}`);
+}
+
+function escapePath(filePath: string): string {
+    return filePath.replace(/\\/g, '\\\\');
+}
+
+async function readFile(filePath: string): Promise<string> {
+    try {
+        return await fs.readFile(filePath, 'utf8');
+    } catch (error) {
+        handleError(error as Error, `Error reading file: ${filePath}`);
+        return '';
+    }
+}
+
+async function writeFile(filePath: string, content: string): Promise<void> {
+    try {
+        await fs.writeFile(filePath, content, 'utf8');
+    } catch (error) {
+        handleError(error as Error, `Error writing file: ${filePath}`);
+    }
+}
+
+async function copyFile(source: string, target: string): Promise<void> {
+    try {
+        await fs.access(target);
+        console.log(`${target} already exists`);
+    } catch {
+        try {
+            await fs.copyFile(source, target);
+            console.log(`Copied ${source} to ${target} successfully`);
+        } catch (error) {
+            handleError(error as Error, `Error copying file`);
+        }
+    }
+}
+
+function extractCommand(data: string, startTag: string, endTag: string): string {
+    const command = data.slice(data.indexOf(startTag), data.indexOf(endTag)).split('"')[1];
+    return escapePath(command);
+}
+
+async function BuildDefaultTask(folderpath: string, selection: string, TaskfileUpdate: string): Promise<string> {
     console.log("BuildDefaultTask Start");
 
-    // Retrieve the veb-build-provider extension
-    const vebExtension = vscode.extensions.getExtension("ieibios.veb-build-provider");
+    const vebExtension = vscode.extensions.getExtension(EXTENSION_ID);
     if (!vebExtension) {
-        console.error("Failed to get ieibios.veb-build-provider");
-        return Promise.reject("Failed to get VEB build provider extension");
+        throw new Error("Failed to get VEB build provider extension");
     }
 
-    // Construct paths for tee.exe and the PrepareEnvScript.bat file
     const teePath = escapePath(path.join(vebExtension.extensionPath, "Tool", "tee.exe"));
-    const filename = 'PrepareEnvScript.bat';
-    const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", filename);
-    const targetScriptPath = escapePath(path.join(folderpath, ".vscode", filename));
+    const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", PREPARE_ENV_SCRIPT);
+    const targetScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_SCRIPT));
 
-    // Copy the resource file
-    copyBuildResource(sourceScriptPath, targetScriptPath);
+    await copyFile(sourceScriptPath, targetScriptPath);
 
-    // Read the selected file
     const fileData = await readFile(path.join(folderpath, selection));
 
-    // Extract build and rebuild commands from the file data
     const buildCommand = extractCommand(fileData, 'Build', 'BuildAll');
     const reBuildCommand = extractCommand(fileData, 'BuildAll', 'BuildLog');
 
     const Veb = selection.split('.')[0];
 
-    // Format TaskfileUpdate with the extracted commands and paths
-    TaskfileUpdate = util.format(Taskfile,
-        Veb, targetScriptPath, buildCommand, teePath,  // BuildAllTask
-        Veb, targetScriptPath, reBuildCommand, teePath // ReBuildAllTask
+    return util.format(Taskfile,
+        Veb, targetScriptPath, buildCommand, teePath,
+        Veb, targetScriptPath, reBuildCommand, teePath
     );
+}
+
+async function AmendTaskByFile(folderpath: string, TaskfileUpdate: string, project: string): Promise<string> {
+    console.log("AmendTaskByFile Start");
+
+    const vebExtension = vscode.extensions.getExtension(EXTENSION_ID);
+    if (!vebExtension) {
+        throw new Error("Failed to get VEB build provider extension");
+    }
+
+    const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", BUILD_COMMAND_LIST);
+    const targetScriptPath = path.join(folderpath, VSCODE_FOLDER, BUILD_COMMAND_LIST);
+
+    await copyFile(sourceScriptPath, targetScriptPath);
+
+    const fileData = await readFile(targetScriptPath);
+    const lines = fileData.split(/\r?\n/);
+
+    for (const line of lines) {
+        const processedLine = line.replace(new RegExp("%project", "ig"), project.split('.')[0]);
+        console.log(processedLine);
+
+        const [commandType, ...rest] = processedLine.split(/:/);
+        const trimmedCommandType = commandType.trim();
+
+        if (trimmedCommandType === "shell") {
+            TaskfileUpdate += util.format(TaskSampleShell, rest[0].trim(), rest[1]);
+        } else {
+            TaskfileUpdate += util.format(TaskSample, rest[0].trim(), trimmedCommandType, rest[1]);
+        }
+    }
 
     return TaskfileUpdate;
 }
 
-async function AmendTaskByFile(folderpath: string, TaskfileUpdate: unknown, project: string) {
-    console.log("AmendTaskByFile Start");
-
-    // Retrieve the veb-build-provider extension
-    const vebExtension = vscode.extensions.getExtension("ieibios.veb-build-provider");
-    if (!vebExtension) {
-        console.error("Failed to get ieibios.veb-build-provider");
-        return Promise.reject("Failed to get VEB build provider extension");
-    }
-
-    // Construct paths for the BuildCommandList.ini file
-    const filename = 'BuildCommandList.ini';
-    const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", filename);
-    const targetScriptPath = path.join(folderpath, ".vscode", filename);
-
-    // Copy the resource file
-    copyBuildResource(sourceScriptPath, targetScriptPath);
-
-    // Read the contents of the target script file
-    let array: string[];
+async function createVscodeFolder(folderpath: string): Promise<void> {
+    const vscodePath = path.join(folderpath, VSCODE_FOLDER);
     try {
-        const fileData = await readFile(targetScriptPath); // Use the async readFile function
-        array = fileData.split(/\r?\n/); // Split the file data into lines
-    } catch (err) {
-        console.log("AmendTaskByFile -> readFile Error");
-        return Promise.resolve(TaskfileUpdate); // Resolve with the current TaskfileUpdate on error
-    }
-
-    // Process each line in the file
-    array.forEach(line => {
-        line = line.toString().replace(new RegExp("%project", "ig"), project.split('.')[0]);
-        console.log(line);
-
-        // Determine whether the line is a shell command or a process command
-        const lineParts = line.split(/:/);
-        const commandType = lineParts[0].replace(/[ |\t]/g, "");
-
-        if (commandType === "shell") {
-            TaskfileUpdate += util.format(TaskSampleShell, lineParts[1].replace(/[\t]/g, ""), lineParts[2]);
-        } else {
-            TaskfileUpdate += util.format(TaskSample, lineParts[1].replace(/[\t]/g, ""), commandType, lineParts[2]);
-        }
-    });
-
-    return TaskfileUpdate; // Return the updated TaskfileUpdate
-}
-
-// Helper function: Reads the contents of a file
-function readFile(filePath: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        let fileStream = fs.createReadStream(filePath);
-        let data = '';
-
-        fileStream.on('data', chunk => {
-            data += chunk.toString(); // Accumulate data chunks
-        });
-
-        fileStream.on('end', () => {
-            resolve(data); // Resolve promise with file data
-        });
-
-        fileStream.on('error', err => {
-            reject(err); // Reject promise on error
-        });
-    });
-}
-
-// Helper function: Extracts a command from the file data based on start and end tags
-function extractCommand(data: string, startTag: string, endTag: string): string {
-    const command = data.slice(data.indexOf(startTag), data.indexOf(endTag)).split('"')[1];
-    return escapePath(command); // Escape backslashes in the command
-}
-
-// Helper function: Escapes backslashes in a file path
-function escapePath(filePath: string): string {
-    return filePath.replace(/\\/g, '\\\\'); // Replace single backslashes with double backslashes
-}
-
-function copyBuildResource(sourceScriptPath: string, targetScriptPath: string) {
-    const vebExtension = vscode.extensions.getExtension("ieibios.veb-build-provider");
-
-    if (!vebExtension) {
-        console.error("Fail to get ieibios.veb-build-provider");
-        return;
-    }
-
-    try {
-        // Check if the file already exists at the target location
-        if (fs.existsSync(targetScriptPath)) {
-            console.log(targetScriptPath + ' already exists at ' + targetScriptPath);
-        } else {
-            fs.copyFileSync(sourceScriptPath, targetScriptPath);
-            console.log('Copied ' + targetScriptPath + ' to ' + targetScriptPath + ' successfully');
-        }
+        await fs.mkdir(vscodePath, { recursive: true });
+        console.log(".vscode folder created successfully.");
     } catch (error) {
-        const err = error as Error;  // Type assertion to Error
-        console.error('Error copying ' + targetScriptPath + ': ' + err.message);
+        handleError(error as Error, "Failed to create .vscode folder");
     }
 }
 
-function CreateBuildtask(folderpath: string, targetFiles: string | any[], start: number, end: number, showType: number) {
+async function writeTasksJson(folderpath: string, TaskfileUpdate: string): Promise<void> {
+    try {
+        await writeFile(path.join(folderpath, VSCODE_FOLDER, TASKS_JSON), TaskfileUpdate);
+        vscode.window.showInformationMessage("Create tasks.json Success.");
+    } catch (error) {
+        handleError(error as Error, "Failed to write tasks.json");
+    }
+}
+
+async function CreateBuildtask(folderpath: string, targetFiles: string[], start: number, end: number, showType: ShowType): Promise<void> {
     console.log("CreateBuildtask Start");
     console.log('Show Veb array from (%d) to (%d)', start, end);
-    if (showType) {
-        vscode.window.showQuickPick([...targetFiles.slice(start, end)], { placeHolder: 'Start Build for ?' })
-            .then(async selection => {
-                // check selection is selected or not.
-                if (!selection) {
-                    return;
-                }
+    
+    if (showType === ShowType.QuickPick) {
+        const selection = await vscode.window.showQuickPick([...targetFiles.slice(start, end)], { placeHolder: 'Start Build for ?' });
+        if (!selection) {
+            return;
+        }
 
-                // make Task content
-                let TaskfileUpdate: unknown = [];
-                const buildTaskUpdate = await BuildDefaultTask(folderpath, selection, TaskfileUpdate);
-                const amendTaskUpdate = await AmendTaskByFile(folderpath, buildTaskUpdate, selection);
-                TaskfileUpdate = amendTaskUpdate;
-                TaskfileUpdate = TaskfileUpdate + "\t]\n}";
-                // Create Task file
-                fs.exists(path.join(folderpath, ".vscode"), exists => {
-                    if (!exists) {
-                        console.log(".vscode not exists and create it.");
-                        fs.mkdir(path.join(folderpath, ".vscode"), err => {
-                            if (err) {
-                                console.log("makdir .vscode fail.");
-                                return;
-                            }
-                        });
-                    }
+        let TaskfileUpdate = await BuildDefaultTask(folderpath, selection, '');
+        TaskfileUpdate = await AmendTaskByFile(folderpath, TaskfileUpdate, selection);
+        TaskfileUpdate += "\t]\n}";
 
-                    console.log("CreateBuildtask -> writeFile tasks.json Start\n");
-                    fs.writeFile(path.join(folderpath, ".vscode", "tasks.json"), TaskfileUpdate, err => {
-                        if (err) {
-                            console.error(err);
-                            vscode.window.showErrorMessage("Create tasks.json fail.");
-                        } else {
-                            vscode.window.showInformationMessage("Create tasks.json Success.");
-                        }
-                    });
-                });
-            });
+        await createVscodeFolder(folderpath);
+        await writeTasksJson(folderpath, TaskfileUpdate);
     } else {
         vscode.window.showInformationMessage('!!! Not support yet !!!');
     }
 }
 
-function getFolderPath() {
-    let folderpath = "";
+function getFolderPath(): string {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (!workspaceFolder) return "";
 
-    if (vscode.workspace.workspaceFolders !== undefined && vscode.workspace.workspaceFolders.length > 0) {
-        const workspaceFolder = vscode.workspace.workspaceFolders[0];
-        const uri = workspaceFolder.uri.toString();
-        const splitUri = uri.split(":///");
+    const uri = workspaceFolder.uri.toString();
+    const [, path] = uri.split(":///");
+    const [drive, rest] = path?.split("%3A") ?? [];
 
-        if (splitUri.length > 1) {
-            const splitPath = splitUri[1].split("%3A");
-
-            if (splitPath.length > 1) {
-                folderpath = splitPath[0] + ":" + splitPath[1];
-            }
-        }
-    }
-    console.log('Folderpath: %s', folderpath);
-    return folderpath;
+    return rest ? `${drive}:${rest}` : "";
 }
 
-function handleInitTask() {
-    let start = 0;
-    let end = 0;
-    let EXTENSION = '.veb';
+async function handleInitTask(): Promise<void> {
     const folderpath = getFolderPath();
-    fs.readdir(folderpath, function (err: any, files: any[]) {
-        if (err) {
-            console.log('Can\'t search .veb file.');
-            return;
-        }
+    if (!folderpath) {
+        vscode.window.showErrorMessage("No workspace folder found");
+        return;
+    }
 
-        let targetFiles = files.filter(function (file) {
-            return path.extname(file).toLowerCase() === EXTENSION;
-        });
+    try {
+        const files = await fs.readdir(folderpath);
+        const targetFiles = files.filter(file => path.extname(file).toLowerCase() === VEB_EXTENSION);
         console.log('targetFiles.length = %d', targetFiles.length);
 
-        CreateBuildtask(folderpath, targetFiles, start = 0, end = targetFiles.length, ShowType.QuickPick);
-    });
+        await CreateBuildtask(folderpath, targetFiles, 0, targetFiles.length, ShowType.QuickPick);
+    } catch (error) {
+        handleError(error as Error, "Can't search .veb file");
+    }
 }
 
-function checkAndExecuteTask(taskName: string, errorMessage: string) {
+async function checkAndExecuteTask(taskName: string, errorMessage: string): Promise<void> {
     const folderpath = getFolderPath();
     if (!folderpath) {
         vscode.window.showErrorMessage("Error folder is Empty");
         return;
     }
 
-    const tasksJsonPath = path.join(folderpath, ".vscode", "tasks.json");
-    fs.exists(tasksJsonPath, (exists: any) => {
-        if (!exists) {
-            vscode.window.showErrorMessage(errorMessage);
-        } else {
-            console.log(taskName);
-            // F7 need to check BuildCommandList.ini
-            if (taskName === "VebBuildTask") {
-                const CommandList: string[] = [];
-                let TasksJson = fs.readFileSync(path.join(folderpath, ".vscode", "tasks.json"), "utf8");
-                let arr = TasksJson.split(/\r?\n/);
-                arr.forEach((line: string, idx: number) => {
-                    if (line.includes("label")) {
-                        console.log((idx + 1) + ':' + line);
-                        CommandList.push(line.split(/"/)[3]);
-                    }
-                });
-                console.log(CommandList);
+    const tasksJsonPath = path.join(folderpath, VSCODE_FOLDER, TASKS_JSON);
+    
+    try {
+        await fs.access(tasksJsonPath);
+        console.log(taskName);
 
-                vscode.window.showQuickPick(CommandList, { placeHolder: 'select command from command list' }).then(selection => {
-                    // check selection is selected or not.
-                    if (!selection) {
-                        return;
-                    }
-                    vscode.commands.executeCommand("workbench.action.tasks.runTask", selection);
-                });
-            } else {
-                // F9
-                vscode.commands.executeCommand("workbench.action.tasks.runTask", taskName);
+        if (taskName === "VebBuildTask") {
+            const tasksJson = await readFile(tasksJsonPath);
+            const commandList = tasksJson.split(/\r?\n/)
+                .filter(line => line.includes("label"))
+                .map(line => line.split(/"/)[3]);
+
+            console.log(commandList);
+
+            const selection = await vscode.window.showQuickPick(commandList, { placeHolder: 'select command from command list' });
+            if (selection) {
+                await vscode.commands.executeCommand("workbench.action.tasks.runTask", selection);
             }
+        } else {
+            await vscode.commands.executeCommand("workbench.action.tasks.runTask", taskName);
         }
-    });
+    } catch (error) {
+        vscode.window.showErrorMessage(errorMessage);
+    }
 }
 
-// F7
-function handleVebBuild() {
-    checkAndExecuteTask("VebBuildTask", "VebBuildTask fail: initialize the tasks.json by pressing the shortcut key (F8).");
-}
-// F9
-function handleVebReBuild() {
-    checkAndExecuteTask("VebReBuildTask", "VebReBuildTask fail: initialize the tasks.json by pressing the shortcut key (F8).");
+function handleVebBuild(): Promise<void> {
+    return checkAndExecuteTask("VebBuildTask", "VebBuildTask fail: initialize the tasks.json by pressing the shortcut key (F8).");
 }
 
-function registerCommand(context, commandName, callback) {
+function handleVebReBuild(): Promise<void> {
+    return checkAndExecuteTask("VebReBuildTask", "VebReBuildTask fail: initialize the tasks.json by pressing the shortcut key (F8).");
+}
+
+function registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any): void {
     const disposable = vscode.commands.registerCommand(commandName, callback);
     context.subscriptions.push(disposable);
 }
 
-/**
- * @param {vscode.ExtensionContext} context
- */
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
     // Edk2 language provider
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_fdf' }, new Edk2FdfProvider());
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_dsc' }, new Edk2DscProvider());
@@ -349,28 +292,14 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_inf' }, new Edk2InfProvider());
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_vfr' }, new Edk2VfrProvider());
 
-    // F8: Build initialize task Command
-    registerCommand(context, 'extension.InitTask', () => handleInitTask());
-    // F7: Build Command
-    registerCommand(context, 'extension.VebBuild', () => handleVebBuild());
-    // F9: ReBuild Command
-    registerCommand(context, 'extension.VebReBuild', () => handleVebReBuild());
-
-
-    // Shift + Alt + F: Uni/Sdl Formatter Documentation
-    registerCommand(context, 'formatter.Edk2Formatter', () => Edk2Formatter());
-    // Alt + F1
+    // Register commands
+    registerCommand(context, 'extension.InitTask', handleInitTask);
+    registerCommand(context, 'extension.VebBuild', handleVebBuild);
+    registerCommand(context, 'extension.VebReBuild', handleVebReBuild);
+    
+    registerCommand(context, 'formatter.Edk2Formatter', Edk2Formatter);
     registerCommand(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
-    // Alt + shift + F1
     registerCommand(context, 'SnippetTools.AsusPrintToDebug', () => new SnippetTools(vscode).AsusPrintToDebug());
-
 }
-exports.activate = activate;
 
-// this method is called when your extension is deactivated
-function deactivate() { }
-
-module.exports = {
-    activate,
-    deactivate
-};
+export function deactivate(): void {}
