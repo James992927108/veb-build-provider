@@ -3,7 +3,7 @@ import * as readline from "readline";
 import * as vscode from 'vscode';
 import { ONE_SPACE } from "./constants";
 
-function formatSdl(filepath: string, fileEncoding: string): Promise<any> {
+function formatSdl(filepath: string, fileEncoding: any): Promise<any> {
     return new Promise(resolve => {
         /**
          * create local variable

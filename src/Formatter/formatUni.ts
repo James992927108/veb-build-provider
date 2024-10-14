@@ -3,7 +3,7 @@ import * as readline from "readline";
 import * as vscode from 'vscode';
 import { ONE_SPACE, HASH_STRING, HASH_LANGUAGE } from "./constants";
 
-function formatUni(filepath: string, fileEncoding: string, maxStringLength: number): Promise<any> {
+function formatUni(filepath: string, fileEncoding: any, maxStringLength: number): Promise<any> {
     return new Promise(resolve => {
         /**
          * create local variable

@@ -41,7 +41,7 @@ class SnippetTools {
         }
     }
 
-    private _DebugToAsusPrint(filepath: string, fileEncoding: string): Promise<any> {
+    private _DebugToAsusPrint(filepath: string, fileEncoding: any): Promise<any> {
         const line_counter = ((i = 0) => () => ++i)();
         return new Promise((resolve) => {
             /**
@@ -101,7 +101,7 @@ class SnippetTools {
             });
         });
     }
-    private _AsusPrintToDebug(filepath: string, fileEncoding: string): Promise<any> {
+    private _AsusPrintToDebug(filepath: string, fileEncoding: any): Promise<any> {
 
         const line_counter = ((i = 0) => () => ++i)();
         return new Promise((resolve) => {
@@ -158,7 +158,7 @@ class SnippetTools {
         });
     }
 
-    private writeBacktoFile(filepath: string, fileEncoding: string, fileString: string) {
+    private writeBacktoFile(filepath: string, fileEncoding: any, fileString: string) {
         const writeFile = util.promisify(fs.writeFile);
         writeFile(filepath, fileString, { encoding: fileEncoding })
             .then(() => {

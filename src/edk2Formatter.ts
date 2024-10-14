@@ -6,23 +6,19 @@ import * as util from 'util';
 import formatUni from "./Formatter/formatUni";
 import formatSdl from "./Formatter/formatSdl";
 
-function detectFileEncoding(filepath: string): Promise<any> {
-    return new Promise(resolve => {
-        /**
-         * create local variable
-         */
+function detectFileEncoding(filepath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
         const chardet = require('chardet');
-        const encodingType: string = chardet.detectFileSync(filepath);
-        //   console.log('encodingType', encodingType);
-
-        /**
-         * resolve result
-         */
-        resolve(encodingType);
+        try {
+            const encodingType = chardet.detectFileSync(filepath);
+            resolve(encodingType);
+        } catch (error) {
+            reject(error); // Handle any potential error in detection
+        }
     });
 }
 
-function writeBacktoFile(filepath: string, fileEncoding: string, fileString: string) {
+function writeBacktoFile(filepath: string, fileEncoding: any, fileString: string) {
 
     const writeFile = util.promisify(fs.writeFile);
 
@@ -34,7 +30,7 @@ function writeBacktoFile(filepath: string, fileEncoding: string, fileString: str
 
 }
 
-function findMaxLength(filepath: string, fileEncoding: string): Promise<any> {
+function findMaxLength(filepath: string, fileEncoding: any): Promise<any> {
     return new Promise((resolve) => {
         /**
          * create local variable
@@ -95,36 +91,29 @@ function Edk2Formatter() {
         console.log('filePath', filePath);
 
         detectFileEncoding(filePath).then(function (fileEncoding) {
-            // console.log('encoding right');
-
             switch (fileEncoding) {
-                // *.uni
                 case "UTF-16LE": {
                     console.log("fileEncoding is", fileEncoding);
-                    fileEncoding = "UTF-16LE";
                     findMaxLength(filePath, fileEncoding).then(function (maxStringLength) {
-                        console.log('return value of findMaxLength: ' + maxStringLength);
-                        formatUni(filePath, fileEncoding, maxStringLength).then(function (fileString) {
-                            // console.log(fileString);
-                            writeBacktoFile(filePath, fileEncoding, fileString);
+                        formatUni(filePath, "utf16le", maxStringLength).then(function (fileString) {
+                            writeBacktoFile(filePath, "utf16le", fileString); // Use correct BufferEncoding
                         });
                     });
                     break;
                 }
-                // *.Sdl
                 case "ISO-8859-1": {
                     console.log("fileEncoding is " + fileEncoding + ", set to utf8");
-                    fileEncoding = "utf8";
-                    formatSdl(filePath, fileEncoding).then(function (fileString) {
-                        // console.log(fileString);
-                        writeBacktoFile(filePath, fileEncoding, fileString);
+                    formatSdl(filePath, "utf8").then(function (fileString) {
+                        writeBacktoFile(filePath, "utf8", fileString); // Use 'utf8' BufferEncoding
                     });
                     break;
                 }
                 default: {
-                    console.log('fileEncoding', fileEncoding);
+                    console.log('Unsupported fileEncoding:', fileEncoding);
                 }
             }
+        }).catch(error => {
+            console.error('Error detecting file encoding:', error);
         });
     }
 }

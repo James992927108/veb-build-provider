@@ -2,14 +2,13 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as rd from 'readline';
 
 
 export class Common {
     static removeHashTagComment(line: string): string {
-        return line.replace(/#.*/g, '')	// comments
-            .replace(/^\s*/g, '')		// front blank
-            .replace(/[\s]*$/g, '');	// tail blank
+        return line.replace(/#.*/g, '')   // comments
+            .replace(/^\s*/g, '')           // front blank
+            .replace(/[\s]*$/g, '');        // tail blank
     }
 
     static pushMatchContent(file: vscode.TextDocument, start: number, end: number, associate_files: string[]): number {
@@ -43,21 +42,102 @@ export class Common {
         }
         return null;
     }
+
+    static getRootPath(): string[] {
+        if (vscode.workspace.workspaceFolders) {
+            let config = vscode.workspace.getConfiguration('edk2-vscode');
+            let folder: string[] = [vscode.workspace.workspaceFolders[0].uri.fsPath];
+
+            if (config.has('root.extend.path')) {
+                let s: string = config.get('root.extend.path') + '';
+                s.replace(/\s/g, '').split(',').forEach(function (v) {
+                    folder.push(vscode.workspace.workspaceFolders![0].uri.fsPath + '/' + v);
+                });
+            }
+            return folder;
+        }
+        return [];
+    }
+
+    static buildDsc(...args: any[]) {
+        let os = require('os');
+        let config = vscode.workspace.getConfiguration('edk2-vscode');
+        let parameter = ' -p ' +
+            args[0].path.substring((os.platform() === 'win32' ? 1 : 0)) +   // windows: \d:\xxxxx ; linux /home/xxxxx
+            ' -t ' +
+            (config.has('build.compiler') ? config.get('build.compiler') : 'VS2015x86') +
+            ' -a ' +
+            (config.has('build.arch') ? config.get('build.arch') : 'X64') +
+            ' -b ' +
+            (config.has('build.target') ? config.get('build.target') : 'DEBUG');
+        if (os.platform() === 'win32') {
+            vscode.window.terminals[0].sendText('cmd.exe /K \"edksetup.bat & build' + parameter + '\"');
+        } else {
+            vscode.window.terminals[0].sendText('. edksetup.sh && build' + parameter);
+        }
+    }
+
+    static goToBuild(...args: any[]) {
+        let openExplorer = require('open-file-explorer');
+        let os = require('os');
+        let config = vscode.workspace.getConfiguration('edk2-vscode');
+
+        if (vscode.workspace.workspaceFolders) {
+            let inf = args[0].path.substring((os.platform() === 'win32' ? 1 : 0) + vscode.workspace.workspaceFolders[0].uri.fsPath.length).replace(/.inf$/g, '');
+            let dict = vscode.workspace.workspaceFolders[0].uri.fsPath.replace(/\\/g, '/') +
+                '/' +
+                'Build' +
+                '/' +
+                (config.has('build.project') ? config.get('build.project') : 'EmulatorX64') +
+                '/' +
+                (config.has('build.target') ? config.get('build.target') : 'DEBUG') +
+                '_' +
+                (config.has('build.compiler') ? config.get('build.compiler') : 'VS2015x86') +
+                '/';
+            let archs = ['IA32', 'X64', 'EBC', 'ARM', 'AARCH64'];
+            for (let arch of archs) {
+                let full_path = dict + arch + inf;
+                if (fs.existsSync(full_path)) {
+                    // openExplorer only accept '\\' in windows.
+                    if (os.platform() === 'win32') {
+                        openExplorer(full_path.replace(/\//g, '\\'), () => { });
+                    } else {
+                        openExplorer(full_path, () => { });
+                    }
+                    return;
+                }
+            }
+            vscode.window.showInformationMessage('Not found in build - ' + inf);
+        }
+    }
+
+    static getDebugMessage(): string {
+        let config = vscode.workspace.getConfiguration('edk2-vscode');
+        let prefix = config.get('debug.prefix');
+        if (prefix !== '') {
+            prefix = prefix + ' ';
+        }
+        return 'DEBUG ((DEBUG_ERROR, \"' + prefix + '%a %d $0 \\n\", __FUNCTION__, __LINE__));';
+    }
+
+    static debugLogHotkey(textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) {
+        return textEditor.insertSnippet(new vscode.SnippetString(Common.getDebugMessage()));
+    }
 }
 
 /*
 */
-export class Edk2FdfProvider implements vscode.DefinitionProvider {
+export class Edk2FdfDefinitionProvider implements vscode.DefinitionProvider {
     provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Definition> {
         let dest = Common.removeHashTagComment(document.lineAt(position).text);
 
         // Check INF prefix
-        if (dest.match(/^INF[a-zA-Z0-9\s]+/g)) {
-            if (vscode.workspace.workspaceFolders) {
-                dest = vscode.workspace.workspaceFolders[0].uri.fsPath + '/' + dest.replace(/^INF[\s]+/g, '');
-                // console.log(dest);
-                if (fs.existsSync(dest)) {
-                    return new vscode.Location(vscode.Uri.file(dest), new vscode.Position(0, 0));
+        if (dest.match(/^INF[\w\s]+/g)) {
+            let folders = Common.getRootPath();
+            for (let i = 0; i < folders.length; i++) {
+                let full_dest = folders[i] + '/' + dest.replace(/^INF[\s]+/g, '');
+                if (fs.existsSync(full_dest)) {
+                    return new vscode.Location(vscode.Uri.file(full_dest), new vscode.Position(0, 0));
                 }
             }
         }
@@ -66,36 +146,41 @@ export class Edk2FdfProvider implements vscode.DefinitionProvider {
 
 /*
 */
-export class Edk2DscProvider implements vscode.DefinitionProvider {
+export class Edk2DscDefinitionProvider implements vscode.DefinitionProvider {
     provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Definition> {
 
-        let dest = document.lineAt(position).text.replace(/#.*/g, '')	// comments
-            .replace(/^\s*/g, '')										// front blank
-            .replace(/[\s\{\}]*$/g, '')									// tail "{", "}"" and blank
-            .replace(/[a-zA-Z0-9\s]+\|/g, '');							// front "|" and blank
+        let dest = document.lineAt(position).text.replace(/#.*/g, '')   // comments
+            .replace(/^\s*/g, '')                        // front blank
+            .replace(/[\s\{\}]*$/g, '')                  // tail "{", "}"" and blank
+            .replace(/[\w\s]+\|/g, '');                  // front "|" and blank
 
-        if (vscode.workspace.workspaceFolders) {
-            if (dest.match(/^(!include )/g)) {
-                dest = dest.replace(/^(!include )/g, '');
-            }
+        if (dest.match(/^(!include )/g)) {
+            dest = dest.replace(/^(!include )/g, '');
+        }
 
-            dest = vscode.workspace.workspaceFolders[0].uri.fsPath + '/' + dest;
-            if (fs.existsSync(dest)) {
-                return new vscode.Location(vscode.Uri.file(dest), new vscode.Position(0, 0));
+        // Files
+        let folders = Common.getRootPath();
+        for (let i = 0; i < folders.length; i++) {
+            let full_dest = folders[i] + '/' + dest;
+            if (fs.existsSync(full_dest)) {
+                return new vscode.Location(vscode.Uri.file(full_dest), new vscode.Position(0, 0));
             }
         }
+
+        // TO-DO: PCDs
+        // ...
     }
 }
 
 /*
 */
-export class Edk2DecProvider implements vscode.DefinitionProvider {
+export class Edk2DecDefinitionProvider implements vscode.DefinitionProvider {
     provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Definition> {
         // check destination file.
-        let dest = document.lineAt(position).text.replace(/#.*/g, '')	// comments
-            .replace(/^\s*/g, '')										// front blank	
-            .replace(/[\s\{\}]*$/g, '')									// tail "{", "}"" and blank
-            .replace(/[a-zA-Z0-9\s]+\|/g, '');							// front "|" and blank
+        let dest = document.lineAt(position).text.replace(/#.*/g, '')   // comments
+            .replace(/^\s*/g, '')                        // front blank  
+            .replace(/[\s\{\}]*$/g, '')                  // tail "{", "}"" and blank
+            .replace(/[\w\s]+\|/g, '');                  // front "|" and blank
         if (!dest.substring(dest.length - 2).match('.h')) {
             return;
         }
@@ -103,18 +188,18 @@ export class Edk2DecProvider implements vscode.DefinitionProvider {
         //
         // TO-DO: Should parse DEC only once when opening *.dec.
         //
-        let parent_path = document.uri.fsPath.replace(/[a-zA-Z0-9\.]*$/g, '');
+        let parent_path = document.uri.fsPath.replace(/[\w\.]*$/g, '');
         // console.log(parent_path);
 
         let directory = [parent_path + dest];
         for (let i = 0; i < document.lineCount; i++) {
             let content = document.lineAt(i).text.trim();
-            if (content.match('\\[Includes\\]')) {
+            if (content.match(/\[Includes\]/)) {
                 for (i += 1; i < document.lineCount; i++) {
                     let folder = document.lineAt(i).text.trim();
                     if (folder.length === 0) {
                         continue;
-                    } else if (folder[0].match('\\[')) {
+                    } else if (folder[0].match(/\[/)) {
                         i = document.lineCount; // as break;
                     } else {
                         directory.push(parent_path + folder + '/' + dest);
@@ -134,7 +219,7 @@ export class Edk2DecProvider implements vscode.DefinitionProvider {
 
 /*
 */
-export class Edk2InfProvider implements vscode.DefinitionProvider {
+export class Edk2InfDefinitionProvider implements vscode.DefinitionProvider {
     provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Definition> {
         let dest = Common.removeHashTagComment(document.lineAt(position).text);
         let associate_c_files: Array<string> = [];
@@ -143,32 +228,33 @@ export class Edk2InfProvider implements vscode.DefinitionProvider {
         // Parse dec/c files
         for (let i = 0; i < document.lineCount; i++) {
             let line = Common.removeHashTagComment(document.lineAt(i).text.toUpperCase());
-            if (line.match(/\[SOURCES[a-zA-Z\.]*\]/g)) {
+            if (line.match(/\[SOURCES[\w\.]*\]/g)) {
                 i = Common.pushMatchContent(document, i + 1, document.lineCount, associate_c_files);
-            } else if (line.match(/\[PACKAGES[a-zA-Z\.]*\]/g)) {
+            } else if (line.match(/\[PACKAGES[\w\.]*\]/g)) {
                 i = Common.pushMatchContent(document, i + 1, document.lineCount, associate_dec_files);
             }
         }
 
         // console.log(dest, dest.match(/^[a-zA-Z0-9_\/]+\.[a-zA-Z0-9]+$/g));
-        if (dest.match(/^[a-zA-Z0-9_\-\/]+\.[a-zA-Z0-9_\-]+$/g)) {
+        if (dest.match(/^[\w\-\/]+\.[\w\-]+$/g)) {
             // format: ****.***
 
-            let file_extension = dest.replace(/^[a-zA-Z0-9_\-\/]+/g, '');
+            let file_extension = dest.replace(/^[\w\-\/]+/g, '');
             // console.log('extension ' + file_extension);
             if (file_extension.match('.dec')) {
                 //
                 // dec
                 //
-                if (vscode.workspace.workspaceFolders) {
-                    let root_path = vscode.workspace.workspaceFolders[0].uri.fsPath + '/';
+                let folders = Common.getRootPath();
+                for (let i = 0; i < folders.length; i++) {
+                    let root_path = folders[i] + '/';
                     if (fs.existsSync(root_path + dest)) {
                         return new vscode.Location(vscode.Uri.file(root_path + dest), new vscode.Position(0, 0));
                     }
                 }
             } else {
 
-                let parent_path = document.uri.fsPath.replace(/[a-zA-Z0-9_\-\.]*$/g, '');
+                let parent_path = document.uri.fsPath.replace(/[\w\-\.]*$/g, '');
                 // console.log(parent_path+dest);
                 if (fs.existsSync(parent_path + dest)) {
                     //
@@ -179,10 +265,13 @@ export class Edk2InfProvider implements vscode.DefinitionProvider {
                     //
                     // pcd
                     //
-                    if (associate_dec_files.length > 0 && vscode.workspace.workspaceFolders) {
-                        let root_path = vscode.workspace.workspaceFolders[0].uri.fsPath + '/';
-
-                        return Common.searchPatternInFiles(associate_dec_files, root_path, dest);
+                    if (associate_dec_files.length > 0) {
+                        let folders = Common.getRootPath();
+                        for (let i = 0; i < folders.length; i++) {
+                            let root_path = folders[i] + '/';
+                            let result = Common.searchPatternInFiles(associate_dec_files, root_path, dest);
+                            if (result) return result;
+                        }
                     }
                 }
             }
@@ -195,25 +284,28 @@ export class Edk2InfProvider implements vscode.DefinitionProvider {
                 // Guid
                 //
 
-                // Only support Protocols and Guids section
+                // Only support Protocols, Ppis, Guids and Depex section
                 let supportable = false;
                 for (let i = position.line; i > 0; i--) {
                     let line = Common.removeHashTagComment(document.lineAt(i).text.toUpperCase());
                     if (line[0] === '[') {
-                        if (line.match(/\[PROTOCOLS[a-zA-Z\.]*\]/g) ||
-                            line.match(/\[GUIDS[a-zA-Z\.]*\]/g) ||
-                            line.match(/\[PPIS[a-zA-Z\.]*\]/g) ||
-                            line.match(/\[DEPEX[a-zA-Z\.]*\]/g)) {
+                        if (line.match(/\[PROTOCOLS[\w\.]*\]/g) ||
+                            line.match(/\[GUIDS[\w\.]*\]/g) ||
+                            line.match(/\[PPIS[\w\.]*\]/g) ||
+                            line.match(/\[DEPEX[\w\.]*\]/g)) {
 
                             supportable = true;
                         }
                         break;
                     }
                 }
-                if (supportable && associate_dec_files.length > 0 && vscode.workspace.workspaceFolders) {
-                    let root_path = vscode.workspace.workspaceFolders[0].uri.fsPath + '/';
-
-                    return Common.searchPatternInFiles(associate_dec_files, root_path, table[0]);
+                if (supportable && associate_dec_files.length > 0) {
+                    let folders = Common.getRootPath();
+                    for (let i = 0; i < folders.length; i++) {
+                        let root_path = folders[i] + '/';
+                        let result = Common.searchPatternInFiles(associate_dec_files, root_path, table[0]);
+                        if (result) return result;
+                    }
                 }
             } else if (table.length === 2 && associate_c_files.length > 0 && keywords.includes(table[0])) {
                 //
@@ -221,7 +313,7 @@ export class Edk2InfProvider implements vscode.DefinitionProvider {
                 //
 
                 // table[0] = keywords, table[1] = function name;
-                let parent_path = document.uri.fsPath.replace(/[a-zA-Z0-9\.]*$/g, '');
+                let parent_path = document.uri.fsPath.replace(/[\w\.]*$/g, '');
                 // console.log(parent_path);
                 return Common.searchPatternInFiles(associate_c_files, parent_path, table[1]);
             }
@@ -230,12 +322,12 @@ export class Edk2InfProvider implements vscode.DefinitionProvider {
 }
 
 /*
-    Only support VFR => UNI/H destination function in same folder.
-    Only support UTF8. (Some edk2 files is UCS2(UTF16) format and we don't support so far.)
+  Only support VFR => UNI/H destination function in same folder.
+  Only support UTF8. (Some edk2 files is UCS2(UTF16) format and we don't support so far.)
 */
-export class Edk2VfrProvider implements vscode.DefinitionProvider {
+export class Edk2VfrDefinitionProvider implements vscode.DefinitionProvider {
     provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Definition> {
-        let parent_path = document.uri.fsPath.replace(/[a-zA-Z0-9\.]*$/g, '');
+        let parent_path = document.uri.fsPath.replace(/[\w\.]*$/g, '');
         let word = document.getText(document.getWordRangeAtPosition(position));
         let string_token_reg = new RegExp('.*' + 'STRING_TOKEN' + '\\s*' + '\\(' + word + '\\)' + '.*');
         let header_file_reg = new RegExp('.*' + '\\#include' + '.*');
@@ -263,66 +355,287 @@ export class Edk2VfrProvider implements vscode.DefinitionProvider {
     }
 }
 
+/*
+*/
+export class Edk2DscSymbolProvider implements vscode.DocumentSymbolProvider {
+    public provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.DocumentSymbol[]> {
 
-function openFileHandler(file: vscode.TextDocument) {
-    /*
-    let file_extension = file.uri.fsPath.substring(file.uri.fsPath.length - 4);
-    
-    if (file_extension.match('.git') || file_extension.match('.svn')) {
-        // Should not parse another plugin...
-        return;
-    }
+        let keywords = new Map<string, vscode.SymbolKind>([
+            ['Pcd', vscode.SymbolKind.Variable],
+            ['Component', vscode.SymbolKind.File],
+            ['Library', vscode.SymbolKind.Package]
+        ]);
 
-    if (file_extension.match('.inf')) {
-        associate_c_files = [];
-        associate_dec_files = [];
-        for (let i = 0; i < file.lineCount; i++) {
+        return new Promise((resolve, reject) => {
+            let symbols: vscode.DocumentSymbol[] = [];
+            let nodes = [symbols];
 
-            let line = Common.removeHashTagComment(file.lineAt(i).text.toUpperCase());
-            if (line.match(/\[SOURCES[a-zA-Z\.]*\]/g)) {
-                i = Common.pushMatchContent(file, i + 1, file.lineCount, associate_c_files);
-            } else if (line.match(/\[PACKAGES[a-zA-Z\.]*\]/g)) {
-                i = Common.pushMatchContent(file, i + 1, file.lineCount, associate_dec_files);
+            for (let i = 0; i < document.lineCount; i++) {
+                let keyword_line = document.lineAt(i);
+                let keyword_text = Common.removeHashTagComment(keyword_line.text);
+
+                let m = '';
+                keywords.forEach((v, k) => { if (keyword_text.includes(k)) m = k; });
+                if (m.length && keyword_text.match(/\[[\s\w.,]+\]/g)) {
+                    let j;
+                    let keyword_symbol = new vscode.DocumentSymbol(keyword_text, '', vscode.SymbolKind.Class, keyword_line.range, keyword_line.range);
+
+                    nodes[nodes.length - 1].push(keyword_symbol);
+                    nodes.push(keyword_symbol.children);
+
+                    let brace = false;
+                    let element_line = keyword_line;
+                    let pre_element_range_end = element_line.range.end;
+                    for (j = i + 1; j < document.lineCount; j++, pre_element_range_end = element_line.range.end) {
+                        element_line = document.lineAt(j);
+                        let element_text = Common.removeHashTagComment(element_line.text).replace(/\|.*/g, '');
+
+                        // skip empty line and control symbol
+                        if (element_text.length === 0 || element_text[0] === '!') {
+                            continue;
+                        }
+
+                        // brace inside.
+                        if (element_text[0] === '}') {
+                            brace = false;
+                            continue;
+                        } else if (brace) {
+                            continue;
+                        }
+                        if (element_text[element_text.length - 1] === '{') {
+                            brace = true;
+                        }
+
+                        // next keyword!
+                        if (element_text[0] === '[') {
+                            break;
+                        }
+
+                        let symbol = new vscode.DocumentSymbol(element_text, '', keywords.get(m)!, element_line.range, element_line.range);
+                        nodes[nodes.length - 1].push(symbol);
+                    }
+
+                    keyword_symbol.range = new vscode.Range(keyword_symbol.range.start, pre_element_range_end);
+                    nodes.pop();
+                    i = j - 1;
+                }
             }
-        }
+            resolve(symbols);
+        });
     }
-
-    console.log(associate_c_files);
-    console.log(associate_dec_files);
-    */
 }
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+/*
+*/
+export class Edk2DecSymbolProvider implements vscode.DocumentSymbolProvider {
+    public provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.DocumentSymbol[]> {
 
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    console.log('Congratulations, your extension "edk2-vscode" is now active!');
+        let keywords = new Map<string, vscode.SymbolKind>([
+            ['Pcd', vscode.SymbolKind.Variable],
+            ['Library', vscode.SymbolKind.Package],
+            ['Guids', vscode.SymbolKind.Interface],
+            ['Ppis', vscode.SymbolKind.Interface],
+            ['Protocols', vscode.SymbolKind.Interface],
+        ]);
 
-    /*
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with registerCommand
-    // The commandId parameter must match the command field in package.json
-    let disposable = vscode.commands.registerCommand('extension.helloWorld', () => {
-        // The code you place here will be executed every time your command is executed
+        return new Promise((resolve, reject) => {
+            let symbols: vscode.DocumentSymbol[] = [];
+            let nodes = [symbols];
 
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World!');
-    });
+            for (let i = 0; i < document.lineCount; i++) {
+                let keyword_line = document.lineAt(i);
+                let keyword_text = Common.removeHashTagComment(keyword_line.text);
 
-    context.subscriptions.push(disposable);
-    */
-    vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_fdf' }, new Edk2FdfProvider());
-    vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_dsc' }, new Edk2DscProvider());
-    vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_dec' }, new Edk2DecProvider());
-    vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_inf' }, new Edk2InfProvider());
-    vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_vfr' }, new Edk2VfrProvider());
-    // vscode.workspace.onDidOpenTextDocument((file) => { openFileHandler(file); });
+                let m = '';
+                keywords.forEach((v, k) => { if (keyword_text.includes(k)) m = k; });
+                if (m.length && keyword_text.match(/\[[\s\w.,]+\]/g)) {
+                    let j;
+                    let keyword_symbol = new vscode.DocumentSymbol(keyword_text, '', vscode.SymbolKind.Class, keyword_line.range, keyword_line.range);
 
-    // vscode.workspace.registerTextDocumentContentProvider({scheme: 'file', language: 'edk2_inf'}, new Edk2InfOpenProvider());
+                    nodes[nodes.length - 1].push(keyword_symbol);
+                    nodes.push(keyword_symbol.children);
 
+                    let element_line = keyword_line;
+                    let pre_element_range_end = element_line.range.end;
+                    for (j = i + 1; j < document.lineCount; j++, pre_element_range_end = element_line.range.end) {
+                        element_line = document.lineAt(j);
+                        let element_text = Common.removeHashTagComment(element_line.text).replace(/\|.*/g, '').replace(/\=.*/g, '');
+
+                        // skip empty line
+                        if (element_text.length === 0) {
+                            continue;
+                        }
+
+                        // next keyword!
+                        if (element_text[0] === '[') {
+                            break;
+                        }
+
+                        let symbol = new vscode.DocumentSymbol(element_text, '', keywords.get(m)!, element_line.range, element_line.range);
+                        nodes[nodes.length - 1].push(symbol);
+                    }
+
+                    keyword_symbol.range = new vscode.Range(keyword_symbol.range.start, pre_element_range_end);
+                    nodes.pop();
+                    i = j - 1;
+                }
+            }
+            resolve(symbols);
+        });
+    }
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() { }
+/*
+*/
+export class Edk2FdfSymbolProvider implements vscode.DocumentSymbolProvider {
+    public provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.DocumentSymbol[]> {
+
+        let keywords = new Map<string, vscode.SymbolKind>([
+            ['Section', vscode.SymbolKind.Variable]
+        ]);
+
+        return new Promise((resolve, reject) => {
+            let symbols: vscode.DocumentSymbol[] = [];
+            let nodes = [symbols];
+
+            for (let i = 0; i < document.lineCount; i++) {
+                let keyword_line = document.lineAt(i);
+                let keyword_text = Common.removeHashTagComment(keyword_line.text);
+
+                let m = 'Section';
+                if (m.length && keyword_text.match(/\[[\s\w.,]+\]/g)) {
+                    let j;
+                    let keyword_symbol = new vscode.DocumentSymbol(keyword_text, '', vscode.SymbolKind.Class, keyword_line.range, keyword_line.range);
+
+                    nodes[nodes.length - 1].push(keyword_symbol);
+                    nodes.push(keyword_symbol.children);
+
+                    let element_line = keyword_line;
+                    let pre_element_range_end = element_line.range.end;
+                    for (j = i + 1; j < document.lineCount; j++, pre_element_range_end = element_line.range.end) {
+                        element_line = document.lineAt(j);
+                        let element_text = Common.removeHashTagComment(element_line.text).replace(/\|.*/g, '');
+
+                        // skip empty line and control symbol
+                        if (element_text.length === 0) {
+                            continue;
+                        }
+
+                        // next keyword!
+                        if (element_text[0] === '[') {
+                            break;
+                        }
+
+                        // Only pop specific files
+                        if (!element_text.match(/^(INF|FILE|\!include)[\w\s]+/g)) {
+                            continue;
+                        }
+
+                        let symbol = new vscode.DocumentSymbol(element_text, '', keywords.get(m)!, element_line.range, element_line.range);
+                        nodes[nodes.length - 1].push(symbol);
+                    }
+
+                    keyword_symbol.range = new vscode.Range(keyword_symbol.range.start, pre_element_range_end);
+                    nodes.pop();
+                    i = j - 1;
+                }
+            }
+            resolve(symbols);
+        });
+    }
+}
+
+/*
+*/
+export class Edk2InfSymbolProvider implements vscode.DocumentSymbolProvider {
+    public provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.DocumentSymbol[]> {
+
+        let keywords = new Map<string, vscode.SymbolKind>([
+            ['Sources', vscode.SymbolKind.File],
+            ['Packages', vscode.SymbolKind.File],
+            ['Pcd', vscode.SymbolKind.Variable],
+            ['Library', vscode.SymbolKind.Package],
+            ['Protocol', vscode.SymbolKind.Interface],
+            ['Ppi', vscode.SymbolKind.Interface],
+            ['Guid', vscode.SymbolKind.Interface],
+            ['Depex', vscode.SymbolKind.Operator],
+        ]);
+
+        return new Promise((resolve, reject) => {
+            let symbols: vscode.DocumentSymbol[] = [];
+            let nodes = [symbols];
+
+            for (let i = 0; i < document.lineCount; i++) {
+                let keyword_line = document.lineAt(i);
+                let keyword_text = Common.removeHashTagComment(keyword_line.text);
+
+                let m = '';
+                keywords.forEach((v, k) => { if (keyword_text.includes(k)) m = k; });
+                if (m.length && keyword_text.match(/\[[\s\w.,]+\]/g)) {
+                    let j;
+                    let keyword_symbol = new vscode.DocumentSymbol(keyword_text, '', vscode.SymbolKind.Class, keyword_line.range, keyword_line.range);
+
+                    nodes[nodes.length - 1].push(keyword_symbol);
+                    nodes.push(keyword_symbol.children);
+
+                    let brace = false;
+                    let element_line = keyword_line;
+                    let pre_element_range_end = element_line.range.end;
+                    for (j = i + 1; j < document.lineCount; j++, pre_element_range_end = element_line.range.end) {
+                        element_line = document.lineAt(j);
+                        let element_text = Common.removeHashTagComment(element_line.text).replace(/AND.*/g, '');
+
+                        // skip empty line and control symbol
+                        if (element_text.length === 0 || element_text[0] === '!') {
+                            continue;
+                        }
+
+                        // brace inside.
+                        if (element_text[0] === '}') {
+                            brace = false;
+                            continue;
+                        } else if (brace) {
+                            continue;
+                        }
+                        if (element_text[element_text.length - 1] === '{') {
+                            brace = true;
+                        }
+
+                        // next keyword!
+                        if (element_text[0] === '[') {
+                            break;
+                        }
+
+                        let symbol = new vscode.DocumentSymbol(element_text, '', keywords.get(m)!, element_line.range, element_line.range);
+                        nodes[nodes.length - 1].push(symbol);
+                    }
+
+                    keyword_symbol.range = new vscode.Range(keyword_symbol.range.start, pre_element_range_end);
+                    nodes.pop();
+                    i = j - 1;
+                }
+            }
+            resolve(symbols);
+        });
+    }
+}
+
+export class Edk2CCompletionItemProvider implements vscode.CompletionItemProvider {
+    public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
+        let message = Common.getDebugMessage();
+
+        let snippet1 = new vscode.CompletionItem('DEBUG', vscode.CompletionItemKind.Snippet);
+        snippet1.insertText = new vscode.SnippetString(message);
+        snippet1.documentation = new vscode.MarkdownString('EDK2 debug snippet');
+
+        let snippet2 = new vscode.CompletionItem('debug', vscode.CompletionItemKind.Snippet);
+        snippet2.insertText = new vscode.SnippetString(message);
+        snippet2.documentation = new vscode.MarkdownString('EDK2 debug snippet');
+
+        let snippet3 = new vscode.CompletionItem('Debug', vscode.CompletionItemKind.Snippet);
+        snippet3.insertText = new vscode.SnippetString(message);
+        snippet3.documentation = new vscode.MarkdownString('EDK2 debug snippet');
+
+        return [snippet1, snippet2, snippet3];
+    }
+}
