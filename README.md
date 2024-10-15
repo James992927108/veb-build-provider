@@ -10,3 +10,5 @@ This extension provides features for building VEB projects.
 ## Installation
 
 Follow the installation instructions here.
+
+vsce package --no-yarn > build.log
