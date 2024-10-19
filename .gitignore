@@ -12,4 +12,3 @@
 *.vsix
 
 /out/*
-/node_modules/*
