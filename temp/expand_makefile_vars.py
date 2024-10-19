@@ -46,7 +46,7 @@ def expand_variables(content):
 
     return expanded_lines, missing_variables
 
-# Function to align comments for new_token.mak
+# Function to align comments for token_new.mak
 def align_comments(expanded_content, original_content):
     aligned_lines = []
     original_lines = original_content.split('\n')
@@ -105,13 +105,13 @@ BOARD_DIR = AmiCompatibilityPkg\\Board
     # Align comments after expansion
     final_content_with_comments = align_comments(expanded_lines, content)
 
-    # Write the final expanded content with aligned comments to new_token.mak
-    with open('new_token.mak', 'w') as file:
+    # Write the final expanded content with aligned comments to token_new.mak
+    with open('token_new.mak', 'w') as file:
         file.write(final_content_with_comments)
 
-    # Write missing variables to miss_token.mak if any, with aligned comment
+    # Write missing variables to token_miss.mak if any, with aligned comment
     if missing_variables:
-        with open('miss_token.mak', 'w') as miss_file:
+        with open('token_miss.mak', 'w') as miss_file:
             comment_padding = 50
             for missing_var, origin_var_expr in missing_variables:
                 line = f'Missing variable: {missing_var}'
@@ -123,9 +123,9 @@ BOARD_DIR = AmiCompatibilityPkg\\Board
                     aligned_line = f'{line} # {origin_var_expr}'
                 miss_file.write(f'{aligned_line}\n')
 
-    print("new_token.mak has been created with expanded variables and aligned comments.")
+    print("token_new.mak has been created with expanded variables and aligned comments.")
     if missing_variables:
-        print("miss_token.mak has been created with unresolved variables.")
+        print("token_miss.mak has been created with unresolved variables.")
     else:
         print("No unresolved variables found.")
 
