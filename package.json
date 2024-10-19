@@ -20,15 +20,6 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "file-explorer",
-          "title": "Veb module explorer",
-          "icon": "media/dep.svg"
-        }
-      ]
-    },
     "keybindings": [
       {
         "command": "extension.InitTask",
@@ -236,27 +227,6 @@
     ],
     "commands": [
       {
-        "command": "rightclick.copyfilepath",
-        "title": "Copy File Path"
-      },
-      {
-        "command": "rightclick.openFile",
-        "title": "Open File"
-      },
-      {
-        "command": "rightclick.Locate",
-        "title": "Locate"
-      },
-      {
-        "command": "rightclick.openFolder",
-        "title": "Open File Location"
-      },
-      {
-        "title": "Refresh",
-        "command": "workbench.action.reloadWindow",
-        "icon": "media/refresh.svg"
-      },
-      {
         "command": "extension.InitTask",
         "title": "Veb initial task program."
       },
@@ -283,11 +253,6 @@
     ],
     "menus": {
       "editor/context": [
-        {
-          "when": "editorTextFocus",
-          "command": "rightclick.Locate",
-          "group": "navigation"
-        },
         {
           "when": "resourceLangId == edk2_uni",
           "command": "formatter.Edk2Formatter",
