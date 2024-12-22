@@ -12,13 +12,6 @@
     "Programming Languages",
     "Other"
   ],
-  "activationEvents": [
-    "onLanguage:edk2_fdf",
-    "onLanguage:edk2_dsc",
-    "onLanguage:edk2_dec",
-    "onLanguage:edk2_inf",
-    "onLanguage:edk2_vfr"
-  ],
   "main": "./out/extension.js",
   "contributes": {
     "keybindings": [
@@ -229,15 +222,15 @@
     "commands": [
       {
         "command": "extension.InitTask",
-        "title": "Veb initial task program."
+        "title": "Run Veb initial task program."
       },
       {
         "command": "extension.VebBuild",
-        "title": "Veb Build."
+        "title": "Run Veb Build."
       },
       {
         "command": "extension.VebReBuild",
-        "title": "Veb ReBuild."
+        "title": "Run Veb ReBuild."
       },
       {
         "command": "formatter.Edk2Formatter",

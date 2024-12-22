@@ -215,7 +215,7 @@ async function CreateBuildtask(folderpath: string, targetFiles: string[], start:
 
 function getFolderPath(): string {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-    if (!workspaceFolder) return "";
+    if (!workspaceFolder) { return ""; }
 
     const uri = workspaceFolder.uri.toString();
     const [, path] = uri.split(":///");
@@ -268,7 +268,12 @@ async function checkAndExecuteTask(taskName: string, errorMessage: string): Prom
                 await vscode.commands.executeCommand("workbench.action.tasks.runTask", selection);
             }
         } else {
-            await vscode.commands.executeCommand("workbench.action.tasks.runTask", taskName);
+            try {
+                await vscode.commands.executeCommand("workbench.action.tasks.runTask", taskName);
+                vscode.window.showInformationMessage(`Task [${taskName}] has been started successfully!`);
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to start task [${taskName}]: ${error}`);
+            }
         }
     } catch (error) {
         vscode.window.showErrorMessage(errorMessage);
@@ -283,6 +288,19 @@ function handleVebReBuild(): Promise<void> {
     return checkAndExecuteTask("VebReBuildTask", "VebReBuildTask fail: initialize the tasks.json by pressing the shortcut key (F8).");
 }
 
+function handleterminateTerminal(): void {
+    // 註冊命令：終止當前活動終端窗口
+    const activeTerminal = vscode.window.activeTerminal;
+
+    if (activeTerminal) {
+        // 模擬向終端發送 Ctrl+C 的中斷信號
+        activeTerminal.sendText("\x03"); // \x03 是 Ctrl+C 的 ASCII 控制碼
+        vscode.window.showInformationMessage("Sent Ctrl+C to the active terminal.");
+    } else {
+        vscode.window.showWarningMessage("No active terminal to send Ctrl+C.");
+    }
+}
+
 function registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any): void {
     const disposable = vscode.commands.registerCommand(commandName, callback);
     context.subscriptions.push(disposable);
@@ -295,18 +313,39 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_dec' }, new Edk2DecDefinitionProvider());
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_inf' }, new Edk2InfDefinitionProvider());
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_vfr' }, new Edk2VfrDefinitionProvider());
-  
+
     vscode.languages.registerDocumentSymbolProvider({ scheme: 'file', language: 'edk2_dsc' }, new Edk2DscSymbolProvider());
     vscode.languages.registerDocumentSymbolProvider({ scheme: 'file', language: 'edk2_dec' }, new Edk2DecSymbolProvider());
     vscode.languages.registerDocumentSymbolProvider({ scheme: 'file', language: 'edk2_fdf' }, new Edk2FdfSymbolProvider());
     vscode.languages.registerDocumentSymbolProvider({ scheme: 'file', language: 'edk2_inf' }, new Edk2InfSymbolProvider());
-  
+
     vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'c'   }, new Edk2CCompletionItemProvider());
     vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'cpp' }, new Edk2CCompletionItemProvider());
     // Register commands
     registerCommand(context, 'extension.InitTask', handleInitTask);
     registerCommand(context, 'extension.VebBuild', handleVebBuild);
     registerCommand(context, 'extension.VebReBuild', handleVebReBuild);
+    registerCommand(context, 'extension.terminateTerminal', handleterminateTerminal);
+
+    // 創建狀態欄按鈕
+    const runRebuildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+    runRebuildButton.command = 'extension.VebReBuild'; // 按鈕點擊時觸發的命令
+    runRebuildButton.text = '$(play) Run Veb ReBuild'; // 顯示按鈕的圖示與文字
+    runRebuildButton.tooltip = 'Click to run Veb ReBuild'; // 滑鼠懸停時顯示的提示文字
+    runRebuildButton.show(); // 顯示按鈕
+
+    // 註冊到 context，這樣按鈕和命令都會在擴展卸載時正確清除
+    context.subscriptions.push(runRebuildButton);
+
+    // 創建狀態欄按鈕：關閉終端
+    const closeTerminalButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99); // 使用較低的優先權，顯示在右側
+    closeTerminalButton.text = "$(stop) Close Terminal"; // 使用 "stop" 圖示
+    closeTerminalButton.tooltip = "Terminate the active terminal"; // 滑鼠懸停提示文字
+    closeTerminalButton.command = "extension.terminateTerminal"; // 綁定命令
+    closeTerminalButton.show(); // 顯示按鈕
+
+    // 將按鈕與命令添加到 context
+    context.subscriptions.push(closeTerminalButton);
     
     registerCommand(context, 'formatter.Edk2Formatter', Edk2Formatter);
     registerCommand(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
