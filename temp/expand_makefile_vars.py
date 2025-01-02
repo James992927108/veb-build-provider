@@ -1,4 +1,5 @@
 import re
+import sys
 
 # Function to perform variable expansion recursively
 def expand_variables(content):
@@ -87,16 +88,21 @@ CONFIGURATION_DIR = AmiPkg\\Configuration
 BOARD_DIR = AmiCompatibilityPkg\\Board
 # <<<<< end
 """
-
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
+    else:
+        filename = 'token.mak'
+    print(f"filename = {sys.argv[1]}")
+    
     # Read the original token.mak file
-    with open('token.mak', 'r') as file:
+    with open(filename, 'r') as file:
         content = file.read()
 
     # Check if header already exists
     if header_content.strip() not in content:
         # Prepend header content to the existing content
         content = header_content + content
-        with open('token.mak', 'w') as file:
+        with open(filename, 'w') as file:
             file.write(content)
 
     # Expand variables and handle $(PATH_SLASH)

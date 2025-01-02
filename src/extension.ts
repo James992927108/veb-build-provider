@@ -63,7 +63,7 @@ const TaskSample = `
         {
             "label": "%s",
             "type": "%s",
-            "command": "%s"
+            "command": "%s",
         },
 `;
 
@@ -160,13 +160,16 @@ async function AmendTaskByFile(folderpath: string, TaskfileUpdate: string, proje
         const processedLine = line.replace(new RegExp("%project", "ig"), project.split('.')[0]);
         console.log(processedLine);
 
-        const [commandType, ...rest] = processedLine.split(/:/);
+        // 使用正則表達式去除多餘的空格並分割，只分割兩次
+        const [commandType, label, ...rest] = processedLine.split(":");
+        rest[0] = rest.join(":");
         const trimmedCommandType = commandType.trim();
+        // console.log(trimmedCommandType, label, rest[0]);
 
         if (trimmedCommandType === "shell") {
-            TaskfileUpdate += util.format(TaskSampleShell, rest[0].trim(), rest[1]);
+            TaskfileUpdate += util.format(TaskSampleShell, label, rest[0]);
         } else {
-            TaskfileUpdate += util.format(TaskSample, rest[0].trim(), trimmedCommandType, rest[1]);
+            TaskfileUpdate += util.format(TaskSample, label, trimmedCommandType, rest[0]);
         }
     }
 
