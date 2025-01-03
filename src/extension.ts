@@ -16,7 +16,6 @@ const VSCODE_FOLDER = ".vscode";
 const TASKS_JSON = "tasks.json";
 const VEB_EXTENSION = '.veb';
 const PREPARE_ENV_SCRIPT = 'PrepareEnvScript.bat';
-const BUILD_COMMAND_LIST = 'BuildCommandList.ini';
 
 // Enums
 enum ShowType {
@@ -48,22 +47,6 @@ const Taskfile = `{
             "label": "------------------------------------External command------------------------------------------",
             "type": "shell",
             "command": ""
-        },
-`;
-
-const TaskSampleShell = `
-        {
-            "label": "%s",
-            "type": "shell",
-            "command": "cmd /V /C \\"%s\\""
-        },
-`;
-
-const TaskSample = `
-        {
-            "label": "%s",
-            "type": "%s",
-            "command": "%s",
         },
 `;
 
@@ -140,42 +123,6 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
     );
 }
 
-async function AmendTaskByFile(folderpath: string, TaskfileUpdate: string, project: string): Promise<string> {
-    console.log("AmendTaskByFile Start");
-
-    const vebExtension = vscode.extensions.getExtension(EXTENSION_ID);
-    if (!vebExtension) {
-        throw new Error("Failed to get VEB build provider extension");
-    }
-
-    const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", BUILD_COMMAND_LIST);
-    const targetScriptPath = path.join(folderpath, VSCODE_FOLDER, BUILD_COMMAND_LIST);
-
-    await copyFile(sourceScriptPath, targetScriptPath);
-
-    const fileData = await readFile(targetScriptPath);
-    const lines = fileData.split(/\r?\n/);
-
-    for (const line of lines) {
-        const processedLine = line.replace(new RegExp("%project", "ig"), project.split('.')[0]);
-        console.log(processedLine);
-
-        // 使用正則表達式去除多餘的空格並分割，只分割兩次
-        const [commandType, label, ...rest] = processedLine.split(":");
-        rest[0] = rest.join(":");
-        const trimmedCommandType = commandType.trim();
-        // console.log(trimmedCommandType, label, rest[0]);
-
-        if (trimmedCommandType === "shell") {
-            TaskfileUpdate += util.format(TaskSampleShell, label, rest[0]);
-        } else {
-            TaskfileUpdate += util.format(TaskSample, label, trimmedCommandType, rest[0]);
-        }
-    }
-
-    return TaskfileUpdate;
-}
-
 async function createVscodeFolder(folderpath: string): Promise<void> {
     const vscodePath = path.join(folderpath, VSCODE_FOLDER);
     try {
@@ -206,7 +153,6 @@ async function CreateBuildtask(folderpath: string, targetFiles: string[], start:
         }
 
         let TaskfileUpdate = await BuildDefaultTask(folderpath, selection, '');
-        TaskfileUpdate = await AmendTaskByFile(folderpath, TaskfileUpdate, selection);
         TaskfileUpdate += "\t]\n}";
 
         await createVscodeFolder(folderpath);
