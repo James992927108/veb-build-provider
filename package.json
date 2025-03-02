@@ -2,11 +2,11 @@
   "name": "veb-build-provider",
   "displayName": "veb-build-provider",
   "description": "This tools provider building project veb module explorer.",
-  "version": "1.0.4",
+  "version": "1.4.1",
   "license": "MIT",
   "publisher": "ieibios",
   "engines": {
-    "vscode": "^1.82.2"
+    "vscode": "^1.85.0"
   },
   "categories": [
     "Programming Languages",

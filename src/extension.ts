@@ -6,8 +6,8 @@ import * as util from 'util';
 import * as fs from 'fs/promises';
 import { Edk2FdfDefinitionProvider, Edk2DscDefinitionProvider, Edk2DecDefinitionProvider, Edk2InfDefinitionProvider, Edk2VfrDefinitionProvider } from './edk2Language';
 import { Edk2DscSymbolProvider, Edk2DecSymbolProvider, Edk2FdfSymbolProvider, Edk2InfSymbolProvider} from './edk2Language';
-import { Edk2CCompletionItemProvider} from './edk2Language';
-import Edk2Formatter from "./edk2Formatter";
+import { Edk2CCompletionItemProvider as Edk2CCompletionProvider} from './edk2Language';
+import Edk2Formatter from "./edk2Formatter/edk2Formatter";
 import SnippetTools from "./SnippetTools";
 
 // Constants
@@ -50,10 +50,31 @@ const Taskfile = `{
         },
 `;
 
+// Define global OutputChannel
+const outputChannel = vscode.window.createOutputChannel('Veb Build Provider');
+
+// Store original console.log
+const originalConsoleLog = console.log;
+
+// Define a unified logging function
+function logMessage(...args: any[]): void {
+    const message = args.map(arg => 
+        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+    ).join(' ');
+    
+    // Output to console (original behavior)
+    originalConsoleLog.apply(console, args);
+    
+    // Output to VS Code's output channel
+    outputChannel.appendLine(message);
+}
+
 // Helper functions
 function handleError(error: Error, message: string) {
-    console.error(`${message}: ${error.message}`);
-    vscode.window.showErrorMessage(`${message}: ${error.message}`);
+    const errorMsg = `${message}: ${error.message}`;
+    console.error(errorMsg);
+    logMessage(errorMsg); // Use the new logging function
+    vscode.window.showErrorMessage(errorMsg);
 }
 
 function escapePath(filePath: string): string {
@@ -62,9 +83,11 @@ function escapePath(filePath: string): string {
 
 async function readFile(filePath: string): Promise<string> {
     try {
-        return await fs.readFile(filePath, 'utf8');
+        const content = await fs.readFile(filePath, 'utf8');
+        logMessage(`Successfully read file: ${filePath}`);
+        return content;
     } catch (error) {
-        handleError(error as Error, `Error reading file: ${filePath}`);
+        handleError(error as Error, `Failed to read file: ${filePath}`);
         return '';
     }
 }
@@ -72,36 +95,38 @@ async function readFile(filePath: string): Promise<string> {
 async function writeFile(filePath: string, content: string): Promise<void> {
     try {
         await fs.writeFile(filePath, content, 'utf8');
+        logMessage(`Successfully wrote to file: ${filePath}`);
     } catch (error) {
-        handleError(error as Error, `Error writing file: ${filePath}`);
+        handleError(error as Error, `Failed to write to file: ${filePath}`);
     }
 }
 
 async function copyFile(source: string, target: string): Promise<void> {
     try {
         await fs.access(target);
-        console.log(`${target} already exists`);
+        logMessage(`${target} already exists`);
     } catch {
         try {
             await fs.copyFile(source, target);
-            console.log(`Copied ${source} to ${target} successfully`);
+            logMessage(`Copied ${source} to ${target} successfully`);
         } catch (error) {
-            handleError(error as Error, `Error copying file`);
+            handleError(error as Error, `Failed to copy file`);
         }
     }
 }
 
 function extractCommand(data: string, startTag: string, endTag: string): string {
     const command = data.slice(data.indexOf(startTag), data.indexOf(endTag)).split('"')[1];
+    logMessage(`Extracted command: ${command}`);
     return escapePath(command);
 }
 
 async function BuildDefaultTask(folderpath: string, selection: string, TaskfileUpdate: string): Promise<string> {
-    console.log("BuildDefaultTask Start");
+    logMessage("BuildDefaultTask Start");
 
     const vebExtension = vscode.extensions.getExtension(EXTENSION_ID);
     if (!vebExtension) {
-        throw new Error("Failed to get VEB build provider extension");
+        throw new Error("Unable to get VEB build provider extension");
     }
 
     const teePath = escapePath(path.join(vebExtension.extensionPath, "Tool", "tee.exe"));
@@ -117,17 +142,19 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
 
     const Veb = selection.split('.')[0];
 
-    return util.format(Taskfile,
+    const result = util.format(Taskfile,
         Veb, targetScriptPath, buildCommand, teePath,
         Veb, targetScriptPath, reBuildCommand, teePath
     );
+    logMessage("BuildDefaultTask completed");
+    return result;
 }
 
 async function createVscodeFolder(folderpath: string): Promise<void> {
     const vscodePath = path.join(folderpath, VSCODE_FOLDER);
     try {
         await fs.mkdir(vscodePath, { recursive: true });
-        console.log(".vscode folder created successfully.");
+        logMessage(".vscode folder created successfully");
     } catch (error) {
         handleError(error as Error, "Failed to create .vscode folder");
     }
@@ -136,6 +163,7 @@ async function createVscodeFolder(folderpath: string): Promise<void> {
 async function writeTasksJson(folderpath: string, TaskfileUpdate: string): Promise<void> {
     try {
         await writeFile(path.join(folderpath, VSCODE_FOLDER, TASKS_JSON), TaskfileUpdate);
+        logMessage("Successfully created tasks.json");
         vscode.window.showInformationMessage("Create tasks.json Success.");
     } catch (error) {
         handleError(error as Error, "Failed to write tasks.json");
@@ -143,12 +171,13 @@ async function writeTasksJson(folderpath: string, TaskfileUpdate: string): Promi
 }
 
 async function CreateBuildtask(folderpath: string, targetFiles: string[], start: number, end: number, showType: ShowType): Promise<void> {
-    console.log("CreateBuildtask Start");
-    console.log('Show Veb array from (%d) to (%d)', start, end);
+    logMessage("Starting CreateBuildtask");
+    logMessage('Show Veb array from (%d) to (%d)', start, end);
     
     if (showType === ShowType.QuickPick) {
         const selection = await vscode.window.showQuickPick([...targetFiles.slice(start, end)], { placeHolder: 'Start Build for ?' });
         if (!selection) {
+            logMessage("No selection made, operation cancelled");
             return;
         }
 
@@ -158,6 +187,7 @@ async function CreateBuildtask(folderpath: string, targetFiles: string[], start:
         await createVscodeFolder(folderpath);
         await writeTasksJson(folderpath, TaskfileUpdate);
     } else {
+        logMessage("Unsupported ShowType");
         vscode.window.showInformationMessage('!!! Not support yet !!!');
     }
 }
@@ -170,31 +200,43 @@ function getFolderPath(): string {
     const [, path] = uri.split(":///");
     const [drive, rest] = path?.split("%3A") ?? [];
 
-    return rest ? `${drive}:${rest}` : "";
+    const folderPath = rest ? `${drive}:${rest}` : "";
+    logMessage(`Retrieved workspace path: ${folderPath}`);
+    return folderPath;
 }
 
 async function handleInitTask(): Promise<void> {
+    logMessage("Starting handleInitTask");
     const folderpath = getFolderPath();
     if (!folderpath) {
+        logMessage("No workspace folder found");
         vscode.window.showErrorMessage("No workspace folder found");
         return;
     }
 
+    logMessage(`Workspace path: ${folderpath}`);
     try {
         const files = await fs.readdir(folderpath);
         const targetFiles = files.filter(file => path.extname(file).toLowerCase() === VEB_EXTENSION);
-        console.log('targetFiles.length = %d', targetFiles.length);
+        logMessage(`Found ${targetFiles.length} .veb files`);
 
         await CreateBuildtask(folderpath, targetFiles, 0, targetFiles.length, ShowType.QuickPick);
     } catch (error) {
-        handleError(error as Error, "Can't search .veb file");
+        if (error instanceof Error) {
+            logMessage(`Error in handleInitTask: ${error.message}`);
+        } else {
+            logMessage(`Error in handleInitTask: ${String(error)}`);
+        }
+        handleError(error instanceof Error ? error : new Error(String(error)), "Unable to search for .veb files");
     }
 }
 
 async function checkAndExecuteTask(taskName: string, errorMessage: string): Promise<void> {
+    logMessage(`Starting ${taskName}`);
     const folderpath = getFolderPath();
     if (!folderpath) {
-        vscode.window.showErrorMessage("Error folder is Empty");
+        vscode.window.showErrorMessage("Workspace path is empty");
+        logMessage("Workspace path is empty");
         return;
     }
 
@@ -202,7 +244,7 @@ async function checkAndExecuteTask(taskName: string, errorMessage: string): Prom
     
     try {
         await fs.access(tasksJsonPath);
-        console.log(taskName);
+        logMessage(taskName);
 
         if (taskName === "VebBuildTask") {
             const tasksJson = await readFile(tasksJsonPath);
@@ -210,21 +252,27 @@ async function checkAndExecuteTask(taskName: string, errorMessage: string): Prom
                 .filter(line => line.includes("label"))
                 .map(line => line.split(/"/)[3]);
 
-            console.log(commandList);
+            logMessage(commandList);
 
-            const selection = await vscode.window.showQuickPick(commandList, { placeHolder: 'select command from command list' });
+            const selection = await vscode.window.showQuickPick(commandList, { placeHolder: 'Select command from command list' });
             if (selection) {
+                logMessage(`Selected task: ${selection}`);
                 await vscode.commands.executeCommand("workbench.action.tasks.runTask", selection);
+            } else {
+                logMessage("No task selected, operation cancelled");
             }
         } else {
             try {
                 await vscode.commands.executeCommand("workbench.action.tasks.runTask", taskName);
+                logMessage(`Task [${taskName}] started successfully`);
                 vscode.window.showInformationMessage(`Task [${taskName}] has been started successfully!`);
             } catch (error) {
+                logMessage(`Failed to start task [${taskName}]: ${error}`);
                 vscode.window.showErrorMessage(`Failed to start task [${taskName}]: ${error}`);
             }
         }
     } catch (error) {
+        logMessage(`${errorMessage}`);
         vscode.window.showErrorMessage(errorMessage);
     }
 }
@@ -238,14 +286,15 @@ function handleVebReBuild(): Promise<void> {
 }
 
 function handleterminateTerminal(): void {
-    // 註冊命令：終止當前活動終端窗口
+    logMessage("Starting handleterminateTerminal");
     const activeTerminal = vscode.window.activeTerminal;
 
     if (activeTerminal) {
-        // 模擬向終端發送 Ctrl+C 的中斷信號
-        activeTerminal.sendText("\x03"); // \x03 是 Ctrl+C 的 ASCII 控制碼
+        activeTerminal.sendText("\x03"); // Ctrl+C ASCII code
+        logMessage("Sent Ctrl+C to active terminal");
         vscode.window.showInformationMessage("Sent Ctrl+C to the active terminal.");
     } else {
+        logMessage("No active terminal to terminate");
         vscode.window.showWarningMessage("No active terminal to send Ctrl+C.");
     }
 }
@@ -253,9 +302,13 @@ function handleterminateTerminal(): void {
 function registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any): void {
     const disposable = vscode.commands.registerCommand(commandName, callback);
     context.subscriptions.push(disposable);
+    logMessage(`Registered command: ${commandName}`);
 }
 
 export function activate(context: vscode.ExtensionContext): void {
+    logMessage(`Extension activated at: ${new Date().toISOString()}`);
+
+    outputChannel.show();
     // Edk2 language provider
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_fdf' }, new Edk2FdfDefinitionProvider());
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_dsc' }, new Edk2DscDefinitionProvider());
@@ -268,37 +321,39 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.languages.registerDocumentSymbolProvider({ scheme: 'file', language: 'edk2_fdf' }, new Edk2FdfSymbolProvider());
     vscode.languages.registerDocumentSymbolProvider({ scheme: 'file', language: 'edk2_inf' }, new Edk2InfSymbolProvider());
 
-    vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'c'   }, new Edk2CCompletionItemProvider());
-    vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'cpp' }, new Edk2CCompletionItemProvider());
+    vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'c' }, new Edk2CCompletionProvider());
+    vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'cpp' }, new Edk2CCompletionProvider());
+
     // Register commands
     registerCommand(context, 'extension.InitTask', handleInitTask);
     registerCommand(context, 'extension.VebBuild', handleVebBuild);
     registerCommand(context, 'extension.VebReBuild', handleVebReBuild);
     registerCommand(context, 'extension.terminateTerminal', handleterminateTerminal);
 
-    // 創建狀態欄按鈕
+    // Create status bar button for ReBuild
     const runRebuildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    runRebuildButton.command = 'extension.VebReBuild'; // 按鈕點擊時觸發的命令
-    runRebuildButton.text = '$(play) Run Veb ReBuild'; // 顯示按鈕的圖示與文字
-    runRebuildButton.tooltip = 'Click to run Veb ReBuild'; // 滑鼠懸停時顯示的提示文字
-    runRebuildButton.show(); // 顯示按鈕
-
-    // 註冊到 context，這樣按鈕和命令都會在擴展卸載時正確清除
+    runRebuildButton.command = 'extension.VebReBuild';
+    runRebuildButton.text = '$(play) Run Veb ReBuild';
+    runRebuildButton.tooltip = 'Click to run Veb ReBuild';
+    runRebuildButton.show();
     context.subscriptions.push(runRebuildButton);
+    logMessage("Created status bar button: Run Veb ReBuild");
 
-    // 創建狀態欄按鈕：關閉終端
-    const closeTerminalButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99); // 使用較低的優先權，顯示在右側
-    closeTerminalButton.text = "$(stop) Close Terminal"; // 使用 "stop" 圖示
-    closeTerminalButton.tooltip = "Terminate the active terminal"; // 滑鼠懸停提示文字
-    closeTerminalButton.command = "extension.terminateTerminal"; // 綁定命令
-    closeTerminalButton.show(); // 顯示按鈕
-
-    // 將按鈕與命令添加到 context
+    // Create status bar button for terminating terminal
+    const closeTerminalButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+    closeTerminalButton.text = "$(stop) Close Terminal";
+    closeTerminalButton.tooltip = "Terminate the active terminal";
+    closeTerminalButton.command = "extension.terminateTerminal";
+    closeTerminalButton.show();
     context.subscriptions.push(closeTerminalButton);
-    
+    logMessage("Created status bar button: Close Terminal");
+
     registerCommand(context, 'formatter.Edk2Formatter', Edk2Formatter);
     registerCommand(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
     registerCommand(context, 'SnippetTools.AsusPrintToDebug', () => new SnippetTools(vscode).AsusPrintToDebug());
 }
 
-export function deactivate(): void {}
+export function deactivate(): void {
+    logMessage(`Extension deactivated at: ${new Date().toISOString()}`);
+    outputChannel.dispose(); // Clean up output channel
+}

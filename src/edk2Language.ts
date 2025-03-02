@@ -270,7 +270,7 @@ export class Edk2InfDefinitionProvider implements vscode.DefinitionProvider {
                         for (let i = 0; i < folders.length; i++) {
                             let root_path = folders[i] + '/';
                             let result = Common.searchPatternInFiles(associate_dec_files, root_path, dest);
-                            if (result) return result;
+                            if (result) {return result;}
                         }
                     }
                 }
@@ -304,7 +304,7 @@ export class Edk2InfDefinitionProvider implements vscode.DefinitionProvider {
                     for (let i = 0; i < folders.length; i++) {
                         let root_path = folders[i] + '/';
                         let result = Common.searchPatternInFiles(associate_dec_files, root_path, table[0]);
-                        if (result) return result;
+                        if (result) {return result;}
                     }
                 }
             } else if (table.length === 2 && associate_c_files.length > 0 && keywords.includes(table[0])) {
@@ -375,7 +375,7 @@ export class Edk2DscSymbolProvider implements vscode.DocumentSymbolProvider {
                 let keyword_text = Common.removeHashTagComment(keyword_line.text);
 
                 let m = '';
-                keywords.forEach((v, k) => { if (keyword_text.includes(k)) m = k; });
+                keywords.forEach((v, k) => { if (keyword_text.includes(k)) {m = k;} });
                 if (m.length && keyword_text.match(/\[[\s\w.,]+\]/g)) {
                     let j;
                     let keyword_symbol = new vscode.DocumentSymbol(keyword_text, '', vscode.SymbolKind.Class, keyword_line.range, keyword_line.range);
@@ -447,7 +447,7 @@ export class Edk2DecSymbolProvider implements vscode.DocumentSymbolProvider {
                 let keyword_text = Common.removeHashTagComment(keyword_line.text);
 
                 let m = '';
-                keywords.forEach((v, k) => { if (keyword_text.includes(k)) m = k; });
+                keywords.forEach((v, k) => { if (keyword_text.includes(k)) {m = k;} });
                 if (m.length && keyword_text.match(/\[[\s\w.,]+\]/g)) {
                     let j;
                     let keyword_symbol = new vscode.DocumentSymbol(keyword_text, '', vscode.SymbolKind.Class, keyword_line.range, keyword_line.range);
@@ -570,7 +570,7 @@ export class Edk2InfSymbolProvider implements vscode.DocumentSymbolProvider {
                 let keyword_text = Common.removeHashTagComment(keyword_line.text);
 
                 let m = '';
-                keywords.forEach((v, k) => { if (keyword_text.includes(k)) m = k; });
+                keywords.forEach((v, k) => { if (keyword_text.includes(k)) {m = k;} });
                 if (m.length && keyword_text.match(/\[[\s\w.,]+\]/g)) {
                     let j;
                     let keyword_symbol = new vscode.DocumentSymbol(keyword_text, '', vscode.SymbolKind.Class, keyword_line.range, keyword_line.range);

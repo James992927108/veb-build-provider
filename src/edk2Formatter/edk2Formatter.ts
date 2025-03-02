@@ -3,8 +3,8 @@ import * as fs from "fs";
 import * as readline from "readline";
 import * as util from 'util';
 
-import formatUni from "./Formatter/formatUni";
-import formatSdl from "./Formatter/formatSdl";
+import formatUni from "./formatUni";
+import formatSdl from "./formatSdl";
 
 function detectFileEncoding(filepath: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -101,7 +101,8 @@ function Edk2Formatter() {
                     });
                     break;
                 }
-                case "ISO-8859-1": {
+                case "ISO-8859-1": 
+                case "UTF-8":{
                     console.log("fileEncoding is " + fileEncoding + ", set to utf8");
                     formatSdl(filePath, "utf8").then(function (fileString) {
                         writeBacktoFile(filePath, "utf8", fileString); // Use 'utf8' BufferEncoding
