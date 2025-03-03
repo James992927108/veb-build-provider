@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as readline from "readline";
 import * as vscode from 'vscode';
 import { ONE_SPACE } from "./constants";
+import { logMessage, handleError, outputChannel } from '../logger';
 
 function formatSdl(filepath: string, fileEncoding: any): Promise<any> {
     return new Promise(resolve => {
@@ -45,10 +46,10 @@ function formatSdl(filepath: string, fileEncoding: any): Promise<any> {
 
             if (line.match(patternSpace) || line.match(patternTab)) {
                 var i = line.indexOf('=');
-                // console.log("indexof \"=\" -> ",i);
+                logMessage("indexof \"=\" -> ",i);
                 if (i > -1) {
                     var element = [line.slice(0, i).trim(), line.slice(i + 2).trim()]; // i + 2 for remove "="
-                    // console.log(element);
+                    logMessage(element);
                     let spacesBetweenIdentifierAndLang: string = '';
                     let identifierNameLength = element[0].length;
                     let identifierLineMaxSpaceBehind = spaceOnSdlAfterNum - identifierNameLength; //Calculate spaces that needed between identifierName and #language

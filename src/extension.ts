@@ -9,6 +9,7 @@ import { Edk2DscSymbolProvider, Edk2DecSymbolProvider, Edk2FdfSymbolProvider, Ed
 import { Edk2CCompletionItemProvider as Edk2CCompletionProvider} from './edk2Language';
 import Edk2Formatter from "./edk2Formatter/edk2Formatter";
 import SnippetTools from "./SnippetTools";
+import { logMessage, handleError, outputChannel } from './logger';
 
 // Constants
 const EXTENSION_ID = "ieibios.veb-build-provider";
@@ -49,33 +50,6 @@ const Taskfile = `{
             "command": ""
         },
 `;
-
-// Define global OutputChannel
-const outputChannel = vscode.window.createOutputChannel('Veb Build Provider');
-
-// Store original console.log
-const originalConsoleLog = console.log;
-
-// Define a unified logging function
-function logMessage(...args: any[]): void {
-    const message = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-    ).join(' ');
-    
-    // Output to console (original behavior)
-    originalConsoleLog.apply(console, args);
-    
-    // Output to VS Code's output channel
-    outputChannel.appendLine(message);
-}
-
-// Helper functions
-function handleError(error: Error, message: string) {
-    const errorMsg = `${message}: ${error.message}`;
-    console.error(errorMsg);
-    logMessage(errorMsg); // Use the new logging function
-    vscode.window.showErrorMessage(errorMsg);
-}
 
 function escapePath(filePath: string): string {
     return filePath.replace(/\\/g, '\\\\');

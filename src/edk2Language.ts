@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import { logMessage, handleError, outputChannel } from './logger';
 
 
 export class Common {
@@ -189,7 +190,7 @@ export class Edk2DecDefinitionProvider implements vscode.DefinitionProvider {
         // TO-DO: Should parse DEC only once when opening *.dec.
         //
         let parent_path = document.uri.fsPath.replace(/[\w\.]*$/g, '');
-        // console.log(parent_path);
+        logMessage(parent_path);
 
         let directory = [parent_path + dest];
         for (let i = 0; i < document.lineCount; i++) {
@@ -235,12 +236,12 @@ export class Edk2InfDefinitionProvider implements vscode.DefinitionProvider {
             }
         }
 
-        // console.log(dest, dest.match(/^[a-zA-Z0-9_\/]+\.[a-zA-Z0-9]+$/g));
+        logMessage(dest, dest.match(/^[a-zA-Z0-9_\/]+\.[a-zA-Z0-9]+$/g));
         if (dest.match(/^[\w\-\/]+\.[\w\-]+$/g)) {
             // format: ****.***
 
             let file_extension = dest.replace(/^[\w\-\/]+/g, '');
-            // console.log('extension ' + file_extension);
+            logMessage('extension ' + file_extension);
             if (file_extension.match('.dec')) {
                 //
                 // dec
@@ -255,7 +256,7 @@ export class Edk2InfDefinitionProvider implements vscode.DefinitionProvider {
             } else {
 
                 let parent_path = document.uri.fsPath.replace(/[\w\-\.]*$/g, '');
-                // console.log(parent_path+dest);
+                logMessage(parent_path+dest);
                 if (fs.existsSync(parent_path + dest)) {
                     //
                     // source code
@@ -314,7 +315,7 @@ export class Edk2InfDefinitionProvider implements vscode.DefinitionProvider {
 
                 // table[0] = keywords, table[1] = function name;
                 let parent_path = document.uri.fsPath.replace(/[\w\.]*$/g, '');
-                // console.log(parent_path);
+                logMessage(parent_path);
                 return Common.searchPatternInFiles(associate_c_files, parent_path, table[1]);
             }
         }

@@ -5,6 +5,7 @@ import * as util from 'util';
 
 import formatUni from "./formatUni";
 import formatSdl from "./formatSdl";
+import { logMessage, handleError, outputChannel } from '../logger';
 
 function detectFileEncoding(filepath: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -24,9 +25,9 @@ function writeBacktoFile(filepath: string, fileEncoding: any, fileString: string
 
     writeFile(filepath, fileString, { encoding: fileEncoding })
         .then(() => {
-            console.log('File created!');
+            logMessage('File created!');
         })
-        .catch(error => console.log("error: ", error));
+        .catch(error => logMessage("error: ", error));
 
 }
 
@@ -52,13 +53,13 @@ function findMaxLength(filepath: string, fileEncoding: any): Promise<any> {
          * readline event: `line` handler
          */
         readStream.once("error", function (err) {
-            console.log("readStream error");
+            logMessage("readStream error");
             resolve(null);
         });
         rl.on("line", (line: string) => {
             const patternString = new RegExp(/^#string/);
             if (line.match(patternString)) {
-                // console.log(line);
+                logMessage(line);
                 currentLength = line.split("#string")[1].trim().split(/\s+/)[0].length;
                 if (currentLength > maxLength) {
                     maxLength = currentLength;
@@ -88,12 +89,12 @@ function Edk2Formatter() {
 
     if (activeEditor) {
         let filePath = activeEditor.document.uri.fsPath;
-        console.log('filePath', filePath);
+        logMessage('filePath: ', filePath);
 
         detectFileEncoding(filePath).then(function (fileEncoding) {
             switch (fileEncoding) {
                 case "UTF-16LE": {
-                    console.log("fileEncoding is", fileEncoding);
+                    logMessage("fileEncoding is", fileEncoding);
                     findMaxLength(filePath, fileEncoding).then(function (maxStringLength) {
                         formatUni(filePath, "utf16le", maxStringLength).then(function (fileString) {
                             writeBacktoFile(filePath, "utf16le", fileString); // Use correct BufferEncoding
@@ -103,14 +104,14 @@ function Edk2Formatter() {
                 }
                 case "ISO-8859-1": 
                 case "UTF-8":{
-                    console.log("fileEncoding is " + fileEncoding + ", set to utf8");
+                    logMessage("fileEncoding is " + fileEncoding + ", set to utf8");
                     formatSdl(filePath, "utf8").then(function (fileString) {
                         writeBacktoFile(filePath, "utf8", fileString); // Use 'utf8' BufferEncoding
                     });
                     break;
                 }
                 default: {
-                    console.log('Unsupported fileEncoding:', fileEncoding);
+                    logMessage('Unsupported fileEncoding:', fileEncoding);
                 }
             }
         }).catch(error => {

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from "fs";
 import * as readline from "readline";
 import * as util from 'util';
+import { logMessage, handleError, outputChannel } from './logger';
 
 /**
  * 
@@ -19,9 +20,9 @@ class SnippetTools {
         if (activeEditor) {
             let filePath = activeEditor.document.uri.fsPath;
             let fileEncoding = "utf8";
-            console.log('filePath', filePath);
+            logMessage('filePath', filePath);
             this._DebugToAsusPrint(filePath, fileEncoding).then((fileString) => {
-                console.log('DebugToAsusPrint');
+                logMessage('DebugToAsusPrint');
                 this.writeBacktoFile(filePath, fileEncoding, fileString);
             });
         }
@@ -33,9 +34,9 @@ class SnippetTools {
         if (activeEditor) {
             let filePath = activeEditor.document.uri.fsPath;
             let fileEncoding = "utf8";
-            console.log('filePath', filePath);
+            logMessage('filePath', filePath);
             this._AsusPrintToDebug(filePath, fileEncoding).then((fileString) => {
-                console.log('AsusPrintToDebug');
+                logMessage('AsusPrintToDebug');
                 this.writeBacktoFile(filePath, fileEncoding, fileString);
             });
         }
@@ -63,7 +64,7 @@ class SnippetTools {
              * readline event: `line` handler
              */
             readStream.once("error", function (err) {
-                console.log("readStream error");
+                logMessage("readStream error");
                 resolve(null);
             });
             //Add header file 
@@ -76,14 +77,14 @@ class SnippetTools {
                 const patternTailString = new RegExp(/\s*\)\s*\)/);
                 // Replace DEBUG
                 if (line.match(patternDebugString)) {
-                    // console.log(lineno, line);
+                    logMessage(lineno, line);
                     line = line.replace(patternDebugString, 'ASUSPRINT(').replace(patternTailString, ')');
-                    // console.log(line);
+                    logMessage(line);
                 }
                 if (line.match(patternTraceString)) {
-                    // console.log(lineno, line);
+                    logMessage(lineno, line);
                     line = line.replace(patternTraceString, 'ASUSPRINT(').replace(patternTailString, ')');
-                    // console.log(line);
+                    logMessage(line);
                 }
                 fileString = fileString + line + '\r\n';
             });
@@ -124,7 +125,7 @@ class SnippetTools {
              * readline event: `line` handler
              */
             readStream.once("error", function (err) {
-                console.log("readStream error");
+                logMessage("readStream error");
                 resolve(null);
             });
 
@@ -137,9 +138,9 @@ class SnippetTools {
                 const patternTailString = new RegExp(/\s*\);/);
                 // Replace DEBUG
                 if (line.match(patternDebugString)) {
-                    // console.log(lineno, line);
+                    logMessage(lineno, line);
                     line = line.replace(patternDebugString, 'DEBUG ((DEBUG_INFO, ').replace(patternTailString, '));');
-                    // console.log(line);
+                    logMessage(line);
                 }
                 fileString = fileString + line + '\r\n';
             });
@@ -162,9 +163,9 @@ class SnippetTools {
         const writeFile = util.promisify(fs.writeFile);
         writeFile(filepath, fileString, { encoding: fileEncoding })
             .then(() => {
-                console.log('File created success!');
+                logMessage('File created success!');
             })
-            .catch(error => console.log(error));
+            .catch(error => logMessage(error));
 
     }
 }
