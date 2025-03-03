@@ -1,0 +1,334 @@
+//******************************************************************************
+//******************************************************************************
+//**                                                                          **
+//** Copyright(C) 2020-2021, XCradle Electronic Information Industry Co., Ltd. **
+//**                                                                          **
+//**                          All Rights Reserved.                            **
+//**                                                                          **
+//******************************************************************************
+//******************************************************************************
+
+//******************************************************************************
+// [File] XCradleStandardPkg.uni
+// [Description] Override the string
+// [Author] Frank Yang
+// [Date] 2021/01/06
+//******************************************************************************
+
+//------------------------------------------------------------------------------
+/=#
+#include "VFR.uni"
+#langdef   zh-chs "中文 (简体)" //XCradle-WZY20210625V001-Add
+//------------------------------------------------------------------------------
+#string STR_GENERAL_HELP_MSG     #language    en-US    "↑↓→←      : Move\nEnter     : Select\n+/-       : Change Opt.\nESC       : Exit\nF1        : General Help\nF2        : Previous Values\nF9        : Optimized Defaults\nF10       : Save & Exit Setup\n<K>       : Scroll help area upwards\n<M>       : Scroll help area downwards"    //XCradle-JX20220407V001-Mod 
+//XCradle-WZY20210625V001-Del                                 #language    fr-FR    "↑↓→←      : Move\nEnter     : Select\n+/-       : Value\nESC       : Exit\nF1        : General Help\nF2        : Previous Values\nF9        : Optimized Defaults\nF10       : Save & Exit Setup"
+//XCradle-WZY20210625V001-Del                                 #language    zh-cht    "↑↓→←      : 移動\nEnter     : 選擇\n+/-       : 數值\nESC       : 離開\nF1        : 一般性提示\nF2        : 之前設定值\nF9        : 最佳化預設值\nF10       : 儲存並離開"
+                                 #language    zh-chs    "↑↓→←      : 移动\nEnter     : 选择\n+/-       : 数值\nESC       : 离开\nF1        : 一般性提示\nF2        : 之前设定值\nF9        : 最佳化预设值\nF10       : 保存并离开"
+
+#string STR_NAV_STRINGS_0        #language    en-US    "Esc : Quit                              ↑ ↓ → ← : Select Item\nF10 : Save & Exit Setup"
+//XCradle-WZY20210625V001-Del                                 #language    fr-FR    "Esc : Quit                              ↑ ↓ → ← : Select Item\nF10 : Save & Exit Setup"
+//XCradle-WZY20210625V001-Del                                 #language    zh-cht    "Esc : 離開                              ↑ ↓ → ← : 選擇項目\nF10 : 儲存並離開"
+                                 #language    zh-chs    "Esc : 离开                              ↑ ↓ → ← : 选择项目\nF10 : 储存并离开" //XCradle-ZZP20200225V001-Add
+
+#string STR_NAV_STRINGS_1        #language    en-US    " ↑↓→←:Move  Enter:Select  F1:General Help\n     F2:Previous Values    F9:Optimized Defaults  F10:Save  ESC:Exit"
+//XCradle-WZY20210625V001-Del                                 #language    fr-FR    " ↑↓→←:Move  Enter:Select  F1:General Help\n     F2:Previous Values    F9:Optimized Defaults  F10:Save  ESC:Exit"
+//XCradle-WZY20210625V001-Del                                 #language    zh-cht    " ↑↓→←:移動  Enter:選擇  F1:一般性提示\n     F2:之前設定值    F9:最佳化預設值  F10:儲存  ESC:離開"
+                                 #language    zh-chs    " ↑↓→←:移动  Enter:选择  F1:一般性提示\n     F2:之前设定值    F9:最佳化预设值  F10:储存  ESC:离开" //XCradle-ZZP20200225V001-Add
+
+#string STR_NAV_STRINGS_2        #language    en-US    "→←: Select Screen\n↑↓: Select Item\nEnter: Select\n+/-: Change Opt.\nF1: General Help\nF2: Previous Values\nF9: Optimized Defaults\nF10: Save & Exit\nESC: Exit"
+//XCradle-WZY20210625V001-Del                                 #language    fr-FR    "→←: Select Screen\n↑↓: Select Item\nEnter: Select\n+/-: Change Opt.\nF1: General Help\nF2: Previous Values\nF9: Optimized Defaults\nF10: Save & Exit\nESC: Exit"
+//XCradle-WZY20210625V001-Del                                 #language    zh-cht    "→←: 選擇畫面\n↑↓: 選擇項目\nEnter: 選擇\n+/-: 變更\nF1: 一般性提示\nF2: 之前設定值\nF9: 最佳化預設值\nF10: 儲存  ESC: 離開"
+                                 #language    zh-chs    "→←: 选择界面\n↑↓: 选择项目\nEnter: 选择\n+/-: 变更选项\nF1: 一般性提示\nF2: 之前设定值\nF9: 最佳化预设值\nF10: 储存  ESC: 离开" //XCradle-ZZP20200225V001-Add
+
+#string STR_NAV_STRINGS_3        #language    en-US    "→←: Select Screen\n↑↓/Click: Select Item\nEnter/Dbl Click: Select\n+/-: Change Opt.\nF1: General Help\nF2: Previous Values\nF9: Optimized Defaults\nF10: Save & Exit\nESC/Right Click: Exit"
+//XCradle-WZY20210625V001-Del                                 #language    fr-FR    "→←: Select Screen\n↑↓/Click: Select Item\nEnter/Dbl Click: Select\n+/-: Change Opt.\nF1: General Help\nF2: Previous Values\nF9: Optimized Defaults\nF10: Save & Exit\nESC/Right Click: Exit"
+//XCradle-WZY20210625V001-Del                                 #language    zh-cht    "→←: Select Screen\n↑↓/Click: Select Item\nEnter/Dbl Click: Select\n+/-: Change Opt.\nF1: General Help\nF2: Previous Values\nF9: Optimized Defaults\nF10: Save & Exit\nESC/Right Click: Exit"
+
+#string STR_EXIT_HELP            #language    zh-chs    "放弃所有资料" //XCradle-ZZP20200225V001-Add
+
+#string STR_RESET_HELP           #language    zh-chs    "放弃所有资料" //XCradle-ZZP20200225V001-Add
+
+//XCradle-QHJ20210316V011-Mod-Start
+#string STR_DATE_HELP            #language en-US "Set the Date. Use Tab to switch between Date elements.\n\rDefault Ranges: \n\rYear: 2005-2104 \n\rMonths: 1-12 \n\rDays: Dependent on month\n\rRange of Years may vary."
+//XCradle-QHJ20210316V011-Mod-End
+//XCradle-YL20210401V001-Add-Start
+#string STR_CSM_OPROM_POLICY                    #language en-US "Option ROM execution"
+                                                #language zh-chs "Option ROM执行策略"
+#string STR_CSM_OPROM_POLICY_HELP               #language en-US "Controls the execution mode of OpROM"
+                                                #language zh-chs "控制 Option Rom执行方式"
+#string STR_CSM_OPROM_POLICY_AUTO               #language en-US "Auto"
+                                                #language zh-chs "自动"
+#string STR_CSM_OPROM_POLICY_MANUAL             #language en-US "Manual"
+                                                #language zh-chs "手动"
+//XCradle-YL20210401V001-Add-End
+
+//XCradle-ZYD20210513V001-Add-Start
+#string STR_SRVRMGMT_FRB_TIMEOUT_HELP               #language en-US  "Enter value Between 3 to 30 min for FRB-2 Timer Expiration"
+#string STR_OS_BOOT_WD_TIMER_TIMEOUT_HELP           #language en-US  "Enter the value Between 3 to 30 min for OS Boot Watchdog Timer Expiration. Not available if OS Boot Watchdog Timer is disabled."
+//XCradle-ZYD20210513V001-Add-End
+
+//XCradle-WZY20210625V001-Add-Start
+
+//SERVER_MGMT
+#string STR_USER_ENABLE                             #language en-US "Enabled"
+#string STR_USER_DISABLE                            #language en-US "Disabled"
+#string STR_BMC_USER_ACCESS_HELP                    #language en-US "Enabled/Disabled the BMC User's Access." //XCradle-WZY20210913V001-Add
+#string STR_POWERDOWN                               #language en-US "Power Off" //XCradle-WZY20211002V001-Add
+#string STR_POWERCYCLE                              #language en-US "Power Cycle" //XCradle-WZY20211002V001-Add//XCradle-YZ20220516V001-Mod
+//XCradle-WJ20220406V231-Add-Start
+//#string STR_POWERCYCLE_Tencent                      #language en-US "Power Cycle" //XCradle-WZY20211002V001-Add//XCradle-YZ20220516V001-Del
+//XCradle-WJ20220406V231-Add-End
+//XCradle-WJ20220406V231-Del                         #string STR_POWERCYCLE#language en-US "Power Cycle" //XCradle-WZY20211002V001-Add                         
+
+//SOCKET_SETUP
+
+#string STR_YES                             #language en-US "Enabled"
+#string STR_NO                              #language en-US "Disabled"
+#string STR_ENABLE                          #language en-US "Enabled"
+#string STR_DISABLE                         #language en-US "Disabled"
+#string STR_KTI_DISABLE                     #language en-US "Disabled"
+#string STR_KTI_ENABLE                      #language en-US "Enabled"
+#string STR_DISABLED_STRING                 #language en-US "Disabled"
+#string STR_ENABLED_STRING                  #language en-US "Enabled"
+
+#string STR_LINKL0P_ENABLE_STRING               #language en-US "Enabled"
+#string STR_LINKL0P_DISABLE_STRING              #language en-US "Disabled"
+#string STR_LINKL1_ENABLE_STRING                #language en-US "Enabled"
+#string STR_LINKL1_DISABLE_STRING               #language en-US "Disabled"
+#string STR_PMON_ACC_CTRL_DISABLE_STRING        #language en-US "Disabled"
+#string STR_PMON_ACC_CTRL_ENABLE_STRING         #language en-US "Enabled"
+#string STR_PMON_CONFIG_REDUCED_DISABLE         #language en-US "Disabled"
+#string STR_ADR_DATASAVE_DIS                    #language en-US "Disabled"
+
+#string STR_UNLOCK_ENABLE                       #language en-US "Unlocked/Enabled"
+#string STR_LOCK_DISABLE                        #language en-US "Locked/Disabled"
+#string STR_UMABASEDCLUSTERING_DISABLE          #language en-US "Disabled   (All2All)"
+
+
+#string STR_NVM_QOS_DISABLE_STR                         #language en-US "Disabled - Disable PMem QoS feature"
+#string STR_DFX_LLC_SHARE_DRD_CRD_HELP                  #language en-US "Enable migration from SF to LLC and to leave shared lines in the LLC for Drd and Crd: Enabled (1), Disabled (0), Auto"
+#string STR_DFX_CLEAN_EVICT_ALWAYS_LIVE_ENABLE_HELP     #language en-US "Enabled - Clean Evict Always Live"
+#string STR_DFX_MODIFIED_EVICT_ALWAYS_LIVE_ENABLE_HELP  #language en-US "Enabled - Modified Evict Always Live"
+#string STR_LINKL0P_HELP                                #language en-US "Enabled - Set the c_l0p_en, Disabled - Reset it, Auto - Auto decides based on Si Compatibility."
+#string STR_LINKL1_HELP                                 #language en-US "Enabled - Set the c_l1_en, Disabled - Reset it, Auto - Auto decides based on Si Compatibility."
+#string STR_KTI_FAILOVER_ENABLE_HELP                    #language en-US "Enabled - Set the c_failover_en, Disabled - Reset it, Auto - Auto decides based on Si Compatibility."
+#string STR_KTI_PCIE_P2P_RELAXED_ORDERING_HELP          #language en-US "Relax P2P write ordering in hardware if software enforces ordering, or doesn't care. Default is DISABLED, so hardware will enforce P2P write ordering."
+#string STR_SCRAMBLE_EN_DDRT_HELP                       #language en-US "Enabled - Enables data scrambling for PMem. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Enabled."
+#string STR_SCRAMBLE_EN_HELP                            #language en-US "Enabled - Enables data scrambling for DDR4 and DDR5. Disabled - Disables this feature."// Auto - Sets it to the MRC default setting; current default is Enabled."//XCradle-WB0220221114V001-Del
+#string STR_PKGC_CRITERIAL_HELP                         #language en-US "Enabled: B2P WRITE_PKGC_SA_PS_CRITERIA accepts input value."
+#string STR_KTI_SKU_MISMATCH_CHECK_HELP                 #language en-US "Enabled or Disabled to do CPU SKU Type Mismatch check"
+#string STR_PMON_ACC_CTRL_HELP                          #language en-US "Auto - Configures PMON access based on CPU.\nDisabled - Prevents PMON access and silently drops.\nEnabled - Configures PMON to get full access."
+#string STR_DFX_DDR_CHANNEL_MASK_HELP                   #language en-US "Enabled (1) or Disabled (0) DDR memory channels. One bit corresponding to one channel per socket."
+#string STR_UMABASEDCLUSTERING_HELP                     #language en-US "UMA Based Clustering options include Disabled (ALL2ALL), Hemisphere (2 cluster), and Quadrant (4 cluster, not supported on ICX). These option are only valid when SNC is disabled. If SNC is enabled, UMA-Based Clustering is automatically disabled by BIOS."
+#string STR_IIO_NG_PCI_LTR_HELP                         #language en-US "Auto/Disabled - Turns off the Latency Tolerance Report feature of the PCI-E Root port and endpoint. Enabled - Turns on the Latency Tolerance Report feature."
+#string STR_IIO_NG_EXTENDED_TAG_HELP                    #language en-US "Auto/Enabled - BIOS sets 8-bit Tag Field for PCI-E Root Port/EndPoint. Disabled - BIOS sets 5-bit Tag Field for PCI-E Root Port/EndPoint"
+#string STR_VMD_PCH_ROOTPORT_HELP                       #language en-US "Configuretion PCH root port: Enabled - VMD ownership root port"
+#string STR_EXTENDED_TAG_HELP                           #language en-US "Auto/Enabled - BIOS sets 8-bit Tag Field for PCIe Root Port/EndPoint. Disabled - BIOS sets 5-bit Tag Field for PCIe Root Port/EndPoint"
+#string STR_PCI_LTR_HELP                                #language en-US "Auto/Disabled - Turns off the Latency Tolerance Report feature of the Pcie Root port and endpoint. Enabled - Turns on the Latency Tolerance Report feature."
+#string STR_RDCUR_HELP                                  #language en-US "Enabled - Set the suppress_mem_rd_prefetch_rdcur, Disabled - Reset it, Auto - Auto decides based on Si Compatibility."
+#string STR_LLC_DEAD_LINE_ALLOC_HELP                    #language en-US "Enabled - opportunistically fill dead lines in LLC. Disabled - never fill dead lines in LLC"
+#string STR_SPLITLOCK_HELP                              #language en-US "Enabled - Enable the split lock. Disabled - Disable the split lock"
+#string STR_FORCE_ODT_ON_HELP                           #language en-US "Enabled - Forces ODT ON. Disabled - Disables ODT ON."
+#string STR_CTLE_OVERRIDE_HELP                          #language en-US "Enabled - Override host CTLE Capacitance and Resistance values. Disabled - Do not modify host CTLE values."
+#string STR_RTT_OVERRIDE_HELP                           #language en-US "Enabled - Able to override DRAM RTT_WR/RTT_PARK/DQ_VREF/MC_DQ_VREF values. Disabled - Do not modify DRAM RTT values."
+#string STR_DDR_ECC_ENABLE_HELP                         #language en-US "Enabled - Enables DDR ECC. Disabled - Disables this feature.Current default is Enable. When this is set to Disable, DDR ECC Check will be set to Disable compulsorily."
+#string STR_DDR_ECC_CHECK_HELP                          #language en-US "Enabled - Enables DDR ECC Check. Disabled - Disables this feature. Current default is Enable."
+#string STR_HBM_ECC_ENABLE_HELP                         #language en-US "Enabled - Enables HBM ECC. Disabled - Disables this feature.Current default is Enable. When this is set to Disable, HBM ECC Check will be set to Disable compulsorily."
+#string STR_HBM_ECC_CHECK_HELP                          #language en-US "Enabled - Enables HBM ECC Check. Disabled - Disables this feature. Current default is Enable."
+#string STR_IMODE_OVERRIDE_HELP                         #language en-US "Enabled - Override IMode value. Disabled - Do not modify IMode value."
+#string STR_ENFORCE_POR_HELP                            #language en-US "Enabled - Enforces Plan Of Record restrictions for DDR4 frequency and voltage programming. Disabled - Disables this feature and user is able to run at higher frequencies, specified in the DDR Frequency Limit field (limited by processor support). Auto - Sets it to the MRC default setting (current default is Enable)."
+//#string STR_ALLOW_CORRECTABLE_ERROR_EN_HELP             #language en-US "Enabled - Allows correctable errors during memory training. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disable." //XCradle-WSX20211104V001-Del for Crb37
+#string STR_ALLOW_CORRECTABLE_MEM_TEST_ERROR_EN_HELP    #language en-US "Enabled - Logs error and allows correctable errors during memory test(DIMM Rank not removed). Disabled - Logs error and removes DIMM Rank."//  Auto - Sets it to the MRC default setting; current default is Enable."
+#string STR_ECC_SUPPORT_HELP                            #language en-US "Enabled - Enables DDR ECC Support. Disabled - Disables this feature."
+#string STR_TRNG_RESULT_OFFSET_HELP                     #language en-US "Enabled - Enables training results to be offset. Disabled - Disables this feature; current default is Enable"
+#string STR_SET_MEM_TESTED_HELP                         #language en-US "Enabled - Sets the TESTED flag for all memory in PEI, making it available for DXE Drivers' usage"
+#string STR_MEM_TEST_HELP                               #language en-US "Enabled - Enables memory test during normal boot. Disabled - Disables this feature."
+#string STR_MEM_TEST_COLD_FAST_BOOT_HELP                #language en-US "Enabled - Enables memory test during cold fast boot. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disable."
+#string STR_ATTEMPT_FAST_BOOT_HELP_SKX                  #language en-US "Enabled - Portions of memory reference code will be skipped when possible to increase boot speed on warm boots. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Enable."
+#string STR_ATTEMPT_FAST_BOOT_HELP_10NM                 #language en-US "Enabled - Portions of memory reference code will be skipped when possible to increase boot speed on warm boots. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disable."
+#string STR_ATTEMPT_FAST_BOOT_COLD_HELP                 #language en-US "Enabled - Portions of memory reference code will be skipped when possible to increase boot speed on cold boots. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disable."
+#string STR_SCRAMBLE_EN_HBM_HELP                        #language en-US "Enabled - Enables data scrambling for HBM. Disabled - Disables this feature; current default is Enable."
+#string STR_LEGACY_RMT_HELP                             #language en-US "Enabled - Enables the legacy rank margin tool to run after DDR4 memory training. Disabled - Disables this feature. Current default is Enable. Should be disabled in production releases."
+#string STR_PER_BIT_MARGIN_HELP                         #language en-US "Enabled - Enables the logging from the serial port of DDR Per Bit Margin Data. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disable."
+#string STR_EARLY_WR_CRC_DDRIO_HELP                     #language en-US "Enabled - Enables Early Write CRC in the DDRIO. Disabled - Disables this feature."
+#string STR_WR_CRC_HELP                                 #language en-US "Enabled - Enables Write CRC. Disabled - Disables this feature."
+#string STR_RMT_COLD_FAST_BOOT_HELP                     #language en-US "Enabled - Enables Rank Margin Tool on Cold Fast Boot. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disable. Should be disabled in production releases."
+#string STR_MULTI_THREADED_HELP                         #language en-US "Enabled - Executes the Memory Reference Code multi-threaded. Disabled - Disables this feature. Auto - Sets it to MRC default setting; current default is Enable."
+#string STR_OPP_READ_DURING_WMM_HELP                    #language en-US "Enabled - Enables issuing read commands opportunistically during Write Major Mode. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Enable."
+#string STR_CA_PARITY_HELP                              #language en-US "Enabled - Enables DDR4 Command Address Parity. Disabled - Disables this feature."  //XCradle-YL20230713V003-Mod
+#string STR_DIMM_ISOLATION_HELP                         #language en-US "Enabled - Enables DIMM Isolation for Command/Address Parity and Write CRC. Disabled - Disables this feature; current default is Enable."
+#string STR_PKG_CST_CONFIG_CONTROL_LOCK_HELP            #language en-US "Enabled - MSR E2h will be locked. Power Good reset is needed to remove lock bits."
+#string STR_DRAM_RAPL_PWR_LIMIT_LOCK_HELP               #language en-US "This Option allows unlock/lock DRAM_PLANE_POWER_LIMIT.pp_pwr_lim_lock.\n\nEnabled - Lock\nDisabled - Unlock"
+#string STR_PROCESSOR_MSR_LOCK_HELP                     #language en-US "Enabled - MSR 3Ah and CSR 80h will be locked. Power Good reset is needed to remove lock bits."
+//XCradle-WZY20210918V001-Add-Start
+#string STR_UMABASEDCLUSTERING_HELP                     #language en-US "UMA Based Clustering options include Disabled (ALL2ALL), Hemisphere (2 cluster), and Quadrant (4 cluster, not supported on ICX). These option are only valid when SNC is disabled. If SNC is enabled, UMA-Based Clustering is automatically disabled by BIOS."
+#string STR_DFX_CXL_VID_HELP                            #language en-US "CXL VID on SPR B0. Auto(Default) and Enabled is 0x1E98. Disabled is 0x8086"
+#string STR_ADV_MEM_TEST_COND_HELP                      #language en-US "Auto = set test conditions based on test type; Manual = specify global test conditions; Disabled = Do not apply test conditions."
+#string STR_FIGURE_OF_MERIT_OPTION_HELP                 #language en-US "Enabled - EyeWidth for Figure of Merit Programming. Disabled - Disable EyeWidth for Figure of Merit Programming."
+#string STR_SMBUS_RESET_ASSERT_OPTION_HELP              #language en-US "Enabled - Assert when SMBUS Reset happens during SMBUS Read/Write. Disabled - Assert when SMBUS Reset happens during SMBUS Read/Write."
+#string STR_LTR_IIO_INPUT_HELP                          #language en-US "MSR 1FCh Bit[29] = LTR_IIO_DISABLE. Disabled = Ignore IIO LTR input."
+#string STR_UNCORE_FREQ_RAPL_LIMIT_HELP                 #language en-US "Enabled: BYPASS_CLM_RAPL_LIMIT = 0\n\nDisabled: BYPASS_CLM_RAPL_LIMIT = 1"
+#string STR_DDR_ECC_ENABLE_HELP                         #language en-US "Enabled - Enables DDR ECC. Disabled - Disables this feature.Current default is Enabled. When this is set to Disabled, DDR ECC Check will be set to Disable compulsorily."
+#string STR_DDR_ECC_CHECK_HELP                          #language en-US "Enabled - Enables DDR ECC Check. Disabled - Disables this feature. Current default is Enabled."
+#string STR_HBM_ECC_ENABLE_HELP                         #language en-US "Enabled - Enables HBM ECC. Disabled - Disables this feature.Current default is Enabled. When this is set to Disabled, HBM ECC Check will be set to Disable compulsorily."
+#string STR_HBM_ECC_CHECK_HELP                          #language en-US "Enabled - Enables HBM ECC Check. Disabled - Disables this feature. Current default is Enabled."
+#string STR_ENFORCE_POR_HELP                            #language en-US "Enabled - Enforces Plan Of Record restrictions for DDR4 frequency and voltage programming. Disabled - Disables this feature and user is able to run at higher frequencies, specified in the DDR Frequency Limit field (limited by processor support). Auto - Sets it to the MRC default setting (current default is Enabled)."
+//#string STR_ALLOW_CORRECTABLE_ERROR_EN_HELP             #language en-US "Enabled - Allows correctable errors during memory training. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disabled." //XCradle-WSX20211104V001-Del for Crb37
+#string STR_ALLOW_CORRECTABLE_MEM_TEST_ERROR_EN_HELP    #language en-US "Enabled - Logs error and allows correctable errors during memory test(DIMM Rank not removed). Disabled - Logs error and removes DIMM Rank."//  Auto - Sets it to the MRC default setting; current default is Enabled."
+#string STR_TRNG_RESULT_OFFSET_HELP                     #language en-US "Enabled - Enables training results to be offset. Disabled - Disables this feature; current default is Enabled"
+#string STR_MEM_TEST_COLD_FAST_BOOT_HELP                #language en-US "Enabled - Enables memory test during cold fast boot. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disabled."
+#string STR_ATTEMPT_FAST_BOOT_HELP_SKX                  #language en-US "Enabled - Portions of memory reference code will be skipped when possible to increase boot speed on warm boots. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Enabled."
+#string STR_ATTEMPT_FAST_BOOT_HELP_10NM                 #language en-US "Enabled - Portions of memory reference code will be skipped when possible to increase boot speed on warm boots. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disabled."
+#string STR_ATTEMPT_FAST_BOOT_COLD_HELP                 #language en-US "Enabled - Portions of memory reference code will be skipped when possible to increase boot speed on cold boots. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disabled."
+#string STR_SCRAMBLE_EN_HBM_HELP                        #language en-US "Enabled - Enables data scrambling for HBM. Disabled - Disables this feature; current default is Enabled."
+#string STR_LEGACY_RMT_HELP                             #language en-US "Enabled - Enables the legacy rank margin tool to run after DDR4 memory training. Disabled - Disables this feature. Current default is Enabled. Should be disabled in production releases."
+#string STR_PER_BIT_MARGIN_HELP                         #language en-US "Enabled - Enables the logging from the serial port of DDR Per Bit Margin Data. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disabled."
+#string STR_RMT_COLD_FAST_BOOT_HELP                     #language en-US "Enabled - Enables Rank Margin Tool on Cold Fast Boot. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Disabled. Should be disabled in production releases."
+#string STR_MULTI_THREADED_HELP                         #language en-US "Enabled - Executes the Memory Reference Code multi-threaded. Disabled - Disables this feature. Auto - Sets it to MRC default setting; current default is Enabled."
+#string STR_OPP_READ_DURING_WMM_HELP                    #language en-US "Enabled - Enables issuing read commands opportunistically during Write Major Mode. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Enabled."
+#string STR_CA_PARITY_HELP                              #language en-US "Enabled - Enables DDR4 Command Address Parity. Disabled - Disables this feature. Auto - Sets it to the MRC default setting; current default is Enabled."
+//XCradle-TMQ20211101V001-Mod-Start
+#string STR_DIMM_ISOLATION_HELP                         #language en-US "Enabled - Enables DIMM Isolation for Command/Address Parity and Write CRC. Disabled - Disables this feature; current default is Disabled."
+//XCradle-TMQ20211101V001-Mod-END
+//XCradle-WZY20210918V001-Add-End
+
+//PLATFORM_SETUP
+//#string STR_ENABLE                        #language en-US "Enabled"
+//#string STR_DISABLE                       #language en-US "Disabled"
+//#string STR_ENABLED                       #language en-US "Enabled"
+//#string STR_DISABLED                      #language en-US "Disabled"
+
+#string STR_PLATFORM_DEEP_S5_HELP               #language en-US "Enabled - Enable Platform Deep S5 mode, Disabled - Disable Platform Deep S5 mode, Hardware - No support Platform Deep S5 mode"
+#string STR_FPS_ENABLE_HELP                     #language en-US  "Auto - FPS will be set to FPC1021 if CSME FW Corporate SKU or DISABLE if CSME FW Consumer SKU; ENABLED - Allows the User to select Finger Print Sensor Device; DISABLED - Forces the FPS to be Disable regardless of the CSME FW SKU"
+
+//TcgSetup
+#string STR_TPM_ENABLE                     #language en-US "Enabled"
+#string STR_TPM_DISABLE                    #language en-US "Disabled"
+
+//XCradle-WZY20210625V001-Add-End
+
+//XCradle-TYQ20210705V001-Add-Start
+#string  STR_NVLOCK_FV_LOAD_SUPPORT_HELP     #language en-US  "Control the NVRAM Runtime Variable protection through System Admin Password\nNOTE:\nIf the Admin Password does not exist, enabling Password Protection will cause the protected variables can not be modified by SCE."
+//XCradle-TYQ20210705V001-Add-End
+
+//XCradle-ZJ20210901V001-Add-Start
+#string STR_MEMTRIPREPORTING_CONFIG_HELP     #language en-US "If set to Disabled, processor will ignore all Mem Trip tree. If set to Enabled processor will include all Mem Trip tree."
+//XCradle-ZJ20210901V001-Add-End
+
+//XCradle-JX20220216V001-Mod-Start
+#string STR_LEAKY_BKT_HOUR_HELP             #language en-US "Leaky bucket time window based interface Hour" (0 - 3744)"
+//XCradle-JX20220216V001-Mod-End
+
+//XCradle-ZJ20220614V001-Add-Start
+#string STR_SET_USER_PASSWORD_FAIL          #language en-US    "Invalid Password, The password format may be incorrect or the BMC password complexity checks that a historical password is entered(please refer to BMC user management for details)"
+//XCradle-ZJ20220614V001-Add-End
+//XCradle-LZQ20230404V001-Add-Start
+#string STR_CSM_MODULE_VERSION          #language eng "CSM16 Module Version"
+                                        #language zh-chs "CSM16模块版本"
+//XCradle-LZQ20230404V001-Add-End
+//
+// AmiNetworkPkg uni
+//
+#ifdefine STR_TLS_AUTH_CONFIG_TITLE
+#undefine STR_TLS_AUTH_CONFIG_TITLE
+#string STR_TLS_AUTH_CONFIG_TITLE                    #language en-US "Tls Auth Configuration"
+                                                     #language zh-chs "Tls Auth配置"
+#endif             
+
+#ifdefine STR_TLS_AUTH_CONFIG_HELP
+#undefine STR_TLS_AUTH_CONFIG_HELP                                        
+#string STR_TLS_AUTH_CONFIG_HELP                     #language en-US "Press <Enter> to select Tls Auth Configuration."
+                                                     #language zh-chs "按 Enter键选择 Tls Auth配置。"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_SERVER_CA
+#undefine STR_TLS_AUTH_CONFIG_SERVER_CA  
+#string STR_TLS_AUTH_CONFIG_SERVER_CA                #language en-US "Server CA Configuration"
+                                                     #language zh-chs "Server CA配置"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_SERVER_CA_HELP
+#undefine STR_TLS_AUTH_CONFIG_SERVER_CA_HELP  
+#string STR_TLS_AUTH_CONFIG_SERVER_CA_HELP           #language en-US "Press <Enter> to configure Server CA."
+                                                     #language zh-chs "按 Enter键配置 Server CA "
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_CLIENT_CERT
+#undefine STR_TLS_AUTH_CONFIG_CLIENT_CERT  
+#string STR_TLS_AUTH_CONFIG_CLIENT_CERT              #language en-US "Client Cert Configuration"
+                                                     #language zh-chs "Client Cert配置"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_CLIENT_CERT_HELP
+#undefine STR_TLS_AUTH_CONFIG_CLIENT_CERT_HELP  
+#string STR_TLS_AUTH_CONFIG_CLIENT_CERT_HELP         #language en-US "Client cert configuration is unsupported currently."
+                                                     #language zh-chs "Client Cert配置目前不支持"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_ENROLL_CERT
+#undefine STR_TLS_AUTH_CONFIG_ENROLL_CERT  
+#string STR_TLS_AUTH_CONFIG_ENROLL_CERT              #language en-US "Enroll Cert"
+                                                     #language zh-chs "注册证书"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_ENROLL_CERT_HELP
+#undefine STR_TLS_AUTH_CONFIG_ENROLL_CERT_HELP  
+#string STR_TLS_AUTH_CONFIG_ENROLL_CERT_HELP         #language en-US "Press <Enter> to enroll cert."
+                                                     #language zh-chs "按下Enter去注册证书"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_DELETE_CERT
+#undefine STR_TLS_AUTH_CONFIG_DELETE_CERT  
+#string STR_TLS_AUTH_CONFIG_DELETE_CERT              #language en-US "Delete Cert"
+                                                     #language zh-chs "删除证书"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_DELETE_CERT_HELP
+#undefine STR_TLS_AUTH_CONFIG_DELETE_CERT_HELP  
+#string STR_TLS_AUTH_CONFIG_DELETE_CERT_HELP         #language en-US "Press <Enter> to delete cert."
+                                                     #language zh-chs "按下Enter去删除证书"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_ADD_CERT_FILE
+#undefine STR_TLS_AUTH_CONFIG_ADD_CERT_FILE  
+#string STR_TLS_AUTH_CONFIG_ADD_CERT_FILE            #language en-US "Enroll Cert Using File"
+                                                     #language zh-chs "使用文件注册证书"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_CERT_GUID_HELP
+#undefine STR_TLS_AUTH_CONFIG_CERT_GUID_HELP  
+#string STR_TLS_AUTH_CONFIG_CERT_GUID_HELP           #language en-US "Input digit character in 11111111-2222-3333-4444-1234567890ab format."
+                                                     #language zh-chs "以11111111-2222-3333-4444-1234567890ab格式输入数字字符。"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_SAVE_AND_EXIT
+#undefine STR_TLS_AUTH_CONFIG_SAVE_AND_EXIT  
+#string STR_TLS_AUTH_CONFIG_SAVE_AND_EXIT            #language en-US "Commit Changes and Exit"
+                                                     #language zh-chs "提交更改并退出"
+#endif
+
+#ifdefine STR_TLS_AUTH_CONFIG_NO_SAVE_AND_EXIT
+#undefine STR_TLS_AUTH_CONFIG_NO_SAVE_AND_EXIT  
+#string STR_TLS_AUTH_CONFIG_NO_SAVE_AND_EXIT         #language en-US "Discard Changes and Exit"
+                                                     #language zh-chs "放弃更改并退出"
+#endif
+
+#ifdefine STR_TLS_AUTH_ENROLL_CERT_FAILURE
+#undefine STR_TLS_AUTH_ENROLL_CERT_FAILURE  
+#string STR_TLS_AUTH_ENROLL_CERT_FAILURE             #language en-US "Enroll Cert Failure!"
+                                                     #language zh-chs "文件注册失败"                                                     
+#endif
+
+#ifdefine STR_MEDIA_DETECT_COUNT_HELP
+#undefine STR_MEDIA_DETECT_COUNT_HELP
+#string STR_MEDIA_DETECT_COUNT_HELP                  #language en-US  "Number of times the presence of media will be checked. Use either +/- or numeric keys to set the value.Rang:1-50"//XCradle-WJ20220501V001-Mod
+#endif
+//******************************************************************************
+//******************************************************************************
+//**                                                                          **
+//** Copyright(C) 2020-2021, XCradle Electronic Information Industry Co., Ltd. **
+//**                                                                          **
+//**                          All Rights Reserved.                            **
+//**                                                                          **
+//******************************************************************************
+//******************************************************************************

@@ -1,0 +1,56 @@
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**                   (C)Copyright 2018 - 2022, XCradle                  **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************
+//*************************************************************************
+// $Archive: $
+//
+// $Author: $
+//
+// $Revision: $
+//
+// $Date: $
+//
+//*************************************************************************
+//*************************************************************************
+//*************************************************************************
+/=#
+#include "VFR.uni"
+
+#ifndef x-AMI
+#langdef   x-AMI "x-AMI"    // AMI Configuration Language
+#endif
+#ifndef zh-chs
+#langdef   zh-chs "中文 (简体)" // Chinese simplified
+#endif
+
+#string STR_OEM_ACTIVE_VIDEO_TITLE                         #language en-US  "Active Video"
+                                                           #language zh-chs "选择显示器使用"
+#string STR_OEM_ACTIVE_VIDEO_TITLE_HELP                    #language en-US  "Active Video Select OnBrd/PCI"
+                                                           #language zh-chs "选择显示器使用 OnBrd/PCI"   														   
+
+
+#string STR_OEM_ACTIVE_VIDEO_SELECT                        #language en-US  "Active Video"
+                                                           #language zh-chs "选择显示器使用"
+#string STR_OEM_ACTIVE_VIDEO_SELECT_HELP                   #language en-US  "Select between onboard or PCI VGA support."
+                                                           #language zh-chs "选择显示器使用 OnBrd/PCI"
+#string STR_OEM_ACTIVE_VIDEO_ONBOARD                       #language en-US  "Onboard"
+                                                           #language zh-chs "Onboard"
+#string STR_OEM_ACTIVE_VIDEO_PCI                           #language en-US  "PCI"
+                                                           #language zh-chs "PCI"
+														 
+
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**                   (C)Copyright 2018 - 2022, XCradle                  **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************

@@ -1,0 +1,70 @@
+//******************************************************************************
+//******************************************************************************
+//**                                                                          **
+//** Copyright(C) 2020-2021, XCradle Electronic Information Industry Co., Ltd. **
+//**                                                                          **
+//**                          All Rights Reserved.                            **
+//**                                                                          **
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+// [File] XCradleMainPage.uni
+// [Description] Define XCradleMainPage
+// [Author] Jasmine Jiang
+// [Date] 20210301
+//******************************************************************************
+//------------------------------------------------------------------------------
+/=#
+#include "VFR.uni"
+//------------------------------------------------------------------------------
+#string STR_PRODUCT_NAME_PROMPT         #language eng "Product Name"
+                                        #language zh-chs "产品名称"
+#string STR_PRODUCT_NAME_VALUE          #language eng "N/A" //dynamically updated
+#string STR_SERIAL_NUMBER_PROMPT        #language eng "Serial Number"
+                                        #language zh-chs "序列号"
+#string STR_SERIAL_NUMBER_VALUE         #language eng "N/A" //dynamically updated
+#string STR_CUSTOMER_ID_PROMPT          #language eng "Customer ID"
+                                        #language zh-chs "客户ID"
+#string STR_CUSTOMER_ID_VALUE           #language eng "N/A" // Dynamically updated
+#string STR_BIOS_VERSION_NAME_PROMPT    #language eng "BIOS Version"
+                                        #language zh-chs "BIOS版本"
+#string STR_BIOS_VERSION_NAME_VALUE     #language eng "N/A" //dynamically updated
+#string STR_BIOS_DATE_NAME_PROMPT       #language eng "Build Date"
+                                        #language zh-chs "编译日期"
+#string STR_BIOS_DATE_NAME_VALUE        #language eng "N/A" //dynamically updated
+#string STR_BMC_VERSION_NAME            #language eng "BMC Firmware Version"
+                                        #language zh-chs "BMC固件版本"
+#string STR_BMC_VERSION_VALUE           #language eng "N/A" //dynamically updated
+
+//XCradle-JSY20210316V001-Add-Start
+#string STR_OEMPLATFORM_INFORMATION     #language en-US "Platform Information"
+                                        #language zh-chs "平台信息"
+#string STR_CPU_INFO                    #language eng "CPU Type"
+                                        #language zh-chs "CPU型号"
+#string STR_CPU_INFO_VALUE              #language eng "N/A" // Dynamically updated
+#string STR_CPU_CUR_FREQ                #language eng "CPU Current Speed"
+                                        #language zh-chs "CPU当前速率"
+#string STR_CPU_CUR_FREQ_VALUE          #language eng "N/A" // Dynamically updated
+
+#string STR_MEMORY_SPEED_NAME           #language eng "System Memory Speed"
+                                        #language zh-chs "系统内存速率"
+#string STR_MEMORY_SPEED_HELP           #language eng "System Memory Speed"
+#string STR_MEMORY_SPEED_VALUE          #language eng "N/A" // Dynamically updated
+#string STR_OEMMEMORY_SIZE_NAME         #language eng "DRAM Total Memory"
+                                        #language zh-chs "DRAM内存总容量"
+#string STR_OEMMEMORY_SIZE_VALUE        #language eng "N/A" // Dynamically updated
+#string STR_OEMMEMORY_SIZE_HELP         #language eng "Total Memory in the System."
+#string STR_PMEM_MEMORY_SIZE_NAME       #language eng "PMem Total Memory"
+                                        #language zh-chs "PMem 内存总容量"
+#string STR_PMEM_MEMORY_SIZE_VALUE      #language eng "N/A" // Dynamically updated
+#string STR_PMEM_MEMORY_SIZE_HELP       #language eng "Total PMem Memory in the System."
+//XCradle-JSY20210316V001-Add-End
+//******************************************************************************
+//******************************************************************************
+//**                                                                          **
+//** Copyright(C) 2020-2021, XCradle Electronic Information Industry Co., Ltd. **
+//**                                                                          **
+//**                          All Rights Reserved.                            **
+//**                                                                          **
+//******************************************************************************
+//******************************************************************************

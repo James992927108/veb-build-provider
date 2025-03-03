@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.mak": "makefile",
+        "*.sdl": "BiosLanguage_sdl",
+        "*.uni": "edk2_uni",
+        "*.log": "log",
+        "*.cif": "asl",
+        "*.veb": "BiosLanguage_veb",
+        "*.sd": "c"
+    },
+    "C_Cpp.dimInactiveRegions": false
+}

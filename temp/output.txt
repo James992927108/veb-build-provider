@@ -1,0 +1,940 @@
+  Level 1: CPU Common Options
+    Level 2: Performance
+      Level 3: OC Mode
+      Level 3: Custom Core Pstates
+        Level 4: Pstates Disclaimer
+        Level 4: Pstates Disclaimer 1
+        Level 4: Pstate_Legal_Disclaimer_Decline
+        Level 4: Pstate_Legal_Disclaimer_Accept
+          Level 5: Custom Pstate0
+          Level 5: Pstate0 Freq (MHz)
+          Level 5: Frequency (MHz)
+          Level 5: Voltage (uV)
+          Level 5: Pstate0 FID
+          Level 5: Pstate0 VID
+          Level 5: Custom Pstate1
+          Level 5: Frequency (MHz)
+          Level 5: Voltage (uV)
+          Level 5: Pstate1 FID
+          Level 5: Pstate1 VID
+          Level 5: Custom Pstate2
+          Level 5: Frequency (MHz)
+          Level 5: Voltage (uV)
+          Level 5: Pstate2 FID
+          Level 5: Pstate2 VID
+          Level 5: Custom Pstate3
+          Level 5: Frequency (MHz)
+          Level 5: Voltage (uV)
+          Level 5: Pstate3 FID
+          Level 5: Pstate3 VID
+          Level 5: Custom Pstate4
+          Level 5: Frequency (MHz)
+          Level 5: Voltage (uV)
+          Level 5: Pstate4 FID
+          Level 5: Pstate4 VID
+          Level 5: Custom Pstate5
+          Level 5: Frequency (MHz)
+          Level 5: Voltage (uV)
+          Level 5: Pstate5 FID
+          Level 5: Pstate5 VID
+          Level 5: Custom Pstate6
+          Level 5: Frequency (MHz)
+          Level 5: Voltage (uV)
+          Level 5: Pstate6 FID
+          Level 5: Pstate6 VID
+          Level 5: Custom Pstate7
+          Level 5: Frequency (MHz)
+          Level 5: Voltage (uV)
+          Level 5: Pstate7 FID
+          Level 5: Pstate7 VID
+      Level 3: DownCore Mode
+      Level 3: DownCore Bitmap
+        Level 4: CCD 0 DownCore Bitmap
+        Level 4: CCD 1 DownCore Bitmap
+        Level 4: CCD 2 DownCore Bitmap
+        Level 4: CCD 3 DownCore Bitmap
+        Level 4: CCD 4 DownCore Bitmap
+        Level 4: CCD 5 DownCore Bitmap
+        Level 4: CCD 6 DownCore Bitmap
+        Level 4: CCD 7 DownCore Bitmap
+        Level 4: CCD 8 DownCore Bitmap
+        Level 4: CCD 9 DownCore Bitmap
+        Level 4: CCD 10 DownCore Bitmap
+        Level 4: CCD 11 DownCore Bitmap
+        Level 4: CCD 12 DownCore Bitmap
+        Level 4: CCD 13 DownCore Bitmap
+        Level 4: CCD 14 DownCore Bitmap
+        Level 4: CCD 15 DownCore Bitmap
+      Level 3: CCD/Core/Thread Enablement
+        Level 4: CCD Control
+        Level 4: Core control
+      Level 3: SMT Control
+      Level 3: Requested CPU min frequency
+      Level 3: Enable Requested CPU min frequency
+    Level 2: REP-MOV/STOS Streaming
+    Level 2: Prefetcher settings
+      Level 3: L1 Stream HW Prefetcher
+      Level 3: L1 Stride Prefetcher
+      Level 3: L1 Region Prefetcher
+      Level 3: L2 Stream HW Prefetcher
+      Level 3: L2 Up/Down Prefetcher
+      Level 3: L1 Burst Prefetch Mode
+    Level 2: Core Watchdog
+      Level 3: Core Watchdog Timer Enable
+      Level 3: Core Watchdog Timer Interval
+    Level 2: RedirectForReturnDis
+    Level 2: Platform First Error Handling
+    Level 2: Core Performance Boost
+    Level 2: Global C-state Control
+    Level 2: Power Supply Idle Control
+    Level 2: Streaming Stores Control
+    Level 2: Local APIC Mode
+    Level 2: ACPI _CST C1 Declaration
+    Level 2: ACPI CST C2 Latency
+    Level 2: MCA error thresh enable
+    Level 2: MCA error thresh count
+    Level 2: PCIe Corrected error thresh count
+    Level 2: MCA FruText
+    Level 2: SMU and PSP Debug Mode
+    Level 2: PPIN Opt-in
+    Level 2: SMEE
+    Level 2: SEV Control
+    Level 2: SEV-ES ASID Space Limit
+    Level 2: SNP Memory (RMP Table) Coverage
+    Level 2: Amount of Memory to Cover
+    Level 2: RMP Coverage for 64Bit MMIO Ranges
+    Level 2: Socket0 RootBridge Mask for 64Bit MMIO RMP Coverage
+    Level 2: Socket1 RootBridge Mask for 64Bit MMIO RMP Coverage
+    Level 2: Split RMP Table
+    Level 2: Segmented RMP Table
+    Level 2: RMP Segment Size
+    Level 2: Action on BIST Failure
+    Level 2: Enhanced REP MOVSB/STOSB (ERSM)
+    Level 2: Log Transparent Errors
+    Level 2: AVX512
+    Level 2: ERMSB Caching Behavior
+    Level 2: MONITOR and MWAIT disable
+    Level 2: CPU Speculative Store Modes
+    Level 2: Fast Short REP MOVSB (FSRM)
+    Level 2: PauseCntSel_1_0
+    Level 2: Prefetch/Request Throttle
+    Level 2: CMC H/W Error Notification type
+    Level 2: Scan Dump Debug Enable
+    Level 2: MCAX 64 bank support
+    Level 2: Adaptive Allocation (AA)
+    Level 2: Latency Under Load (LUL)
+    Level 2: Core Trace Dump Enable
+    Level 2: FP512
+    Level 2: AMD_ERMSB Reporting
+  Level 1: DF Common Options
+    Level 2: Memory Addressing
+      Level 3: NUMA nodes per socket
+      Level 3: Memory interleaving
+      Level 3: Mixed interleaved mode
+      Level 3: CXL Memory interleaving
+      Level 3: CXL Sublink interleaving
+      Level 3: DRAM map inversion
+      Level 3: Location of private memory regions
+    Level 2: ACPI
+      Level 3: ACPI SRAT L3 Cache As NUMA Domain
+      Level 3: ACPI SLIT Distance Control
+      Level 3: ACPI SLIT remote relative distance
+      Level 3: ACPI SLIT virtual distance
+      Level 3: ACPI SLIT same socket distance
+      Level 3: ACPI SLIT remote socket distance
+      Level 3: ACPI SLIT local CXL distance
+      Level 3: ACPI SLIT remote CXL distance
+    Level 2: Link
+      Level 3: GMI encryption control
+      Level 3: xGMI encryption control
+      Level 3: xGMI Link Configuration
+      Level 3: 4-link xGMI max speed
+      Level 3: 3-link xGMI max speed
+      Level 3: xGMI CRC Scale
+      Level 3: xGMI CRC Threshold
+      Level 3: xGMI Preset Control
+      Level 3: xGMI Global Preset List
+        Level 4: Preset P11
+          Level 5: Preset P11 (APCB)
+          Level 5: Preset P11 Cmn1
+          Level 5: Preset P11 Cn
+          Level 5: Preset P11 Cnp1
+        Level 4: Preset P12
+          Level 5: Preset P12 (APCB)
+          Level 5: Preset P12 Cmn1
+          Level 5: Preset P12 Cn
+          Level 5: Preset P12 Cnp1
+        Level 4: Preset P13
+          Level 5: Preset P13 (APCB)
+          Level 5: Preset P13 Cmn1
+          Level 5: Preset P13 Cn
+          Level 5: Preset P13 Cnp1
+        Level 4: Preset P14
+          Level 5: Preset P14 (APCB)
+          Level 5: Preset P14 Cmn1
+          Level 5: Preset P14 Cn
+          Level 5: Preset P14 Cnp1
+        Level 4: Preset P15
+          Level 5: Preset P15 (APCB)
+          Level 5: Preset P15 Cmn1
+          Level 5: Preset P15 Cn
+          Level 5: Preset P15 Cnp1
+      Level 3: xGMI Initial Preset
+        Level 4: Initial Preset Socket 0 Link 0
+          Level 5: Initial Preset Socket 0 Link 0 Pstate0/1/2/3 (APCB)
+          Level 5: Initial Preset Socket 0 Link 0 Pstate0
+          Level 5: Initial Preset Socket 0 Link 0 Pstate1
+          Level 5: Initial Preset Socket 0 Link 0 Pstate2
+          Level 5: Initial Preset Socket 0 Link 0 Pstate3
+        Level 4: Initial Preset Socket 0 Link 1
+          Level 5: Initial Preset Socket 0 Link 1 Pstate0/1/2/3 (APCB)
+          Level 5: Initial Preset Socket 0 Link 1 Pstate0
+          Level 5: Initial Preset Socket 0 Link 1 Pstate1
+          Level 5: Initial Preset Socket 0 Link 1 Pstate2
+          Level 5: Initial Preset Socket 0 Link 1 Pstate3
+        Level 4: Initial Preset Socket 0 Link 2
+          Level 5: Initial Preset Socket 0 Link 2 Pstate0/1/2/3 (APCB)
+          Level 5: Initial Preset Socket 0 Link 2 Pstate0
+          Level 5: Initial Preset Socket 0 Link 2 Pstate1
+          Level 5: Initial Preset Socket 0 Link 2 Pstate2
+          Level 5: Initial Preset Socket 0 Link 2 Pstate3
+        Level 4: Initial Preset Socket 0 Link 3
+          Level 5: Initial Preset Socket 0 Link 3 Pstate0/1/2/3 (APCB)
+          Level 5: Initial Preset Socket 0 Link 3 Pstate0
+          Level 5: Initial Preset Socket 0 Link 3 Pstate1
+          Level 5: Initial Preset Socket 0 Link 3 Pstate2
+          Level 5: Initial Preset Socket 0 Link 3 Pstate3
+        Level 4: Initial Preset Socket 1 Link 0
+          Level 5: Initial Preset Socket 1 Link 0 Pstate0/1/2/3 (APCB)
+          Level 5: Initial Preset Socket 1 Link 0 Pstate0
+          Level 5: Initial Preset Socket 1 Link 0 Pstate1
+          Level 5: Initial Preset Socket 1 Link 0 Pstate2
+          Level 5: Initial Preset Socket 1 Link 0 Pstate3
+        Level 4: Initial Preset Socket 1 Link 1
+          Level 5: Initial Preset Socket 1 Link 1 Pstate0/1/2/3 (APCB)
+          Level 5: Initial Preset Socket 1 Link 1 Pstate0
+          Level 5: Initial Preset Socket 1 Link 1 Pstate1
+          Level 5: Initial Preset Socket 1 Link 1 Pstate2
+          Level 5: Initial Preset Socket 1 Link 1 Pstate3
+        Level 4: Initial Preset Socket 1 Link 2
+          Level 5: Initial Preset Socket 1 Link 2 Pstate0/1/2/3 (APCB)
+          Level 5: Initial Preset Socket 1 Link 2 Pstate0
+          Level 5: Initial Preset Socket 1 Link 2 Pstate1
+          Level 5: Initial Preset Socket 1 Link 2 Pstate2
+          Level 5: Initial Preset Socket 1 Link 2 Pstate3
+        Level 4: Initial Preset Socket 1 Link 3
+          Level 5: Initial Preset Socket 1 Link 3 Pstate0/1/2/3 (APCB)
+          Level 5: Initial Preset Socket 1 Link 3 Pstate0
+          Level 5: Initial Preset Socket 1 Link 3 Pstate1
+          Level 5: Initial Preset Socket 1 Link 3 Pstate2
+          Level 5: Initial Preset Socket 1 Link 3 Pstate3
+      Level 3: xGMI TXEQ Search Mask
+        Level 4: TXEQ Search Mask Socket 0 Link 0
+          Level 5: TXEQ Search Mask Socket 0 Link 0 Pstate0/1 (APCB)
+          Level 5: TXEQ Search Mask Socket 0 Link 0 Pstate2/3 (APCB)
+          Level 5: TXEQ Search Mask Socket 0 Link 0 Pstate0
+          Level 5: TXEQ Search Mask Socket 0 Link 0 Pstate1
+          Level 5: TXEQ Search Mask Socket 0 Link 0 Pstate2
+          Level 5: TXEQ Search Mask Socket 0 Link 0 Pstate3
+        Level 4: TXEQ Search Mask Socket 0 Link 1
+          Level 5: TXEQ Search Mask Socket 0 Link 1 Pstate0/1 (APCB)
+          Level 5: TXEQ Search Mask Socket 0 Link 1 Pstate2/3 (APCB)
+          Level 5: TXEQ Search Mask Socket 0 Link 1 Pstate0
+          Level 5: TXEQ Search Mask Socket 0 Link 1 Pstate1
+          Level 5: TXEQ Search Mask Socket 0 Link 1 Pstate2
+          Level 5: TXEQ Search Mask Socket 0 Link 1 Pstate3
+        Level 4: TXEQ Search Mask Socket 0 Link 2
+          Level 5: TXEQ Search Mask Socket 0 Link 2 Pstate0/1 (APCB)
+          Level 5: TXEQ Search Mask Socket 0 Link 2 Pstate2/3 (APCB)
+          Level 5: TXEQ Search Mask Socket 0 Link 2 Pstate0
+          Level 5: TXEQ Search Mask Socket 0 Link 2 Pstate1
+          Level 5: TXEQ Search Mask Socket 0 Link 2 Pstate2
+          Level 5: TXEQ Search Mask Socket 0 Link 2 Pstate3
+        Level 4: TXEQ Search Mask Socket 0 Link 3
+          Level 5: TXEQ Search Mask Socket 0 Link 3 Pstate0/1 (APCB)
+          Level 5: TXEQ Search Mask Socket 0 Link 3 Pstate2/3 (APCB)
+          Level 5: TXEQ Search Mask Socket 0 Link 3 Pstate0
+          Level 5: TXEQ Search Mask Socket 0 Link 3 Pstate1
+          Level 5: TXEQ Search Mask Socket 0 Link 3 Pstate2
+          Level 5: TXEQ Search Mask Socket 0 Link 3 Pstate3
+        Level 4: TXEQ Search Mask Socket 1 Link 0
+          Level 5: TXEQ Search Mask Socket 1 Link 0 Pstate0/1 (APCB)
+          Level 5: TXEQ Search Mask Socket 1 Link 0 Pstate2/3 (APCB)
+          Level 5: TXEQ Search Mask Socket 1 Link 0 Pstate0
+          Level 5: TXEQ Search Mask Socket 1 Link 0 Pstate1
+          Level 5: TXEQ Search Mask Socket 1 Link 0 Pstate2
+          Level 5: TXEQ Search Mask Socket 1 Link 0 Pstate3
+        Level 4: TXEQ Search Mask Socket 1 Link 1
+          Level 5: TXEQ Search Mask Socket 1 Link 1 Pstate0/1 (APCB)
+          Level 5: TXEQ Search Mask Socket 1 Link 1 Pstate2/3 (APCB)
+          Level 5: TXEQ Search Mask Socket 1 Link 1 Pstate0
+          Level 5: TXEQ Search Mask Socket 1 Link 1 Pstate1
+          Level 5: TXEQ Search Mask Socket 1 Link 1 Pstate2
+          Level 5: TXEQ Search Mask Socket 1 Link 1 Pstate3
+        Level 4: TXEQ Search Mask Socket 1 Link 2
+          Level 5: TXEQ Search Mask Socket 1 Link 2 Pstate0/1 (APCB)
+          Level 5: TXEQ Search Mask Socket 1 Link 2 Pstate2/3 (APCB)
+          Level 5: TXEQ Search Mask Socket 1 Link 2 Pstate0
+          Level 5: TXEQ Search Mask Socket 1 Link 2 Pstate1
+          Level 5: TXEQ Search Mask Socket 1 Link 2 Pstate2
+          Level 5: TXEQ Search Mask Socket 1 Link 2 Pstate3
+        Level 4: TXEQ Search Mask Socket 1 Link 3
+          Level 5: TXEQ Search Mask Socket 1 Link 3 Pstate0/1 (APCB)
+          Level 5: TXEQ Search Mask Socket 1 Link 3 Pstate2/3 (APCB)
+          Level 5: TXEQ Search Mask Socket 1 Link 3 Pstate0
+          Level 5: TXEQ Search Mask Socket 1 Link 3 Pstate1
+          Level 5: TXEQ Search Mask Socket 1 Link 3 Pstate2
+          Level 5: TXEQ Search Mask Socket 1 Link 3 Pstate3
+      Level 3: xGMI AC/DC Coupled Link
+        Level 4: xGMI AC/DC Coupled Link Control
+        Level 4: xGMI AC/DC Coupled Link (APCB)
+        Level 4: xGMI AC/DC Coupled Link Socket 0 Link 0
+        Level 4: xGMI AC/DC Coupled Link Socket 0 Link 1
+        Level 4: xGMI AC/DC Coupled Link Socket 0 Link 2
+        Level 4: xGMI AC/DC Coupled Link Socket 0 Link 3
+        Level 4: xGMI AC/DC Coupled Link Socket 1 Link 0
+        Level 4: xGMI AC/DC Coupled Link Socket 1 Link 1
+        Level 4: xGMI AC/DC Coupled Link Socket 1 Link 2
+        Level 4: xGMI AC/DC Coupled Link Socket 1 Link 3
+      Level 3: xGMI Channel Type
+        Level 4: xGMI Channel Type Control
+        Level 4: xGMI Channel Type (APCB)
+        Level 4: xGMI Channel Type Socket 0 Link 0
+        Level 4: xGMI Channel Type Socket 0 Link 1
+        Level 4: xGMI Channel Type Socket 0 Link 2
+        Level 4: xGMI Channel Type Socket 0 Link 3
+        Level 4: xGMI Channel Type Socket 1 Link 0
+        Level 4: xGMI Channel Type Socket 1 Link 1
+        Level 4: xGMI Channel Type Socket 1 Link 2
+        Level 4: xGMI Channel Type Socket 1 Link 3
+      Level 3: xGMI Training Err Mask
+    Level 2: SDCI
+      Level 3: SDCI
+      Level 3: DisRmtSteer
+    Level 2: Probe Filter
+      Level 3: Organization
+      Level 3: Periodic Directory Rinse (PDR) Tuning
+      Level 3: Tracking Granularity
+    Level 2: DF Watchdog Timer Interval
+    Level 2: Disable DF to external IP SyncFloodPropagation
+    Level 2: Sync Flood Propagation to DF Components
+    Level 2: Freeze DF module queues on error
+    Level 2: CC6 memory region encryption
+    Level 2: CCD B/W Balance Throttle Level
+    Level 2: Number of PCI Segments
+    Level 2: CCM Throttler
+    Level 2: MemReqBandwidthControl[FineThrotHeavy]
+    Level 2: MemReqBandwidthControl[FineThrotLight]
+    Level 2: Clean Victim FTI Cmd Balancing
+    Level 2: CCMConfig5[ReqvReqNDImbThr]
+    Level 2: CXL Strongly Ordered Writes
+  Level 1: UMC Common Options
+    Level 2: DDR Addressing Options
+      Level 3: Chipselect Interleaving
+      Level 3: Address Hash Bank
+      Level 3: Address Hash CS
+      Level 3: Address Hash Rm
+      Level 3: Address Hash Subchannel
+      Level 3: BankSwapMode
+    Level 2: DDR Controller Configuration
+      Level 3: DDR Power Options
+        Level 4: Power Down Enable
+        Level 4: Sub Urgent Refresh Lower Bound
+        Level 4: Urgent Refresh Limit
+        Level 4: DRAM Refresh Rate
+        Level 4: Self-Refresh Exit Staggering
+        Level 4: DRAM 2x Refresh Temperature Threshold
+      Level 3: Memory Channel Disable
+        Level 4: Memory Channel Disable Float Power Good
+        Level 4: Memory Channel Disable Bitmask
+        Level 4: Socket 0 Channel 0
+        Level 4: Socket 0 Channel 1
+        Level 4: Socket 0 Channel 2
+        Level 4: Socket 0 Channel 3
+        Level 4: Socket 0 Channel 4
+        Level 4: Socket 0 Channel 5
+        Level 4: Socket 0 Channel 6
+        Level 4: Socket 0 Channel 7
+        Level 4: Socket 0 Channel 8
+        Level 4: Socket 0 Channel 9
+        Level 4: Socket 0 Channel 10
+        Level 4: Socket 0 Channel 11
+        Level 4: Socket 1 Channel 0
+        Level 4: Socket 1 Channel 1
+        Level 4: Socket 1 Channel 2
+        Level 4: Socket 1 Channel 3
+        Level 4: Socket 1 Channel 4
+        Level 4: Socket 1 Channel 5
+        Level 4: Socket 1 Channel 6
+        Level 4: Socket 1 Channel 7
+        Level 4: Socket 1 Channel 8
+        Level 4: Socket 1 Channel 9
+        Level 4: Socket 1 Channel 10
+        Level 4: Socket 1 Channel 11
+      Level 3: Refresh Management (RFM)
+        Level 4: Refresh Management
+        Level 4: Adaptive Refresh Management
+        Level 4: RAA Initial Management Threshold
+        Level 4: RAA Maximum Management Threshold
+        Level 4: RAA Refresh Decrement Multiplier
+        Level 4: DRFM Enable
+        Level 4: Bounded Refresh Configuration
+        Level 4: DRFM Hash Enable
+      Level 3: Memory Context Restore
+      Level 3: DRAM Survives Warm Reset
+    Level 2: DDR MBIST Options
+      Level 3: MBIST Enable
+      Level 3: MBIST Test Mode
+      Level 3: MBIST Aggressors
+      Level 3: DDR Healing BIST
+      Level 3: DDR Healing BIST Execution Mode
+      Level 3: PMU Mem BIST Algorithm
+        Level 4: PMU Mem BIST Algorithm Select
+        Level 4: PMU Mem BIST Algorithm Bitmask
+        Level 4: Algorithm #1
+        Level 4: Algorithm #2
+        Level 4: Algorithm #3
+        Level 4: Algorithm #4
+        Level 4: Algorithm #5
+        Level 4: Algorithm #6
+        Level 4: Algorithm #7
+        Level 4: Algorithm #8
+        Level 4: Algorithm #9
+      Level 3: DDR Healing BIST Repair Type
+      Level 3: Data Eye
+        Level 4: Pattern Select
+        Level 4: Pattern Length
+        Level 4: Aggressor Channel
+        Level 4: Aggressor Static Lane Control
+        Level 4: Aggressor Static Lane Select Upper 32 bits
+        Level 4: Aggressor Static Lane Select Lower 32 Bits
+        Level 4: Aggressor Static Lane Select ECC
+        Level 4: Aggressor Static Lane Value
+        Level 4: Target Static Lane Control
+        Level 4: Target Static Lane Select Upper 32 bit
+        Level 4: Target Static Lane Select Lower 32 Bits
+        Level 4: Target Static Lane Select ECC
+        Level 4: Target Static Lane Value
+        Level 4: Read Voltage Sweep Step Size
+        Level 4: Read Timing Sweep Step Size
+        Level 4: Write Voltage Sweep Step Size
+        Level 4: Write Timing Sweep Step Size
+        Level 4: Silent Execution
+    Level 2: DDR RAS
+      Level 3: Data Poisoning
+      Level 3: DRAM Boot Time Post Package Repair
+      Level 3: DRAM Runtime Post Package Repair
+      Level 3: DRAM Post Package Repair Config Initiator
+      Level 3: RCD Parity
+      Level 3: Max RCD Parity Error Replay
+      Level 3: Write CRC
+      Level 3: Max Write CRC Error Replay
+      Level 3: Read CRC
+      Level 3: Max Read CRC Error Replay
+      Level 3: Memory Error Injection
+      Level 3: EcsStatus Interrupt
+      Level 3: ECC Configuration
+        Level 4: DRAM ECC Symbol Size
+        Level 4: DRAM ECC Enable
+        Level 4: DRAM UECC Retry
+        Level 4: Max DRAM UECC Error Replay
+        Level 4: Memory Clear
+        Level 4: Address XOR after ECC
+        Level 4: CipherText Hiding Enable
+      Level 3: DRAM Scrubbers
+        Level 4: DRAM ECS Mode
+        Level 4: DRAM Redirect Scrubber Enable
+        Level 4: DRAM Scrub Redirection Limit
+        Level 4: DRAM Scrub Time
+        Level 4: ECS Config
+          Level 5: DRAM Error Threshold Count
+          Level 5: DRAM ECS Count Mode
+          Level 5: DRAM AutoEcs during Self Refresh
+          Level 5: DRAM ECS WriteBack Suppression
+          Level 5: DRAM X4 WriteBack Suppression
+        Level 4: tECSint Ctrl
+        Level 4: tECSint
+      Level 3: DRAM Corrected Error Counter Enable
+      Level 3: DRAM Corrected Error Counter Interrupt Enable
+      Level 3: DRAM Corrected Error Counter Leak Rate
+      Level 3: DRAM Corrected Error Counter Start Count
+    Level 2: DDR Bus Configuration
+      Level 3: P-State 0 Dram ODT Impedance
+        Level 4: RTT_NOM_WR P-State 0
+        Level 4: RTT_NOM_RD P-State 0
+        Level 4: RTT_WR P-State 0
+        Level 4: RTT_PARK P-State 0
+        Level 4: DQS_RTT_PARK P-State 0
+      Level 3: P-State 1 Dram ODT Impedance
+        Level 4: RTT_NOM_WR P-State 1
+        Level 4: RTT_NOM_RD P-State 1
+        Level 4: RTT_WR P-State 1
+        Level 4: RTT_PARK P-State 1
+        Level 4: DQS_RTT_PARK P-State 1
+      Level 3: Processor ODT Pull Up Impedance
+      Level 3: Processor ODT Pull Down Impedance
+      Level 3: Dram DQ drive strengths
+    Level 2: DDR Timing Configuration
+      Level 3: DRAM Timing Configuration Legal Disclaimer
+      Level 3: DRAM Timing Configuration Legal Disclaimer 1
+      Level 3: DTC_Legal_Disclaimer_Decline
+      Level 3: DTC_Legal_Disclaimer_Accept
+        Level 4: Active Memory Timing Settings
+        Level 4: Memory Speed
+        Level 4: SPD Timing
+          Level 5: Tcl Ctrl
+          Level 5: Tcl
+          Level 5: Trcd Ctrl
+          Level 5: Trcd
+          Level 5: Trp Ctrl
+          Level 5: Trp
+          Level 5: Tras Ctrl
+          Level 5: Tras
+          Level 5: Trc Ctrl
+          Level 5: Trc
+          Level 5: Twr Ctrl
+          Level 5: Twr
+          Level 5: Trfc1 Ctrl
+          Level 5: Trfc1
+          Level 5: Trfc2 Ctrl
+          Level 5: Trfc2
+          Level 5: TrfcSb Ctrl
+          Level 5: TrfcSb
+        Level 4: Non-SPD Timing
+          Level 5: Tcwl Ctrl
+          Level 5: Tcwl
+          Level 5: Trtp Ctrl
+          Level 5: Trtp
+          Level 5: TrrdL Ctrl
+          Level 5: TrrdL
+          Level 5: TrrdS Ctrl
+          Level 5: TrrdS
+          Level 5: Tfaw Ctrl
+          Level 5: Tfaw
+          Level 5: TwtrL Ctrl
+          Level 5: TwtrL
+          Level 5: TwtrS Ctrl
+          Level 5: TwtrS
+          Level 5: TrdrdScL Ctrl
+          Level 5: TrdrdScL
+          Level 5: TrdrdSc Ctrl
+          Level 5: TrdrdSc
+          Level 5: TrdrdSd Ctrl
+          Level 5: TrdrdSd
+          Level 5: TrdrdDd Ctrl
+          Level 5: TrdrdDd
+          Level 5: TwrwrScL Ctrl
+          Level 5: TwrwrScL
+          Level 5: TwrwrSc Ctrl
+          Level 5: TwrwrSc
+          Level 5: TwrwrSd Ctrl
+          Level 5: TwrwrSd
+          Level 5: TwrwrDd Ctrl
+          Level 5: TwrwrDd
+          Level 5: Twrrd Ctrl
+          Level 5: Twrrd
+          Level 5: Trdwr Ctrl
+          Level 5: Trdwr
+    Level 2: DDR Training Options
+      Level 3: DRAM PDA Enumerate ID Programming Mode
+      Level 3: Periodic Phase Training
+        Level 4: Periodic Training Mode
+        Level 4: Periodic Interval Mode
+        Level 4: Periodic Interval
+      Level 3: Write Training Burst Length
+    Level 2: DDR Security
+      Level 3: TSME
+      Level 3: AES
+      Level 3: Data Scramble
+      Level 3: SME-MK
+    Level 2: DDR PMIC Configuration
+      Level 3: PMIC Error Reporting
+      Level 3: PMIC Operation Mode
+      Level 3: PMIC Fault Recovery
+      Level 3: PMIC SWA/SWB VDD Core
+      Level 3: PMIC SWC VDDIO
+      Level 3: PMIC SWD VPP
+      Level 3: PMIC Stagger Delay
+      Level 3: Max PMIC Power On
+    Level 2: DDR Thermal Throttling
+      Level 3: ODTS Thermal Throttle Control
+      Level 3: ODTS Thermal Throttle Threshold
+      Level 3: TSOD Thermal Throttle Control
+      Level 3: TSOD Thermal Throttle Start Temperature
+      Level 3: TSOD Thermal Throttle Hysteresis
+      Level 3: TSOD Command Throttle Percentage (Threshold)
+      Level 3: TSOD Command Throttle Percentage (Threshold+5C)
+      Level 3: TSOD Command Throttle Percentage (Threshold+10C)
+    Level 2: DDR Miscellaneous
+  Level 1: NBIO Common Options
+    Level 2: SMU Common Options
+      Level 3: TDP Control
+      Level 3: TDP
+      Level 3: PPT Control
+      Level 3: PPT
+      Level 3: Determinism Control
+      Level 3: Determinism Enable
+      Level 3: xGMI Link Width Control
+      Level 3: xGMI Force Link Width Control
+      Level 3: xGMI Force Link Width
+      Level 3: xGMI Max Link Width Range Control
+      Level 3: xGMI Max Link Width
+      Level 3: xGMI Min Link Width
+      Level 3: APBDIS
+      Level 3: DfPstate
+      Level 3: Power Profile Selection
+      Level 3: xGMI Pstate Control
+      Level 3: xGMI Pstate Selection
+      Level 3: BoostFmaxEn
+      Level 3: BoostFmax
+      Level 3: DF PState Frequency Optimizer
+      Level 3: DF Cstates
+      Level 3: CPPC
+      Level 3: HSMP Support
+      Level 3: SVI3 SVC Speed Control
+      Level 3: SVI3 SVC Speed
+      Level 3: 3D V-Cache
+      Level 3: L3 BIST
+      Level 3: Diagnostic Mode
+      Level 3: GMI Folding
+      Level 3: Separate CPU power plane throttling
+      Level 3: DfPstate Range Control
+      Level 3: DfPstate Max Index
+      Level 3: DfPstate Min Index
+    Level 2: NBIO RAS Common Options
+      Level 3: NBIO RAS Control
+      Level 3: NBIO SyncFlood Generation
+      Level 3: NBIO SyncFlood Reporting
+      Level 3: PCIe Aer Reporting Mechanism
+      Level 3: Edpc Control
+      Level 3: ACS RAS Request Value
+      Level 3: NBIO Poison Consumption
+      Level 3: Sync Flood on PCIe Fatal Error
+      Level 3: NBIO RAS Numerical Common Options
+      Level 3: Egress Poison Severity High
+      Level 3: Egress Poison Severity Low
+      Level 3: Egress Poison Mask High
+      Level 3: Egress Poison Mask Low
+      Level 3: Uncorrected Converted to Poison Enable Mask High
+      Level 3: Uncorrected Converted to Poison Enable Mask Low
+      Level 3: System Hub Watchdog Timer
+    Level 2: PCIE
+      Level 3: Data Object Exchange
+      Level 3: RTM Margining Support
+      Level 3: Multi Auto Speed Change On Last Rate
+      Level 3: Multi Upstream Auto Speed Change
+      Level 3: Allow Compliance
+      Level 3: EQ Bypass To Highest Rate
+      Level 3: Data Link Feature Cap
+      Level 3: Data Link Feature Exchange
+      Level 3: SRIS
+      Level 3: ACS Enable
+      Level 3: PCIe Ten Bit Tag Support
+      Level 3: PCIe ARI Enumeration
+      Level 3: PCIe ARI Support
+      Level 3: Presence Detect Select mode
+      Level 3: Hot Plug Handling mode
+      Level 3: Presence Detect State Settle Time
+      Level 3: Hot Plug Port Settle Time
+      Level 3: Hotplug Support
+      Level 3: Early Link Speed
+      Level 3: Enable AER Cap
+      Level 3: PCIE Link Speed Capability
+      Level 3: PCIE Target Link Speed
+      Level 3: ASPM Control
+      Level 3: MCTP Enable
+      Level 3: MCTP Mode
+      Level 3: MCTP discovery notify message
+      Level 3: Non-PCIe Compliant Support
+      Level 3: Limit hotplug devices to PCIe boot speed
+      Level 3: Enable PCIe SFI Config via OOB
+      Level 3: PCIE Idle Power Setting
+    Level 2: nBif Common Options
+      Level 3: RCC_DEV0
+        Level 4: ACS Rcc_Dev0
+        Level 4: AER Rcc_Dev0
+        Level 4: DlfEnableStrap1
+        Level 4: Phy16GTStrap1
+        Level 4: MarginEnStrap1
+        Level 4: SourceValStrap5
+        Level 4: TranslationalBlockingStrap5
+        Level 4: P2pReq ACS Control
+        Level 4: P2pCompStrap5
+        Level 4: UpstreamFwdStrap5
+        Level 4: P2PEgressStrap5
+        Level 4: DirectTranslatedStrap5
+        Level 4: SsidEnStrap5
+        Level 4: PriEnPageReq
+        Level 4: PriResetPageReq
+        Level 4: SourceVal ACS cntl
+        Level 4: TranslationalBlocking ACS Control
+        Level 4: P2pComp ACS Control
+        Level 4: UpstreamFwd ACS Control
+        Level 4: P2PEgress ACS Control
+        Level 4: P2pReqStrap5
+        Level 4: E2E_PREFIX
+        Level 4: EXTENDED_FMT
+        Level 4: AtomicRoutingStrap5
+    Level 2: IOMMU/Security
+      Level 3: SEV-SNP Support
+      Level 3: DRTM Memory Reservation
+      Level 3: DRTM Virtual Device Support
+      Level 3: DMA Protection
+      Level 3: IOMMU
+      Level 3: DMAr Support
+    Level 2: Enable Port Bifurcation
+      Level 3: Enable Port Bifurcation
+      Level 3: Socket0 Slot Info Override
+        Level 4: Socket 0 P0 Override
+        Level 4: Socket 0 P1 Override
+        Level 4: Socket 0 P2 Override
+        Level 4: Socket 0 P3 Override
+      Level 3: Socket1 Slot Info Override
+        Level 4: Socket 1 P0 Override
+        Level 4: Socket 1 P1 Override
+        Level 4: Socket 1 P2 Override
+        Level 4: Socket 1 P3 Override
+      Level 3: P-Links Override
+        Level 4: P0 Override
+        Level 4: P1 Override
+        Level 4: P2 Override
+        Level 4: P3 Override
+      Level 3: G-Links Override
+        Level 4: G0 Override
+        Level 4: G1 Override
+        Level 4: G2 Override
+        Level 4: G3 Override
+    Level 2: Link EQ Preset Options
+      Level 3: GEN3
+        Level 4: Preset Search Mask Configuration (Gen3)
+        Level 4: Preset Search Mask (Gen3)
+      Level 3: GEN4
+        Level 4: Preset Search Mask Configuration (Gen4)
+        Level 4: Preset Search Mask (Gen4)
+      Level 3: GEN5
+        Level 4: Preset Search Mask Configuration (Gen5)
+        Level 4: Preset Search Mask (Gen5)
+    Level 2: PCIe loopback Mode
+    Level 2: Enable 2 SPC (Gen 4)
+    Level 2: Enable 2 SPC (Gen 5)
+    Level 2: Safe recovery upon a BERExceeded Error
+    Level 2: Periodic Calibration
+  Level 1: FCH Common Options
+    Level 2: I3C/I2C Configuration Options
+      Level 3: I3C/I2C 0 Enable
+      Level 3: I3C/I2C 1 Enable
+      Level 3: I3C/I2C 2 Enable
+      Level 3: I3C/I2C 3 Enable
+      Level 3: I2C 4 Enable
+      Level 3: I2C 5 Enable
+      Level 3: Release SPD Host Control
+      Level 3: PMFW Poll DDR5 Telemetry
+      Level 3: Ixc Telemetry Ports Fence Control
+      Level 3: I2C SDA Hold Override
+      Level 3: APML SB-TSI Mode
+      Level 3: I3C Mode Speed
+      Level 3: I3C Push Pull HCNT Value
+      Level 3: I3C SDA Hold Value
+      Level 3: I2C SDA TX HOLD VALUE
+        Level 4: I2C 0 SDA TX HOLD VALUE
+        Level 4: I2C 1 SDA TX HOLD VALUE
+        Level 4: I2C 2 SDA TX HOLD VALUE
+        Level 4: I2C 3 SDA TX HOLD VALUE
+        Level 4: I2C 4 SDA TX HOLD VALUE
+        Level 4: I2C 5 SDA TX HOLD VALUE
+      Level 3: I2C SDA RX HOLD VALUE
+        Level 4: I2C 0 SDA RX HOLD VALUE
+        Level 4: I2C 1 SDA RX HOLD VALUE
+        Level 4: I2C 2 SDA RX HOLD VALUE
+        Level 4: I2C 3 SDA RX HOLD VALUE
+        Level 4: I2C 4 SDA RX HOLD VALUE
+        Level 4: I2C 5 SDA RX HOLD VALUE
+      Level 3: I3C SDA Hold Override
+      Level 3: I3C SDA HOLD VALUE
+        Level 4: I3C 0 SDA HOLD VALUE
+        Level 4: I3C 1 SDA HOLD VALUE
+        Level 4: I3C 2 SDA HOLD VALUE
+        Level 4: I3C 3 SDA HOLD VALUE
+    Level 2: SATA Configuration Options
+      Level 3: SATA Enable
+      Level 3: SATA Mode
+      Level 3: SATA RAS Support
+      Level 3: SATA Staggered Spin-up
+      Level 3: SATA Disabled AHCI Prefetch Function
+      Level 3: SATA Controller options
+        Level 4: SATA Controller Enable
+          Level 5: Sata0 Enable
+          Level 5: Sata1 Enable
+          Level 5: Sata2 Enable
+          Level 5: Sata3 Enable
+          Level 5: Sata4 (Socket1) Enable
+          Level 5: Sata5 (Socket1) Enable
+          Level 5: Sata6 (Socket1) Enable
+          Level 5: Sata7 (Socket1) Enable
+        Level 4: SATA Controller eSATA
+          Level 5: Sata0 eSATA
+            Level 6: Sata0 eSATA Port0
+            Level 6: Sata0 eSATA Port1
+            Level 6: Sata0 eSATA Port2
+            Level 6: Sata0 eSATA Port3
+            Level 6: Sata0 eSATA Port4
+            Level 6: Sata0 eSATA Port5
+            Level 6: Sata0 eSATA Port6
+            Level 6: Sata0 eSATA Port7
+          Level 5: Sata1 eSATA
+            Level 6: Sata1 eSATA Port0
+            Level 6: Sata1 eSATA Port1
+            Level 6: Sata1 eSATA Port2
+            Level 6: Sata1 eSATA Port3
+            Level 6: Sata1 eSATA Port4
+            Level 6: Sata1 eSATA Port5
+            Level 6: Sata1 eSATA Port6
+            Level 6: Sata1 eSATA Port7
+          Level 5: Sata2 eSATA
+            Level 6: Sata2 eSATA Port0
+            Level 6: Sata2 eSATA Port1
+            Level 6: Sata2 eSATA Port2
+            Level 6: Sata2 eSATA Port3
+            Level 6: Sata2 eSATA Port4
+            Level 6: Sata2 eSATA Port5
+            Level 6: Sata2 eSATA Port6
+            Level 6: Sata2 eSATA Port7
+          Level 5: Sata3 eSATA
+            Level 6: Sata3 eSATA Port0
+            Level 6: Sata3 eSATA Port1
+            Level 6: Sata3 eSATA Port2
+            Level 6: Sata3 eSATA Port3
+            Level 6: Sata3 eSATA Port4
+            Level 6: Sata3 eSATA Port5
+            Level 6: Sata3 eSATA Port6
+            Level 6: Sata3 eSATA Port7
+          Level 5: Sata4 eSATA
+            Level 6: Sata4 eSATA Port0
+            Level 6: Sata4 eSATA Port1
+            Level 6: Sata4 eSATA Port2
+            Level 6: Sata4 eSATA Port3
+            Level 6: Sata4 eSATA Port4
+            Level 6: Sata4 eSATA Port5
+            Level 6: Sata4 eSATA Port6
+            Level 6: Sata4 eSATA Port7
+          Level 5: Sata5 eSATA
+            Level 6: Sata5 eSATA Port0
+            Level 6: Sata5 eSATA Port1
+            Level 6: Sata5 eSATA Port2
+            Level 6: Sata5 eSATA Port3
+            Level 6: Sata5 eSATA Port4
+            Level 6: Sata5 eSATA Port5
+            Level 6: Sata5 eSATA Port6
+            Level 6: Sata5 eSATA Port7
+          Level 5: Sata6 eSATA
+            Level 6: Sata6 eSATA Port0
+            Level 6: Sata6 eSATA Port1
+            Level 6: Sata6 eSATA Port2
+            Level 6: Sata6 eSATA Port3
+            Level 6: Sata6 eSATA Port4
+            Level 6: Sata6 eSATA Port5
+            Level 6: Sata6 eSATA Port6
+            Level 6: Sata6 eSATA Port7
+          Level 5: Sata7 eSATA
+            Level 6: Sata7 eSATA Port0
+            Level 6: Sata7 eSATA Port1
+            Level 6: Sata7 eSATA Port2
+            Level 6: Sata7 eSATA Port3
+            Level 6: Sata7 eSATA Port4
+            Level 6: Sata7 eSATA Port5
+            Level 6: Sata7 eSATA Port6
+            Level 6: Sata7 eSATA Port7
+        Level 4: SATA Controller DevSlp
+          Level 5: Socket0 DevSlp
+            Level 6: Socket0 DevSlp0 Enable
+            Level 6: Socket0 DevSlp0 Controller Number
+            Level 6: Socket0 DevSlp0 Port Number
+            Level 6: Socket0 DevSlp1 Enable
+            Level 6: Socket0 DevSlp1 Controller Number
+            Level 6: Socket0 DevSlp1 Port Number
+          Level 5: Socket1 DevSlp
+            Level 6: Socket1 DevSlp0 Enable
+            Level 6: Socket1 DevSlp0 Controller Number
+            Level 6: Socket1 DevSlp0 Port Number
+            Level 6: Socket1 DevSlp1 Enable
+            Level 6: Socket1 DevSlp1 Controller Number
+            Level 6: Socket1 DevSlp1 Port Number
+        Level 4: SATA Controller SGPIO
+          Level 5: Sata0 SGPIO
+          Level 5: Sata1 SGPIO
+          Level 5: Sata2 SGPIO
+          Level 5: Sata3 SGPIO
+          Level 5: Sata4 SGPIO
+          Level 5: Sata5 SGPIO
+          Level 5: Sata6 SGPIO
+          Level 5: Sata7 SGPIO
+    Level 2: USB Configuration Options
+      Level 3: XHCI Controller0 enable
+      Level 3: XHCI Controller1 enable
+      Level 3: MCM USB enable
+        Level 4: XHCI2 enable (Socket1)
+        Level 4: XHCI3 enable (Socket1)
+    Level 2: Ac Power Loss Options
+      Level 3: Ac Loss Control
+      Level 3: Set Fch Power failed Shadow in ABL
+    Level 2: Uart Configuration Options
+      Level 3: Uart 0 Enable
+      Level 3: Uart 0 Legacy Options
+      Level 3: Uart 1 Enable
+      Level 3: Uart 1 Legacy Options
+      Level 3: Uart 2 Enable
+      Level 3: Uart 2 Legacy Options
+    Level 2: FCH RAS Options
+      Level 3: ALink RAS Support
+      Level 3: Reset After Sync-Flood
+      Level 3: Delay Reset After Sync-Flood
+    Level 2: Miscellaneous Options
+      Level 3: FCH Spread Spectrum
+      Level 3: Boot Timer Enable
+  Level 1: NTB Common Options
+    Level 2: Socket-0 P0 NTB Enable
+    Level 2: Socket-0 P0 Start Lane
+    Level 2: Socket-0 P0 End Lane
+    Level 2: Socket-0 P0 Link Speed
+    Level 2: Socket-0 P0 NTB Mode
+    Level 2: Socket-0 P2 NTB Enable
+    Level 2: Socket-0 P2 Start Lane
+    Level 2: Socket-0 P2 End Lane
+    Level 2: Socket-0 P2 Link Speed
+    Level 2: Socket-0 P2 NTB Mode
+  Level 1: Soc Miscellaneous Control
+    Level 2: ABL Console Out Control
+    Level 2: ABL Console Out Serial Port
+    Level 2: ABL Console Out Serial Port IO
+    Level 2: ABL Serial port IO customized enabled
+    Level 2: ABL Console out Serial Port IO Customized
+    Level 2: ABL Basic Console Out Control
+    Level 2: ABL PMU message Control
+    Level 2: ABL Memory Population message Control
+    Level 2: Print Socket 1 PMU MsgBlock
+    Level 2: Print Socket 1 PMU Training Log
+    Level 2: PSP error injection support
+    Level 2: Firmware Anti-rollback (FAR)
+      Level 3: FAR enforcement state
+      Level 3: SPL value in the CPU fuse
+      Level 3: SPL value in the SPL table
+      Level 3: FAR Switch
+    Level 2: Number of Sockets
+    Level 2: SEC_I2C Voltage Mode
+  Level 1: CXL Common Options
+    Level 2: CXL Control
+    Level 2: CXL Physical Addressing
+    Level 2: CXL Memory Attribute
+    Level 2: CXL Encryption
+    Level 2: CXL DVSEC Lock
+    Level 2: CXL HDM Decoder Lock On Commit
+    Level 2: Temp Gen5 Advertisement
+    Level 2: Sync Header Bypass
+    Level 2: Sync Header Bypass Compatibility Mode
+    Level 2: CXL RAS
+      Level 3: CXL Protocol Error Reporting
+      Level 3: CXL Component Error Reporting
+      Level 3: CXL Root Port Isolation
+      Level 3: CXL Root Port Isolation FW Notification
+    Level 2: CXL Memory Online/Offline
+    Level 2: Override CXL Memory Size

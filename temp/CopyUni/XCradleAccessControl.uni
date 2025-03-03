@@ -1,0 +1,55 @@
+//******************************************************************************
+//******************************************************************************
+//**                                                                          **
+//** Copyright(C) 2020-2021, XCradle Electronic Information Industry Co., Ltd. **
+//**                                                                          **
+//**                          All Rights Reserved.                            **
+//**                                                                          **
+//******************************************************************************
+//******************************************************************************
+
+//******************************************************************************
+// [File] XCradleAccessControl.uni
+// [Description] Add XCradle Chinese STR define in this file
+// [Author] Jeremy Zhai
+// [Date] 2021/06/05
+//******************************************************************************
+/=#
+#include "VFR.uni"
+#langdef   x-AMI "x-AMI"    // AMI Configuration Language
+
+#string STR_SECURITY_BANNER_ONE         #language eng "Password Description"
+//XCradle-WSX20210916V001-Mod-Start
+#string STR_SECURITY_BANNER_TWO         #language eng "If only the administrator password is set,"
+                                        #language zh-chs "如果仅设置了管理员密码,当在POST中按下热键"
+#string STR_SECURITY_BANNER_THREE       #language eng "then this is asked when Hotkey is pressed to"
+                                        #language zh-chs "进入Setup,启动菜单或从PXE启动时 需要输入"
+#string STR_SECURITY_BANNER_FOUR        #language eng "enter Setup, Boot Menu and Pxe etc."
+                                        #language zh-chs "管理员密码."
+#string STR_SECURITY_BANNER_FIVE        #language eng "If both the user password and administrator"
+                                        #language zh-chs "如果同时设置了用户密码和管理员,则在进入"
+#string STR_SECURITY_BANNER_SIX         #language eng "password are set, then a password must be "
+                                        #language zh-chs "POST之前必须要输入密码,Setup中获取的权限"
+#string STR_SECURITY_BANNER_SEVEN       #language eng "entered before Post. And the access level in Setup corresponds to password type."
+                                        #language zh-chs "和输入的密码对应."
+#string STR_SECURITY_BANNER_EIGHT       #language eng "If the user's password is the same as the administrator's password, the access level is administrator permissions."
+                                        #language zh-chs "如果用户密码和管理员密码相同,则获得的权限等级为管理员权限."
+#string STR_SECURITY_BANNER_NINE        #language eng "The user password is only availiable if administrator password exists otherwise it will be cleared."
+                                        #language zh-chs "用户密码仅在管理员密码存在后可用,当清除管理员密码后用户密码也被清除."
+#string STR_SECURITY_BANNER_TEN         #language eng "The password length in the following range:"
+                                        #language zh-chs "密码长度必须在以下范围内:"
+//XCradle-WSX20210916V001-Mod-End
+
+//XCradle-ZZP20211115V001-Add-Start
+#string STR_SECURITY_PERMISSION_DENIED  #language eng "Permission Denied!"
+//XCradle-ZZP20211115V001-Add-End
+
+//******************************************************************************
+//******************************************************************************
+//**                                                                          **
+//** Copyright(C) 2020-2021, XCradle Electronic Information Industry Co., Ltd. **
+//**                                                                          **
+//**                          All Rights Reserved.                            **
+//**                                                                          **
+//******************************************************************************
+//******************************************************************************

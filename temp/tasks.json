@@ -1,0 +1,72 @@
+{
+    "version": "1.0.0",
+    "tasks": 
+    [
+        {
+            "label": "------------------------------------Internal command------------------------------------------",
+            "type": "shell",
+            "command": ""
+        },
+        {
+            "label": "VebBuildTask",
+            "type": "shell",
+            "command": "cmd /V /C \"SET VEB=I24A7&&echo veb = !VEB! &&c:\\1-TPE_BIOS_Code\\Turin-a8isbios\\.vscode\\PrepareEnvScript.bat && make 2>&1| d:\\veb-build-provider\\Tool\\tee.exe Build.log\""
+        },
+        {
+            "label": "VebReBuildTask",
+            "type": "shell",
+            "command": "cmd /V /C \"SET VEB=I24A7&&echo veb = !VEB! &&c:\\1-TPE_BIOS_Code\\Turin-a8isbios\\.vscode\\PrepareEnvScript.bat && make rebuild 2>&1| d:\\veb-build-provider\\Tool\\tee.exe Build.log\""
+        },
+        {
+            "label": "------------------------------------External command------------------------------------------",
+            "type": "shell",
+            "command": ""
+        },
+        {
+            "label": "Run ExpandMakefileVars",
+            "type": "process",
+            "command": "python",
+            "args": [
+                ".\\.vscode\\ExpandMakefileVars.py",
+                "Build\\token.mak"
+            ],
+        },
+        {
+            "label": "Run CopyUni",
+            "type": "process",
+            "command": "python",
+            "args": [
+                ".\\.vscode\\CopyUni.py",
+                // "Build\\token.mak"
+                ".\\.vscode\\token_new.mak",
+            ],
+        },
+        {
+            "label": "Run MergeUNIFile",
+            "type": "process",
+            "command": "python",
+            "args": [
+                ".\\.vscode\\MergeUNIFile.py",
+            ],
+        },
+        {
+            "label": "Run MergeVFR",
+            "type": "process",
+            "command": "python",
+            "args": [
+                ".\\.vscode\\MergeVFR.py",
+                ".\\.vscode\\CopyUni\\Setup.i",
+                ".\\.vscode\\CopyUni\\SetupStrDefs.h",
+                ".\\.vscode\\CopyUni\\AllSetup.uni",
+                // ".\\.vscode\\CopyUni\\AmdCbsForm.i",
+                // ".\\.vscode\\CopyUni\\CbsSetupLibInstanceStrDefs.h",
+                // ".\\.vscode\\CopyUni\\AmdCbsStrings.uni",
+            ],
+        },
+        {
+            "label": "remove bios build file",
+            "type": "shell",
+            "command": "del *.bin *.hpm *.FD *.tar.gz"
+        }
+	]
+}
