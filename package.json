@@ -243,6 +243,10 @@
       {
         "command": "SnippetTools.AsusPrintToDebug",
         "title": "Replace ASUSPRINT to Debug"
+      },
+      {
+        "command": "extension.expandMakefileVars",
+        "title": "Expand Makefile Variables"
       }
     ],
     "menus": {
@@ -265,6 +269,11 @@
         {
           "when": "resourceLangId == c",
           "command": "SnippetTools.AsusPrintToDebug",
+          "group": "navigation"
+        },
+        {
+          "when": "editorLangId == makefile",
+          "command": "extension.expandMakefileVars",
           "group": "navigation"
         }
       ]

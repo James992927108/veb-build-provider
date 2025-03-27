@@ -1,5 +1,6 @@
 import re
 import sys
+import os
 
 def expand_variables(content):
     variables = {}
@@ -139,14 +140,19 @@ BOARD_DIR = AmiCompatibilityPkg\\Board
     if len(sys.argv) > 1:
         filename = sys.argv[1]
     else:
-        filename = 'token.mak'
-    print(f"filename = {filename}")
+        filename = 'Token.mak'
+    print(f"Processing file: {filename}")
     
+    # 獲取檔案所在的目錄和基本名稱
+    file_dir = os.path.dirname(filename) or os.getcwd()
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+    output_file = os.path.join(file_dir, f"{base_name}_expanded.mak")
+    missing_file = os.path.join(file_dir, f"{base_name}_miss.mak")
+
     try:
         with open(filename, 'r') as file:
             content = file.read()
     except UnicodeDecodeError:
-        # Try reading with different encoding if default fails
         with open(filename, 'r', encoding='utf-8-sig') as file:
             content = file.read()
 
@@ -160,13 +166,13 @@ BOARD_DIR = AmiCompatibilityPkg\\Board
     # 對齊注釋
     aligned_lines = align_comments(expanded_lines)
     
-    # Write the expanded content with aligned comments
-    with open('.vscode/token_new.mak', 'w') as file:
+    # 將結果寫入新檔案
+    with open(output_file, 'w') as file:
         file.write('\n'.join(aligned_lines))
 
-    # Write missing variables if any
+    # 寫入缺失變數（如果有）
     if missing_variables:
-        with open('.vscode/token_miss.mak', 'w') as miss_file:
+        with open(missing_file, 'w') as miss_file:
             for missing_var, origin_var_expr in missing_variables:
                 line = f'Missing variable: {missing_var}'
                 padding = 100 - len(line)
@@ -175,9 +181,9 @@ BOARD_DIR = AmiCompatibilityPkg\\Board
                 else:
                     miss_file.write(f"{line} #{origin_var_expr}\n")
 
-    print("token_new.mak has been created with expanded variables and aligned comments.")
+    print(f"{output_file} has been created with expanded variables and aligned comments.")
     if missing_variables:
-        print("token_miss.mak has been created with unresolved variables.")
+        print(f"{missing_file} has been created with unresolved variables.")
     else:
         print("No unresolved variables found.")
 
