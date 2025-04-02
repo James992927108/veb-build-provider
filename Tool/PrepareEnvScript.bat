@@ -25,5 +25,5 @@ Set Path=%Path%;%TOOLS_DIR%;%EWDK_DIR%;%MSVC_ROOT%;%JAVA_HOME%;%PYTHON_COMMAND%
 
 echo %Path%
 echo Environment setup complete.
-del *.bin *.hpm *.FD *.tar.gz
-echo del *.bin *.hpm *.FD *.tar.gz
+del *.bin *.hpm *.FD *.tar.gz *.rom
+echo del *.bin *.hpm *.FD *.tar.gz *.rom

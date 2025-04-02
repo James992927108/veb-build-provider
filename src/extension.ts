@@ -25,33 +25,6 @@ enum ShowType {
     QuickPick = 1,
 }
 
-// Task file templates
-const Taskfile = `{
-    "version": "1.0.0",
-    "tasks": 
-    [
-        {
-            "label": "------------------------------------Internal command------------------------------------------",
-            "type": "shell",
-            "command": ""
-        },
-        {
-            "label": "VebBuildTask",
-            "type": "shell",
-            "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s Build.log\\""
-        },
-        {
-            "label": "VebReBuildTask",
-            "type": "shell",
-            "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s Build.log\\""
-        },
-        {
-            "label": "------------------------------------External command------------------------------------------",
-            "type": "shell",
-            "command": ""
-        },
-`;
-
 // 處理擴展 Makefile 變數的函數
 async function expandMakefileVars(): Promise<void> {
     // 獲取當前活動的編輯器
@@ -144,10 +117,15 @@ async function copyFile(source: string, target: string): Promise<void> {
     }
 }
 
-function extractCommand(data: string, startTag: string, endTag: string): string {
-    const command = data.slice(data.indexOf(startTag), data.indexOf(endTag)).split('"')[1];
-    logMessage(`Extracted command: ${command}`);
-    return escapePath(command);
+function getFormattedTimestamp(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `${year}${month}${day}-${hours}${minutes}${seconds}`;
 }
 
 async function BuildDefaultTask(folderpath: string, selection: string, TaskfileUpdate: string): Promise<string> {
@@ -159,25 +137,62 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
     }
 
     const teePath = escapePath(path.join(vebExtension.extensionPath, "Tool", "tee.exe"));
+
+    // Put PrepareEnvScript.bat to project .vscode folder
     const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", PREPARE_ENV_SCRIPT);
     const targetScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_SCRIPT));
-
     await copyFile(sourceScriptPath, targetScriptPath);
 
     const fileData = await readFile(path.join(folderpath, selection));
+    
+    function extractValue(data: string, key: string): string {
+        const match = data.match(new RegExp(`^\\s*${key} = \"(.*?)\"`, 'm'));
+        return match ? match[1] : "";
+    }
 
-    const buildCommand = extractCommand(fileData, 'Build', 'BuildAll');
-    const reBuildCommand = extractCommand(fileData, 'BuildAll', 'BuildLog');
+    const buildCommand = extractValue(fileData, 'Build');
+    const reBuildCommand = extractValue(fileData, 'BuildAll');
+    const cleanCommand = extractValue(fileData, 'CleanCmd');
 
     const Veb = selection.split('.')[0];
 
+    logMessage(` buildCommand: ${buildCommand}`);
+    logMessage(` reBuildCommand: ${reBuildCommand}`);
+    logMessage(` cleanCommand: ${cleanCommand}`);
+    logMessage(` Veb: ${Veb}`);
+    const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
+
+    const Taskfile = `{
+        "version": "1.5.0", 
+        "tasks": [
+            {
+                "label": "VebBuildTask",
+                "type": "shell",
+                "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
+            },
+            {
+                "label": "VebReBuildTask",
+                "type": "shell",
+                "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
+            },
+            {
+                "label": "VebCleanTask",
+                "type": "shell",
+                "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
+            }
+        ]
+    }`;
+
     const result = util.format(Taskfile,
-        Veb, targetScriptPath, buildCommand, teePath,
-        Veb, targetScriptPath, reBuildCommand, teePath
+        Veb, targetScriptPath, buildCommand, teePath, logFile,
+        Veb, targetScriptPath, reBuildCommand, teePath, logFile,
+        Veb, targetScriptPath, cleanCommand, teePath, logFile
     );
+    
     logMessage("BuildDefaultTask completed");
     return result;
 }
+
 
 async function createVscodeFolder(folderpath: string): Promise<void> {
     const vscodePath = path.join(folderpath, VSCODE_FOLDER);
@@ -211,7 +226,6 @@ async function CreateBuildtask(folderpath: string, targetFiles: string[], start:
         }
 
         let TaskfileUpdate = await BuildDefaultTask(folderpath, selection, '');
-        TaskfileUpdate += "\t]\n}";
 
         await createVscodeFolder(folderpath);
         await writeTasksJson(folderpath, TaskfileUpdate);
@@ -378,8 +392,8 @@ export function activate(context: vscode.ExtensionContext): void {
     logMessage("Created status bar button: Close Terminal");
 
     registerCommand(context, 'formatter.Edk2Formatter', Edk2Formatter);
-    registerCommand(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
-    registerCommand(context, 'SnippetTools.AsusPrintToDebug', () => new SnippetTools(vscode).AsusPrintToDebug());
+    // registerCommand(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
+    // registerCommand(context, 'SnippetTools.AsusPrintToDebug', () => new SnippetTools(vscode).AsusPrintToDebug());
     registerCommand(context, 'extension.expandMakefileVars', () => {expandMakefileVars();});
 }
 
