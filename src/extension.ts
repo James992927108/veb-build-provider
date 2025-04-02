@@ -13,7 +13,7 @@ import { logMessage, handleError, outputChannel } from './logger';
 import { spawn } from 'child_process';
 
 // Constants
-const EXTENSION_ID = "ieibios.veb-build-provider";
+const EXTENSION_ID = "aivres-bios.veb-build-provider";
 const VSCODE_FOLDER = ".vscode";
 const TASKS_JSON = "tasks.json";
 const VEB_EXTENSION = '.veb';
