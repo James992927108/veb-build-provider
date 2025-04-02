@@ -17,4 +17,4 @@ vsce package --no-yarn > build.log
 vsce package --no-yarn --allow-missing-repository > build.log
 
 git tag <version>
-git tag v1.5.0
+git tag v1.5.1

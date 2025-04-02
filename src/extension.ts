@@ -163,7 +163,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
     const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
 
     const Taskfile = `{
-        "version": "1.5.0", 
+        "version": "1.5.1", 
         "tasks": [
             {
                 "label": "VebBuildTask",
