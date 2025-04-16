@@ -136,63 +136,107 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
         throw new Error("Unable to get VEB build provider extension");
     }
 
-    const teePath = escapePath(path.join(vebExtension.extensionPath, "Tool", "tee.exe"));
+    const isLinux = process.platform === 'linux';
+    const isWindows = process.platform === 'win32';
+    let Taskfile: string;
+    let result: string;
 
-    // Put PrepareEnvScript.bat to project .vscode folder
-    const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", PREPARE_ENV_SCRIPT);
-    const targetScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_SCRIPT));
-    await copyFile(sourceScriptPath, targetScriptPath);
+    logMessage(`Detected platform: ${process.platform}`);
 
-    const fileData = await readFile(path.join(folderpath, selection));
+    if (isWindows) {
+        const teePath = escapePath(path.join(vebExtension.extensionPath, "Tool", "tee.exe"));
+        const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", PREPARE_ENV_SCRIPT);
+        const targetScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_SCRIPT));
+        await copyFile(sourceScriptPath, targetScriptPath);
+
+        const fileData = await readFile(path.join(folderpath, selection));
+
+        function extractValue(data: string, key: string): string {
+            const match = data.match(new RegExp(`^\\s*${key} = \"(.*?)\"`, 'm'));
+            return match ? match[1] : "";
+        }
+
+        const buildCommand = extractValue(fileData, 'Build');
+        const reBuildCommand = extractValue(fileData, 'BuildAll');
+        const cleanCommand = extractValue(fileData, 'CleanCmd');
+
+        const Veb = selection.split('.')[0];
+        const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
+
+        Taskfile = `{
+            "version": "1.5.2", 
+            "tasks": [
+                {
+                    "label": "VebBuildTask",
+                    "type": "shell",
+                    "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
+                },
+                {
+                    "label": "VebReBuildTask",
+                    "type": "shell",
+                    "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
+                },
+                {
+                    "label": "VebCleanTask",
+                    "type": "shell",
+                    "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
+                }
+            ]
+        }`;
+
+        result = util.format(Taskfile,
+            Veb, targetScriptPath, buildCommand, teePath, logFile,
+            Veb, targetScriptPath, reBuildCommand, teePath, logFile,
+            Veb, targetScriptPath, cleanCommand, teePath, logFile
+        );
+
+    } else if (isLinux) {
+        const Veb = selection.split('.')[0];
+        const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
+        const logFilePath = escapePath(path.join(folderpath, logFile));
     
-    function extractValue(data: string, key: string): string {
-        const match = data.match(new RegExp(`^\\s*${key} = \"(.*?)\"`, 'm'));
-        return match ? match[1] : "";
+        const taskfileTemplate = `{
+            "version": "1.5.2",
+            "tasks": [
+                {
+                    "label": "VebBuildTask",
+                    "type": "shell",
+                    "command": "source .env && make 2>&1 | tee %s",
+                    "options": {
+                        "env": { "VEB": "%s" }
+                    }
+                },
+                {
+                    "label": "VebReBuildTask",
+                    "type": "shell",
+                    "command": "source .env && make rebuild 2>&1 | tee %s",
+                    "options": {
+                        "env": { "VEB": "%s" }
+                    }
+                },
+                {
+                    "label": "VebCleanTask",
+                    "type": "shell",
+                    "command": "source .env && make clean 2>&1 | tee %s",
+                    "options": {
+                        "env": { "VEB": "%s" }
+                    }
+                }
+            ]
+        }`;
+    
+        result = util.format(taskfileTemplate,
+            logFilePath, Veb,
+            logFilePath, Veb,
+            logFilePath, Veb
+        );
+    }else {
+        throw new Error("Unsupported platform");
     }
 
-    const buildCommand = extractValue(fileData, 'Build');
-    const reBuildCommand = extractValue(fileData, 'BuildAll');
-    const cleanCommand = extractValue(fileData, 'CleanCmd');
-
-    const Veb = selection.split('.')[0];
-
-    logMessage(` buildCommand: ${buildCommand}`);
-    logMessage(` reBuildCommand: ${reBuildCommand}`);
-    logMessage(` cleanCommand: ${cleanCommand}`);
-    logMessage(` Veb: ${Veb}`);
-    const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
-
-    const Taskfile = `{
-        "version": "1.5.2", 
-        "tasks": [
-            {
-                "label": "VebBuildTask",
-                "type": "shell",
-                "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
-            },
-            {
-                "label": "VebReBuildTask",
-                "type": "shell",
-                "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
-            },
-            {
-                "label": "VebCleanTask",
-                "type": "shell",
-                "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
-            }
-        ]
-    }`;
-
-    const result = util.format(Taskfile,
-        Veb, targetScriptPath, buildCommand, teePath, logFile,
-        Veb, targetScriptPath, reBuildCommand, teePath, logFile,
-        Veb, targetScriptPath, cleanCommand, teePath, logFile
-    );
-    
     logMessage("BuildDefaultTask completed");
     return result;
 }
-
 
 async function createVscodeFolder(folderpath: string): Promise<void> {
     const vscodePath = path.join(folderpath, VSCODE_FOLDER);

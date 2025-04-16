@@ -18,3 +18,9 @@ vsce package --no-yarn --allow-missing-repository > build.log
 
 git tag <version>
 git tag v1.5.2
+
+ubuntu note:
+rm -rf node_modules
+rm -rf out
+npm install
+npm run compile
