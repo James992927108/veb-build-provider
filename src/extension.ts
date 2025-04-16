@@ -237,14 +237,11 @@ async function CreateBuildtask(folderpath: string, targetFiles: string[], start:
 
 function getFolderPath(): string {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-    if (!workspaceFolder) { return ""; }
-
-    const uri = workspaceFolder.uri.toString();
-    const [, path] = uri.split(":///");
-    const [drive, rest] = path?.split("%3A") ?? [];
-
-    const folderPath = rest ? `${drive}:${rest}` : "";
-    logMessage(`Retrieved workspace path: ${folderPath}`);
+    if (!workspaceFolder) {
+        logMessage("No workspace folder found. Please open a folder in VSCode.");
+        return "";
+    }
+    const folderPath = workspaceFolder.uri.fsPath;
     return folderPath;
 }
 
