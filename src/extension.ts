@@ -17,7 +17,8 @@ const EXTENSION_ID = "aivres-bios.veb-build-provider";
 const VSCODE_FOLDER = ".vscode";
 const TASKS_JSON = "tasks.json";
 const VEB_EXTENSION = '.veb';
-const PREPARE_ENV_SCRIPT = 'PrepareEnvScript.bat';
+const PREPARE_ENV_WIN_SCRIPT = 'PrepareEnvScript.bat';
+const PREPARE_ENV_LINUX_SCRIPT = 'PrepareEnvLinuxScript.sh';
 
 // Enums
 enum ShowType {
@@ -145,8 +146,8 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
 
     if (isWindows) {
         const teePath = escapePath(path.join(vebExtension.extensionPath, "Tool", "tee.exe"));
-        const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", PREPARE_ENV_SCRIPT);
-        const targetScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_SCRIPT));
+        const sourceScriptPath = path.join(vebExtension.extensionPath, "Tool", PREPARE_ENV_WIN_SCRIPT);
+        const targetScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_WIN_SCRIPT));
         await copyFile(sourceScriptPath, targetScriptPath);
 
         const fileData = await readFile(path.join(folderpath, selection));
@@ -164,7 +165,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
         const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
 
         Taskfile = `{
-            "version": "1.5.2", 
+            "version": "1.6.0", 
             "tasks": [
                 {
                     "label": "VebBuildTask",
@@ -192,16 +193,24 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
 
     } else if (isLinux) {
         const Veb = selection.split('.')[0];
+    
+        // 複製 Linux 用的環境設定腳本 PrepareEnvLinuxScript.sh
+        const sourceLinuxScript = path.join(vebExtension.extensionPath, "Tool", PREPARE_ENV_LINUX_SCRIPT);
+        const targetLinuxScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_LINUX_SCRIPT));
+        await copyFile(sourceLinuxScript, targetLinuxScriptPath);
+        logMessage(`Copied Linux prepare script to ${targetLinuxScriptPath}`);
+    
         const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
+        // 依需求可將 logFile 放置於 folderpath 或 folderpath/VSCODE_FOLDER (此處直接放在 folderpath)
         const logFilePath = escapePath(path.join(folderpath, logFile));
     
         const taskfileTemplate = `{
-            "version": "1.5.2",
+            "version": "1.6.0",
             "tasks": [
                 {
                     "label": "VebBuildTask",
                     "type": "shell",
-                    "command": "source .env && make 2>&1 | tee %s",
+                    "command": "source %s && make 2>&1 | tee %s",
                     "options": {
                         "env": { "VEB": "%s" }
                     }
@@ -209,7 +218,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
                 {
                     "label": "VebReBuildTask",
                     "type": "shell",
-                    "command": "source .env && make rebuild 2>&1 | tee %s",
+                    "command": "source %s && make rebuild 2>&1 | tee %s",
                     "options": {
                         "env": { "VEB": "%s" }
                     }
@@ -217,7 +226,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
                 {
                     "label": "VebCleanTask",
                     "type": "shell",
-                    "command": "source .env && make clean 2>&1 | tee %s",
+                    "command": "source %s && make clean 2>&1 | tee %s",
                     "options": {
                         "env": { "VEB": "%s" }
                     }
@@ -226,9 +235,9 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
         }`;
     
         result = util.format(taskfileTemplate,
-            logFilePath, Veb,
-            logFilePath, Veb,
-            logFilePath, Veb
+            targetLinuxScriptPath, logFilePath, Veb,
+            targetLinuxScriptPath, logFilePath, Veb,
+            targetLinuxScriptPath, logFilePath, Veb
         );
     }else {
         throw new Error("Unsupported platform");
