@@ -2,14 +2,14 @@ import * as vscode from 'vscode';
 import * as fs from "fs";
 import * as readline from "readline";
 import * as util from 'util';
-import { logMessage, handleError, outputChannel } from './logger';
+import { logMessage, handleError, outputChannel } from '../utils/logger';
 
 /**
  * 
  * @param filePath 
  */
 
-class SnippetTools {
+export class SnippetTools {
     constructor(private vscodeInstance: typeof vscode) {
         // 可以在构造函数中进行初始化操作
     }
@@ -169,5 +169,3 @@ class SnippetTools {
 
     }
 }
-
-export default SnippetTools;

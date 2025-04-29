@@ -2,7 +2,7 @@
 <!--
 /*****************************************************************************
  *
- * Copyright (C) 2008-2024 Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2008-2025 Advanced Micro Devices, Inc. All rights reserved.
  *
 *****************************************************************************
  */
@@ -3353,7 +3353,9 @@ Disable: Legacy caching behavior for REPs.</Help_text>
       <Variable_name>CbsCpuSpeculativeStoreModes</Variable_name>
       <Input_type>Fixed</Input_type>
       <Nv_type>Byte</Nv_type>
-      <Help_text>Balanced:
+      <Help_text>[Warning] If CPU Debug Options/CPU Aggressive Store Speculation is set to "Yes", it'll override the setting of this option and enforce the CPU Speculative Store Mode to be Aggressive.
+
+Balanced:
 Store instructions may delay sending out their invalidations to remote cacheline copies when the cacheline is present but not in a writable state in the local cache.
 
 More Speculative:
@@ -3363,7 +3365,7 @@ Less Speculative:
 Store instructions may delay sending out their invalidations to remote cacheline copies when the cacheline is not present in the local cache or not in a writable state in the local cache.</Help_text>
       <Apcb_structure />
       <PCD>gEfiAmdAgesaPkgTokenSpaceGuid.PcdAmdCpuSpeculativeStoreMode</PCD>
-      <Additional_information>LABEL_DYNAMIC_CBS_OPTION=TRUE</Additional_information>
+      <Additional_information />
       <BIOS_Default>0xFF</BIOS_Default>
       <GBS>No</GBS>
       <Time_point />
@@ -7866,7 +7868,7 @@ Disabled: Memory Addressing \ NUMA nodes per socket will be declared.</Help_text
         <Apcb_structure>APCB_TOKEN_UID_DF_XGMI_TRAINING_ERR_MASK(BOOL)</Apcb_structure>
         <PCD />
         <Additional_information />
-        <BIOS_Default>0xFF</BIOS_Default>
+        <BIOS_Default>0xff</BIOS_Default>
         <GBS>No</GBS>
         <Time_point />
         <Key_function>0</Key_function>
@@ -7883,7 +7885,7 @@ Disabled: Memory Addressing \ NUMA nodes per socket will be declared.</Help_text
           <System_impact />
         </OPTION_ITEM>
         <OPTION_ITEM Name="Auto">
-          <Nv_storage>0xFF</Nv_storage>
+          <Nv_storage>0xff</Nv_storage>
           <System_impact />
         </OPTION_ITEM>
       </ITEM>
@@ -8072,6 +8074,43 @@ Blended (Cache Load Based Floss with Background RefClock Based Floss): Demand ba
         <OPTION_ITEM Name="Auto">
           <Nv_storage>0xFF</Nv_storage>
           <System_impact />
+        </OPTION_ITEM>
+      </ITEM>
+      <ITEM Type="OPTION" Level="3" Name="PDR Mode">
+        <Doc_Name />
+        <Display_condition />
+        <Active_condition />
+        <Variable_name>CbsDfCmnPfPdrMode</Variable_name>
+        <Input_type>Fixed</Input_type>
+        <Nv_type>Byte</Nv_type>
+        <Help_text>Selective: [Recommended setting] Rinsing applied only to the minimum set of memory addresses.
+All: Rinsing applied to all memory addresses.</Help_text>
+        <Apcb_structure>APCB_TOKEN_UID_DF_PF_PDR_MODE</Apcb_structure>
+        <PCD />
+        <Additional_information />
+        <BIOS_Default>0xFF</BIOS_Default>
+        <GBS>No</GBS>
+        <Time_point />
+        <Key_function>0</Key_function>
+        <By_IDS>0</By_IDS>
+        <PEI>0</PEI>
+        <DXE>0</DXE>
+        <APCB>1</APCB>
+        <OPTION_ITEM Name="Auto">
+          <Nv_storage>0xFF</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="Selective">
+          <Nv_storage>0x1</Nv_storage>
+          <System_impact>
+            <Reg Name="PCI">D18F2x230[28]=1</Reg>
+          </System_impact>
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="All">
+          <Nv_storage>0x0</Nv_storage>
+          <System_impact>
+            <Reg Name="PCI">D18F2x230[28]=0</Reg>
+          </System_impact>
         </OPTION_ITEM>
       </ITEM>
     </ITEM>
@@ -8354,7 +8393,7 @@ Disabling this option sets DF::DfGlobalCtrl[DisImmSyncFloodOnFatalError]</Help_t
       <Help_text />
       <Apcb_structure>APCB_TOKEN_UID_DF_PCI_MMIO_SIZE</Apcb_structure>
       <PCD />
-      <Additional_information />
+      <Additional_information>LABEL_DYNAMIC_CBS_OPTION=TRUE</Additional_information>
       <BIOS_Default>0xFFFFFFFF</BIOS_Default>
       <GBS>No</GBS>
       <Time_point />
@@ -9471,8 +9510,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 0">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel0Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9499,8 +9538,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 1">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel1Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9527,8 +9566,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 2">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel2Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9555,8 +9594,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 3">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel3Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9583,8 +9622,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 4">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel4Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9611,8 +9650,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 5">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel5Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9639,8 +9678,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 6">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel6Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9667,8 +9706,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 7">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel7Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9695,8 +9734,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 8">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel8Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9723,8 +9762,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 9">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel9Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9751,8 +9790,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 10">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel10Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -9779,8 +9818,8 @@ n = 9 &lt;= Stagger Channels By ~30 ns (Default)
         </ITEM>
         <ITEM Type="OPTION" Level="4" Name="Socket 1 Channel 11">
           <Doc_Name />
-          <Display_condition />
-          <Active_condition />
+          <Display_condition>CbsNumberOfSockets=2</Display_condition>
+          <Active_condition>CbsNumberOfSockets=2</Active_condition>
           <Variable_name>CbsCmnMemSocket1Channel11Ddr</Variable_name>
           <Input_type>Fixed</Input_type>
           <Nv_type>Byte</Nv_type>
@@ -14892,6 +14931,74 @@ PMU MsgBlock-&gt;AdvTrainOpt[6:5]</Help_text>
         </OPTION_ITEM>
         <OPTION_ITEM Name="8x">
           <Nv_storage>3</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+      </ITEM>
+      <ITEM Type="OPTION" Level="3" Name="Training Retry Count">
+        <Doc_Name />
+        <Display_condition />
+        <Active_condition />
+        <Variable_name>CbsCmnTrainingRetryCount</Variable_name>
+        <Input_type>Fixed</Input_type>
+        <Nv_type>Byte</Nv_type>
+        <Help_text>Retry on PMU training failure, retry to all channels, including passed and failed channel.</Help_text>
+        <Apcb_structure>APCB_TOKEN_UID_MEM_PMU_TRAINING_RETRY_COUNT</Apcb_structure>
+        <PCD />
+        <Additional_information />
+        <BIOS_Default>0xFF</BIOS_Default>
+        <GBS>No</GBS>
+        <Time_point />
+        <Key_function>0</Key_function>
+        <By_IDS>0</By_IDS>
+        <PEI>0</PEI>
+        <DXE>0</DXE>
+        <APCB>0</APCB>
+        <OPTION_ITEM Name="Auto">
+          <Nv_storage>0xFF</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="Disabled">
+          <Nv_storage>0</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="1">
+          <Nv_storage>1</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="2">
+          <Nv_storage>2</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="3">
+          <Nv_storage>3</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="4">
+          <Nv_storage>4</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="5">
+          <Nv_storage>5</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="6">
+          <Nv_storage>6</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="7">
+          <Nv_storage>7</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="8">
+          <Nv_storage>8</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="9">
+          <Nv_storage>9</Nv_storage>
+          <System_impact />
+        </OPTION_ITEM>
+        <OPTION_ITEM Name="10">
+          <Nv_storage>10</Nv_storage>
           <System_impact />
         </OPTION_ITEM>
       </ITEM>

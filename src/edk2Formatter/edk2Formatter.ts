@@ -5,7 +5,7 @@ import * as util from 'util';
 
 import formatUni from "./formatUni";
 import formatSdl from "./formatSdl";
-import { logMessage, handleError, outputChannel } from '../logger';
+import { logMessage, handleError, outputChannel } from '../utils/logger';
 
 function detectFileEncoding(filepath: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -84,7 +84,7 @@ function findMaxLength(filepath: string, fileEncoding: any): Promise<any> {
  * 
  * @param filePath 
  */
-function Edk2Formatter() {
+export function Edk2Formatter() {
     const activeEditor = vscode.window.activeTextEditor;
 
     if (activeEditor) {

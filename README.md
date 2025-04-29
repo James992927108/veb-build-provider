@@ -16,9 +16,8 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 ## 安裝方式
 
 1. **下載專案原始碼**  
-git clone https://github.com/James992927108/veb-build-provider.git
+git clone <https://github.com/James992927108/veb-build-provider.git>
 cd veb-build-provider
-
 
 2. **安裝依賴並編譯**  
 npm install
@@ -44,6 +43,7 @@ npm run compile
 | 插入 Debug User Snippet    | `editor.action.insertSnippet`   | Ctrl+F1      | C/C++ 檔案                            | 插入自定義 debug_user snippet            |
 | 插入 Debug Start Snippet   | `editor.action.insertSnippet`   | Ctrl+F2      | C/C++ 檔案                            | 插入自定義 debug_start snippet           |
 | 插入 Debug End Snippet     | `editor.action.insertSnippet`   | Ctrl+F3      | C/C++ 檔案                            | 插入自定義 debug_end snippet             |
+
 - **命令面板呼叫**：按下 `Ctrl+Shift+P`，輸入 `VEB`，即可看到所有相關指令。
 - **自訂快捷鍵**：可於 VS Code 的 `keybindings.json` 新增或修改快捷鍵。
 
@@ -78,7 +78,6 @@ npm run compile
 git tag v1.6.0
 git push origin v1.6.0
 
-
 ---
 
 ## 授權
@@ -92,5 +91,52 @@ MIT License
 如有任何問題，歡迎聯絡 [James992927108](https://github.com/James992927108)。
 
 ---
+
+## 專案結構
+
+```專案結構
+├── scripts/                     # 外部腳本與自動化工具
+│   ├── ExpandMakefileVars.py
+│   ├── PrepareEnvLinuxScript.sh
+│   └── PrepareEnvScript.bat
+│
+├── src/                         # TypeScript 主程式碼
+│   ├── edk2Formatter/           # EDK2 格式化相關模組
+│   │   ├── edk2Formatter.ts
+│   │   ├── formatSdl.ts
+│   │   └── formatUni.ts
+│   │
+│   ├── edk2Language/            # EDK2 語言支援
+│   │   └── edk2Language.ts
+│   │
+│   ├── tools/                   # 開發輔助工具
+│   │   ├── expandMakefileVars.ts
+│   │   └── SnippetTools.ts
+│   │
+│   ├── utils/                   # 共用工具
+│   │   ├── file.ts
+│   │   └── logger.ts
+│   │
+│   ├── VebBuild/                # VEB 專案初始化與建置
+│   │   ├── initTask.ts
+│   │   └── terminal.ts
+│   │
+│   ├── constants.ts             # 全域常數
+│   ├── extension.ts             # VS Code Extension 入口
+│   └── TreeProvider.ts          # 樹狀結構 UI 元件
+│
+├── syntaxes/                    # VS Code 語法高亮設定
+│
+├── temp/                        # 暫存資料夾
+│
+├── Tool/                        # 外部工具（如 tee.exe）
+│   └── tee.exe
+│
+├── .eslintrc.json               # ESLint 設定
+├── .gitignore                   # Git 忽略清單
+├── package.json                 # NPM 專案設定
+├── package-lock.json            # NPM 鎖定檔
+└── README.md                    # 專案說明文件
+```
 
 > 本專案仍持續開發中，歡迎大家共同參與完善！

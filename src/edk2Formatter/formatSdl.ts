@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as readline from "readline";
 import * as vscode from 'vscode';
-import { ONE_SPACE } from "./constants";
-import { logMessage, handleError, outputChannel } from '../logger';
+import { ONE_SPACE } from "../constants";
+import { logMessage, handleError, outputChannel } from '../utils/logger';
 
 function formatSdl(filepath: string, fileEncoding: any): Promise<any> {
     return new Promise(resolve => {

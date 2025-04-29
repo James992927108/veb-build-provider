@@ -315,6 +315,7 @@
       Level 3: Organization
       Level 3: Periodic Directory Rinse (PDR) Tuning
       Level 3: Tracking Granularity
+      Level 3: PDR Mode
     Level 2: DF Watchdog Timer Interval
     Level 2: Disable DF to external IP SyncFloodPropagation
     Level 2: Sync Flood Propagation to DF Components
@@ -542,6 +543,7 @@
         Level 4: Periodic Interval Mode
         Level 4: Periodic Interval
       Level 3: Write Training Burst Length
+      Level 3: Training Retry Count
     Level 2: DDR Security
       Level 3: TSME
       Level 3: AES

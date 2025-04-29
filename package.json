@@ -207,19 +207,19 @@
     "snippets": [
       {
         "language": "c",
-        "path": "./snippets/edk2_c.snippet.json"
+        "path": "./resource/snippets/edk2_c.snippet.json"
       },
       {
         "language": "cpp",
-        "path": "./snippets/edk2_c.snippet.json"
+        "path": "./resource/snippets/edk2_c.snippet.json"
       },
       {
         "language": "c",
-        "path": "./snippets/edk2_gtest.snippet.json"
+        "path": "./resource/snippets/edk2_gtest.snippet.json"
       },
       {
         "language": "cpp",
-        "path": "./snippets/edk2_gtest.snippet.json"
+        "path": "./resource/snippets/edk2_gtest.snippet.json"
       }
     ],
     "commands": [

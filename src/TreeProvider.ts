@@ -258,58 +258,58 @@ export class MyTreeProvider implements vscode.TreeDataProvider<MyTreeNode>
             {treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;}
         if (element.kind === 1) { // files
             treeItem.command = { command: 'fileExplorer.openFile', title: "Open File", arguments: [uri] };
-            treeItem.iconPath = join(__filename, '..', '..', 'media', 'document.svg');
+            treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'document.svg');
         }
         else if (element.kind === 0) { // .cif
             switch (element.category.toLowerCase()) {
                 case "ecore":
-                    treeItem.iconPath = join(__filename, '..', '..', 'media', 'eCore.svg');
+                    treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'eCore.svg');
                     break;
                 case "modulepart":
-                    treeItem.iconPath = join(__filename, '..', '..', 'media', 'ModulePart.svg');
+                    treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'ModulePart.svg');
                     break;
                 case "io":
-                    treeItem.iconPath = join(__filename, '..', '..', 'media', 'IO.svg');
+                    treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'IO.svg');
                     break;
                 case "flash":
-                    treeItem.iconPath = join(__filename, '..', '..', 'media', 'FLASH.svg');
+                    treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'FLASH.svg');
                     break;
                 case "cpu":
-                    treeItem.iconPath = join(__filename, '..', '..', 'media', 'cpu.svg');
+                    treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'cpu.svg');
                     break;
                 case "echipset":
-                    treeItem.iconPath = join(__filename, '..', '..', 'media', 'eChipset.svg');
+                    treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'eChipset.svg');
                     break;
                 case "emodule":
-                    treeItem.iconPath = join(__filename, '..', '..', 'media', 'eModule.svg');
+                    treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'eModule.svg');
                     break;
                 case "module":
-                    treeItem.iconPath = join(__filename, '..', '..', 'media', 'eModule.svg');
+                    treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'eModule.svg');
                     break;
                 case "eboard":
-                    treeItem.iconPath = join(__filename, '..', '..', 'media', 'eBoard.svg');
+                    treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'eBoard.svg');
                     break;
                 case "flavor":
-                    treeItem.iconPath = join(__filename, '..', '..', 'media', 'Flavor.svg');
+                    treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'Flavor.svg');
                     break;
                 default:
                     break;
             }
         }
         else if (element.kind === 2) { // .inf    
-            treeItem.iconPath = join(__filename, '..', '..', 'media', 'INF.svg');
+            treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'INF.svg');
         }
         else if (element.kind === 3) { // .veb
             treeItem.command = { command: 'fileExplorer.openFile', title: "Open File", arguments: [uri] };
-            treeItem.iconPath = join(__filename, '..', '..', 'media', 'letter-v.svg');
+            treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'letter-v.svg');
         }
         else if (element.kind === 4) { //dec
             if (treeItem.collapsibleState === 0)
                 {treeItem.command = { command: 'fileExplorer.openFile', title: "Open File", arguments: [uri] };}
-            treeItem.iconPath = join(__filename, '..', '..', 'media', 'filefolder.svg');
+            treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'filefolder.svg');
         }
         else if (element.kind === 5) { //error
-            treeItem.iconPath = join(__filename, '..', '..', 'media', 'error.svg');
+            treeItem.iconPath = join(__filename, '..', '..', 'resources/icons', 'error.svg');
         }
         return treeItem;
     }

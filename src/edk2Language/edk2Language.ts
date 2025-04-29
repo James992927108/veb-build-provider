@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { logMessage, handleError, outputChannel } from './logger';
+import { logMessage, handleError, outputChannel } from '../utils/logger';
 
 
 export class Common {
