@@ -10,6 +10,7 @@ import { handleterminateTerminal } from './VebBuild/terminal';
 import { expandMakefileVars } from './tools/expandMakefileVars';
 import { SnippetTools } from "./tools/SnippetTools";
 import { Edk2Formatter } from "./edk2Formatter/edk2Formatter";
+import { registerStatusBarItems } from './VebBuild/ui/statusBar';
 
 /**
  * Registers a VS Code command and adds it to the subscriptions.
@@ -46,29 +47,13 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'c' }, new Edk2CCompletionProvider());
     vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'cpp' }, new Edk2CCompletionProvider());
 
-    // Register commands
+    // Register Commands
     registerCommandWithLog(context, 'extension.InitTask', handleInitTask);
     registerCommandWithLog(context, 'extension.VebBuild', handleVebBuild);
     registerCommandWithLog(context, 'extension.VebReBuild', handleVebReBuild);
     registerCommandWithLog(context, 'extension.terminateTerminal', handleterminateTerminal);
-
-    // Create status bar button for ReBuild
-    const runRebuildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    runRebuildButton.command = 'extension.VebReBuild';
-    runRebuildButton.text = '$(play) Run Veb ReBuild';
-    runRebuildButton.tooltip = 'Click to run Veb ReBuild';
-    runRebuildButton.show();
-    context.subscriptions.push(runRebuildButton);
-    logMessage("Created status bar button: Run Veb ReBuild");
-
-    // Create status bar button for terminating terminal
-    const closeTerminalButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
-    closeTerminalButton.text = "$(stop) Close Terminal";
-    closeTerminalButton.tooltip = "Terminate the active terminal";
-    closeTerminalButton.command = "extension.terminateTerminal";
-    closeTerminalButton.show();
-    context.subscriptions.push(closeTerminalButton);
-    logMessage("Created status bar button: Close Terminal");
+    // Register Status Bar (InitTask(F8), VebBuild(F7), VebReBuild(F9), terminateTerminal)
+    registerStatusBarItems(context);
 
     registerCommandWithLog(context, 'formatter.Edk2Formatter', Edk2Formatter);
     registerCommandWithLog(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
