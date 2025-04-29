@@ -28,6 +28,8 @@ npm run compile
 
 產生的 `.vsix` 檔案可直接在 VS Code 內安裝。
 
+打包指令`vsce package`
+
 ---
 
 ## 使用說明
