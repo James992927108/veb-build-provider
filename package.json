@@ -85,7 +85,7 @@
       },
       {
         "command": "edk2Debug.enhanceModule",
-        "key": "ctrl+shift+f7", 
+        "key": "ctrl+shift+f7",
         "mac": "cmd+shift+f7"
       }
     ],
@@ -262,21 +262,43 @@
         "title": "Expand Makefile Variables"
       },
       {
-        "command": "edk2Debug.scanProject",
+        "command": "vebBuild.edk2Debug.scanProject",
         "title": "Scan EDK2 Project",
-        "category": "EDK2 Debug"
+        "category": "VEB Build",
+        "icon": "$(search)"
       },
       {
-        "command": "edk2Debug.enhanceModule", 
+        "command": "vebBuild.edk2Debug.enhanceModule",
         "title": "Enhance Module Debug",
-        "category": "EDK2 Debug"
+        "category": "VEB Build",
+        "icon": "$(debug-alt)"
       },
       {
-        "command": "edk2Debug.batchEnhance",
-        "title": "Batch Enhance Debug", 
-        "category": "EDK2 Debug"
+        "command": "vebBuild.edk2Debug.showStatistics",
+        "title": "Show EDK2 Statistics",
+        "category": "VEB Build",
+        "icon": "$(graph)"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "veb-build-explorer",
+          "title": "Veb Build",
+          "icon": "resource/icons/dep.svg"
+        }
+      ]
+    },
+    "views": {
+      "veb-build-explorer": [
+        {
+          "id": "vebBuildEdk2Modules",
+          "name": "EDK2 Modules",
+          "when": "vebBuild.hasEdk2Workspace",
+          "icon": "resource/icons/dep.svg"
+        }
+      ]
+    },
     "menus": {
       "editor/context": [
         {
@@ -304,6 +326,20 @@
           "command": "extension.expandMakefileVars",
           "group": "navigation"
         }
+      ],
+      "view/title": [
+        {
+          "command": "vebBuild.edk2Debug.scanProject",
+          "when": "view == vebBuildEdk2Modules",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "vebBuild.edk2Debug.enhanceModule",
+          "when": "view == vebBuildEdk2Modules && viewItem == edk2Module",
+          "group": "inline"
+        }
       ]
     },
     "configuration": {
@@ -328,15 +364,15 @@
           "minimum": 1,
           "description": "Provide space numbers after the string"
         },
-        "edk2Debug.autoScan": {
+        "vebBuild.edk2Debug.autoScan": {
           "type": "boolean",
           "default": true,
           "description": "Automatically scan EDK2 modules"
         },
-        "edk2Debug.pythonPath": {
-          "type": "string",
-          "default": "python3", 
-          "description": "Path to Python executable"
+        "vebBuild.edk2Debug.showProgress": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show scan progress"
         }
       }
     }
@@ -352,8 +388,8 @@
   "devDependencies": {
     "@types/glob": "^7.1.1",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^22.7.5",
-    "@types/vscode": "^1.49.0",
+    "@types/node": "^22.15.33",
+    "@types/vscode": "^1.101.0",
     "@typescript-eslint/eslint-plugin": "^2.30.0",
     "@typescript-eslint/parser": "^2.30.0",
     "eslint": "^6.8.0",

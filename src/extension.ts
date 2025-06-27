@@ -8,10 +8,11 @@ import { logMessage, handleError, outputChannel } from './utils/logger';
 import { handleInitTask, handleVebBuild, handleVebReBuild } from './VebBuild/initTask';
 import { handleterminateTerminal } from './VebBuild/terminal';
 import { expandMakefileVars } from './tools/expandMakefileVars';
-import { SnippetTools } from "./tools/SnippetTools";
-import { Edk2Formatter } from "./edk2Formatter/edk2Formatter";
+import { SnippetTools } from './tools/SnippetTools';
+import { Edk2Formatter } from './edk2Formatter/edk2Formatter';
 import { registerStatusBarItems } from './VebBuild/ui/statusBar';
-import { initializeEdk2Debug, EDK2_DEBUG_COMMANDS } from './edk2Debug';
+
+import { Edk2ModuleProvider } from './edk2Debug';
 /**
  * Registers a VS Code command and adds it to the subscriptions.
  * @param context The extension context.
@@ -28,25 +29,6 @@ function registerCommandWithLog(
     logMessage(`Registered command: ${commandId}`);
 }
 
-/**
- * Registers EDK2 debug-related commands with the VS Code extension context.
- * Each command displays an informational message indicating that its feature is ready.
- * 
- * @param context The VS Code extension context used to register the commands.
- */
-function registerEdk2DebugCommands(context: vscode.ExtensionContext): void {
-    registerCommandWithLog(context, EDK2_DEBUG_COMMANDS.SCAN_PROJECT, async () => {
-        vscode.window.showInformationMessage('🔍 EDK2 project scan feature is ready!');
-    });
-
-    registerCommandWithLog(context, EDK2_DEBUG_COMMANDS.ENHANCE_MODULE, async () => {
-        vscode.window.showInformationMessage('⚡ EDK2 module enhancement feature is ready!');
-    });
-
-    registerCommandWithLog(context, EDK2_DEBUG_COMMANDS.BATCH_ENHANCE, async () => {
-        vscode.window.showInformationMessage('🚀 EDK2 batch enhancement feature is ready!');
-    });
-}
 
 export function activate(context: vscode.ExtensionContext): void {
     logMessage(`Extension activated at: ${new Date().toISOString()}`);
@@ -67,7 +49,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'c' }, new Edk2CCompletionProvider());
     vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'cpp' }, new Edk2CCompletionProvider());
 
-    // Register Commands
+  // VSBuild commands and status bar
     registerCommandWithLog(context, 'extension.InitTask', handleInitTask);
     registerCommandWithLog(context, 'extension.VebBuild', handleVebBuild);
     registerCommandWithLog(context, 'extension.VebReBuild', handleVebReBuild);
@@ -75,13 +57,73 @@ export function activate(context: vscode.ExtensionContext): void {
     // Register Status Bar (InitTask(F8), VebBuild(F7), VebReBuild(F9), terminateTerminal)
     registerStatusBarItems(context);
 
+  // Formatter and snippets
     registerCommandWithLog(context, 'formatter.Edk2Formatter', Edk2Formatter);
     registerCommandWithLog(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
     registerCommandWithLog(context, 'SnippetTools.AsusPrintToDebug', () => new SnippetTools(vscode).AsusPrintToDebug());
     registerCommandWithLog(context, 'extension.expandMakefileVars', () => { expandMakefileVars(); });
 
-    initializeEdk2Debug();
-    registerEdk2DebugCommands(context);
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    
+    if (workspaceRoot) {
+        // Initialize EDK2 module provider
+        const edk2ModuleProvider = new Edk2ModuleProvider(workspaceRoot);
+
+        // Tree view for EDK2 modules
+        const edk2TreeView = vscode.window.createTreeView('vebBuildEdk2Modules', {
+            treeDataProvider: edk2ModuleProvider,
+            showCollapseAll: true,
+            canSelectMany: true
+        });
+
+        // Scan command
+        const scanEdk2Command = vscode.commands.registerCommand(
+            'vebBuild.edk2Debug.scanProject',
+            async () => {
+                await edk2ModuleProvider.refresh();
+            }
+        );
+
+        // Enhance module (placeholder for phase 3)
+        const enhanceModuleCommand = vscode.commands.registerCommand(
+            'vebBuild.edk2Debug.enhanceModule',
+            async (moduleNode) => {
+                if (moduleNode?.module) {
+                    // TODO: Implement module enhancement feature (phase 3)
+                    vscode.window.showInformationMessage(
+                        `Ready to enhance module: ${moduleNode.module.name}`
+                    );
+                }
+            }
+        );
+
+        // Show statistics
+        const showStatsCommand = vscode.commands.registerCommand(
+            'vebBuild.edk2Debug.showStatistics',
+            async () => {
+                const stats = await edk2ModuleProvider.getProjectStatistics();
+                const message = `EDK2 Module Statistics:\nTotal: ${stats.totalModules}\nEnhanced: ${stats.enhancedModules}`;
+                vscode.window.showInformationMessage(message);
+            }
+        );
+
+        // Add to context.subscriptions
+        context.subscriptions.push(
+            edk2TreeView,
+            scanEdk2Command,
+            enhanceModuleCommand,
+            showStatsCommand
+        );
+
+        // Set workspace context
+        vscode.commands.executeCommand('setContext', 'vebBuild.hasEdk2Workspace', true);
+
+        // Auto scan (if enabled in settings)
+        const config = vscode.workspace.getConfiguration('vebBuild.edk2Debug');
+        if (config.get('autoScan', true)) {
+            edk2ModuleProvider.refresh();
+        }
+    }
 }
 
 export function deactivate(): void {

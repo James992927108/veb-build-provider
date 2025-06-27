@@ -139,6 +139,25 @@ MIT License
 ├── package.json                 # NPM 專案設定
 ├── package-lock.json            # NPM 鎖定檔
 └── README.md                    # 專案說明文件
+
+src/
+├── edk2Debug/                    # 新增的 EDK2 Debug 主模組
+│   ├── index.ts                 # 模組出口
+│   ├── types.ts                 # 型別定義
+│   ├── constants.ts             # 常數定義
+│   ├── scanner/                 # 掃描子模組
+│   │   ├── index.ts
+│   │   ├── infParser.ts         # INF 檔案解析器
+│   │   ├── moduleScanner.ts     # 模組掃描器
+│   │   └── projectAnalyzer.ts   # 專案分析器
+│   └── provider/                # 資料提供者
+│       ├── index.ts
+│       └── edk2ModuleProvider.ts # 模組樹狀視圖提供者
+├── utils/                       # 現有工具模組（擴展）
+│   ├── logger.ts               # 擴展日誌功能
+│   └── file.ts                 # 擴展檔案處理
+└── extension.ts                # 主擴展檔案（整合命令）
+
 ```
 
 > 本專案仍持續開發中，歡迎大家共同參與完善！
