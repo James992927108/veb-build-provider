@@ -11,7 +11,7 @@ import { expandMakefileVars } from './tools/expandMakefileVars';
 import { SnippetTools } from "./tools/SnippetTools";
 import { Edk2Formatter } from "./edk2Formatter/edk2Formatter";
 import { registerStatusBarItems } from './VebBuild/ui/statusBar';
-
+import { initializeEdk2Debug, EDK2_DEBUG_COMMANDS } from './edk2Debug';
 /**
  * Registers a VS Code command and adds it to the subscriptions.
  * @param context The extension context.
@@ -26,6 +26,26 @@ function registerCommandWithLog(
     const disposable = vscode.commands.registerCommand(commandId, handler);
     context.subscriptions.push(disposable);
     logMessage(`Registered command: ${commandId}`);
+}
+
+/**
+ * Registers EDK2 debug-related commands with the VS Code extension context.
+ * Each command displays an informational message indicating that its feature is ready.
+ * 
+ * @param context The VS Code extension context used to register the commands.
+ */
+function registerEdk2DebugCommands(context: vscode.ExtensionContext): void {
+    registerCommandWithLog(context, EDK2_DEBUG_COMMANDS.SCAN_PROJECT, async () => {
+        vscode.window.showInformationMessage('🔍 EDK2 project scan feature is ready!');
+    });
+
+    registerCommandWithLog(context, EDK2_DEBUG_COMMANDS.ENHANCE_MODULE, async () => {
+        vscode.window.showInformationMessage('⚡ EDK2 module enhancement feature is ready!');
+    });
+
+    registerCommandWithLog(context, EDK2_DEBUG_COMMANDS.BATCH_ENHANCE, async () => {
+        vscode.window.showInformationMessage('🚀 EDK2 batch enhancement feature is ready!');
+    });
 }
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -59,6 +79,9 @@ export function activate(context: vscode.ExtensionContext): void {
     registerCommandWithLog(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
     registerCommandWithLog(context, 'SnippetTools.AsusPrintToDebug', () => new SnippetTools(vscode).AsusPrintToDebug());
     registerCommandWithLog(context, 'extension.expandMakefileVars', () => { expandMakefileVars(); });
+
+    initializeEdk2Debug();
+    registerEdk2DebugCommands(context);
 }
 
 export function deactivate(): void {

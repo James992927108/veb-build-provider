@@ -77,6 +77,16 @@
           "langId": "c",
           "name": "debug_end_snippet"
         }
+      },
+      {
+        "command": "edk2Debug.scanProject",
+        "key": "ctrl+shift+f8",
+        "mac": "cmd+shift+f8"
+      },
+      {
+        "command": "edk2Debug.enhanceModule",
+        "key": "ctrl+shift+f7", 
+        "mac": "cmd+shift+f7"
       }
     ],
     "languages": [
@@ -250,6 +260,21 @@
       {
         "command": "extension.expandMakefileVars",
         "title": "Expand Makefile Variables"
+      },
+      {
+        "command": "edk2Debug.scanProject",
+        "title": "Scan EDK2 Project",
+        "category": "EDK2 Debug"
+      },
+      {
+        "command": "edk2Debug.enhanceModule", 
+        "title": "Enhance Module Debug",
+        "category": "EDK2 Debug"
+      },
+      {
+        "command": "edk2Debug.batchEnhance",
+        "title": "Batch Enhance Debug", 
+        "category": "EDK2 Debug"
       }
     ],
     "menus": {
@@ -302,6 +327,16 @@
           "default": 15,
           "minimum": 1,
           "description": "Provide space numbers after the string"
+        },
+        "edk2Debug.autoScan": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically scan EDK2 modules"
+        },
+        "edk2Debug.pythonPath": {
+          "type": "string",
+          "default": "python3", 
+          "description": "Path to Python executable"
         }
       }
     }
