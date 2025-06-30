@@ -97,14 +97,8 @@ export class ModuleScanner {
       handleError(`Scan directory error ${directory}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
 
-    // Log all found INF file paths
-    logMessage('Found INF files during "Scanning EDK2 modules...":');
-    if (infFiles.length === 0) {
-      logMessage('No INF files found.');
-    } else {
-      infFiles.forEach(file => logMessage(file));
-      logMessage(`Total INF files found: ${infFiles.length}`);
-    }
+    // 🔥 簡化 log 輸出，只記錄基本資訊
+    logMessage(`Scanning completed: found ${infFiles.length} INF files in workspace.`);
 
     return infFiles;
   }

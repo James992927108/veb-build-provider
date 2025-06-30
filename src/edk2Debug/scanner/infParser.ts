@@ -39,9 +39,10 @@ export class InfParser {
   }
 
   private parseModuleType(moduleTypeString: string): Edk2ModuleType {
-    const normalizedType = moduleTypeString.toUpperCase();
-    return Object.values(Edk2ModuleType).includes(normalizedType as Edk2ModuleType)
-      ? normalizedType as Edk2ModuleType
+    // Remove comments after '#' and trim whitespace
+    const cleanedType = moduleTypeString.split('#')[0].trim().toUpperCase();
+    return Object.values(Edk2ModuleType).includes(cleanedType as Edk2ModuleType)
+      ? cleanedType as Edk2ModuleType
       : Edk2ModuleType.USER_DEFINED;
   }
 

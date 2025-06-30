@@ -43,6 +43,16 @@ export function logMessage(message: string) {
     }
 }
 
+export function logMessageWithLevel(message: string, level: 'info' | 'warn') {
+    if (level === 'warn') {
+        vscode.window.showWarningMessage(message);
+        logMessage(`Warning: ${message}`);
+    } else {
+        vscode.window.showInformationMessage(message);
+        logMessage(message);
+    }
+}
+
 /**
  * Output error message
  */

@@ -290,6 +290,16 @@
         "title": "Show EDK2 Statistics",
         "category": "VEB Build",
         "icon": "$(graph)"
+      },
+      {
+        "command": "vebBuild.edk2Debug.filterByModuleType",
+        "title": "Filter by ModuleType",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "vebBuild.edk2Debug.filterByStatus",
+        "title": "Filter by Enhancement Status",
+        "icon": "$(filter)"
       }
     ],
     "viewsContainers": {
@@ -354,6 +364,16 @@
           "command": "vebBuild.edk2Debug.clearSearch",
           "when": "view == vebBuildEdk2Modules",
           "group": "navigation@2"
+        },
+        {
+          "command": "vebBuild.edk2Debug.filterByModuleType",
+          "when": "view == vebBuildEdk2Modules",
+          "group": "navigation@3"
+        },
+        {
+          "command": "vebBuild.edk2Debug.filterByStatus",
+          "when": "view == vebBuildEdk2Modules",
+          "group": "navigation@4"
         }
       ],
       "view/item/context": [

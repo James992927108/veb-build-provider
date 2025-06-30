@@ -1,2 +1,2 @@
-// src/edk2Debug/providers/index.ts
+// src/edk2Debug/provider/index.ts
 export { Edk2ModuleProvider } from './edk2ModuleProvider';

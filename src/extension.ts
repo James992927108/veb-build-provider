@@ -50,7 +50,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'c' }, new Edk2CCompletionProvider());
     vscode.languages.registerCompletionItemProvider({ scheme: 'file', language: 'cpp' }, new Edk2CCompletionProvider());
 
-  // VSBuild commands and status bar
+    // VSBuild commands and status bar
     registerCommandWithLog(context, 'extension.InitTask', handleInitTask);
     registerCommandWithLog(context, 'extension.VebBuild', handleVebBuild);
     registerCommandWithLog(context, 'extension.VebReBuild', handleVebReBuild);
@@ -58,14 +58,14 @@ export function activate(context: vscode.ExtensionContext): void {
     // Register Status Bar (InitTask(F8), VebBuild(F7), VebReBuild(F9), terminateTerminal)
     registerStatusBarItems(context);
 
-  // Formatter and snippets
+    // Formatter and snippets
     registerCommandWithLog(context, 'formatter.Edk2Formatter', Edk2Formatter);
     registerCommandWithLog(context, 'SnippetTools.DebugToAsusPrint', () => new SnippetTools(vscode).DebugToAsusPrint());
     registerCommandWithLog(context, 'SnippetTools.AsusPrintToDebug', () => new SnippetTools(vscode).AsusPrintToDebug());
     registerCommandWithLog(context, 'extension.expandMakefileVars', () => { expandMakefileVars(); });
 
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    
+
     if (workspaceRoot) {
         // Initialize EDK2 module provider
         const edk2ModuleProvider = new Edk2ModuleProvider(workspaceRoot);
@@ -77,44 +77,29 @@ export function activate(context: vscode.ExtensionContext): void {
             canSelectMany: true
         });
 
-        // Scan command
-        const scanEdk2Command = vscode.commands.registerCommand(
-            'vebBuild.edk2Debug.scanProject',
-            async () => {
-                await edk2ModuleProvider.refresh();
-            }
-        );
+        // 🔥 新增：讓 provider 知道 TreeView 參考，以便更新 message
+        edk2ModuleProvider.setTreeView(edk2TreeView);
 
-        // Enhance module (placeholder for phase 3)
-        const enhanceModuleCommand = vscode.commands.registerCommand(
-            'vebBuild.edk2Debug.enhanceModule',
-            async (moduleNode) => {
-                if (moduleNode?.module) {
-                    // TODO: Implement module enhancement feature (phase 3)
-                    vscode.window.showInformationMessage(
-                        `Ready to enhance module: ${moduleNode.module.name}`
-                    );
-                }
-            }
-        );
+        // Unified command registration for EDK2 debug features
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.scanProject', async () => {
+            await edk2ModuleProvider.refresh();
+        });
 
-        // Show statistics
-        const showStatsCommand = vscode.commands.registerCommand(
-            'vebBuild.edk2Debug.showStatistics',
-            async () => {
-                const stats = await edk2ModuleProvider.getProjectStatistics();
-                const message = `EDK2 Module Statistics:\nTotal: ${stats.totalModules}\nEnhanced: ${stats.enhancedModules}`;
-                vscode.window.showInformationMessage(message);
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.enhanceModule', async (moduleNode) => {
+            if (moduleNode && moduleNode.filePath) {
+                logMessage(`Starting enhancement for module: ${moduleNode.baseName || moduleNode.filePath}`);
+                await edk2ModuleProvider.enhanceModule(moduleNode);
+                vscode.window.showInformationMessage(`Enhanced module: ${moduleNode.baseName || moduleNode.filePath}`);
             }
-        );
+        });
 
-        // Add to context.subscriptions
-        context.subscriptions.push(
-            edk2TreeView,
-            scanEdk2Command,
-            enhanceModuleCommand,
-            showStatsCommand
-        );
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.showStatistics', async () => {
+            const stats = await edk2ModuleProvider.getProjectStatistics();
+            const message = `EDK2 Module Statistics:\nTotal: ${stats.totalModules}\nEnhanced: ${stats.enhancedModules}`;
+            vscode.window.showInformationMessage(message);
+        });
+
+        context.subscriptions.push(edk2TreeView);
 
         // Inside activate function, after creating edk2ModuleProvider
         const searchCommand = vscode.commands.registerCommand(
@@ -124,7 +109,7 @@ export function activate(context: vscode.ExtensionContext): void {
                     prompt: 'Search EDK2 modules (name, type, path)',
                     placeHolder: 'Enter search term'
                 });
-                
+
                 if (searchTerm !== undefined) { // User didn't cancel
                     edk2ModuleProvider.searchModules(searchTerm);
                 }
@@ -143,6 +128,22 @@ export function activate(context: vscode.ExtensionContext): void {
             clearSearchCommand
         );
 
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByModuleType', async () => {
+            const types = Array.from(new Set(edk2ModuleProvider.getAllModulesSync().map(m => m.moduleType)));
+            const picked = await vscode.window.showQuickPick(['All', ...types], { placeHolder: 'Select ModuleType to filter' });
+            edk2ModuleProvider.setModuleTypeFilter(picked === 'All' ? undefined : picked);
+        });
+
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByStatus', async () => {
+            const picked = await vscode.window.showQuickPick(['All', 'Enhanced', 'Not Enhanced'], { placeHolder: 'Select status to filter' });
+            let status: 'all' | 'enhanced' | 'notEnhanced' = 'all';
+            if (picked === 'Enhanced') {
+                status = 'enhanced';
+            } else if (picked === 'Not Enhanced') {
+                status = 'notEnhanced';
+            }
+            edk2ModuleProvider.setStatusFilter(status);
+        });
         // Set workspace context
         vscode.commands.executeCommand('setContext', 'vebBuild.hasEdk2Workspace', true);
 
