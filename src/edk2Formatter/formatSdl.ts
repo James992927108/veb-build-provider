@@ -46,10 +46,10 @@ function formatSdl(filepath: string, fileEncoding: any): Promise<any> {
 
             if (line.match(patternSpace) || line.match(patternTab)) {
                 var i = line.indexOf('=');
-                logMessage("indexof \"=\" -> ",i);
+                logMessage(`indexof "=" -> ${i}`);
                 if (i > -1) {
                     var element = [line.slice(0, i).trim(), line.slice(i + 2).trim()]; // i + 2 for remove "="
-                    logMessage(element);
+                    logMessage(element.join(', '));
                     let spacesBetweenIdentifierAndLang: string = '';
                     let identifierNameLength = element[0].length;
                     let identifierLineMaxSpaceBehind = spaceOnSdlAfterNum - identifierNameLength; //Calculate spaces that needed between identifierName and #language

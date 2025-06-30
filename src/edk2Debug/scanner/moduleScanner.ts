@@ -69,7 +69,7 @@ export class ModuleScanner {
       const parser = new InfParser();
       return parser.parse(content, infPath);
     } catch (error) {
-      handleError(error as Error, `Rescan module error ${infPath}:`);
+      handleError(`Rescan module error ${infPath}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
       return null;
     }
   }
@@ -94,7 +94,7 @@ export class ModuleScanner {
     try {
       await this.scanDirectory(directory, infFiles, options, 0, progress, token);
     } catch (error) {
-      handleError(error as Error, `Scan directory error ${directory}:`);
+      handleError(`Scan directory error ${directory}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
 
     // Log all found INF file paths
@@ -154,7 +154,7 @@ export class ModuleScanner {
         }
       }
     } catch (error) {
-      handleError(error as Error, `Read directory error ${directory}:`);
+      handleError(`Read directory error ${directory}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
   }
 

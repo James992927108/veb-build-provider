@@ -27,7 +27,7 @@ function writeBacktoFile(filepath: string, fileEncoding: any, fileString: string
         .then(() => {
             logMessage('File created!');
         })
-        .catch(error => logMessage("error: ", error));
+        .catch(error => logMessage("error: " + error));
 
 }
 
@@ -89,12 +89,12 @@ export function Edk2Formatter() {
 
     if (activeEditor) {
         let filePath = activeEditor.document.uri.fsPath;
-        logMessage('filePath: ', filePath);
+        logMessage('filePath: ' + filePath);
 
         detectFileEncoding(filePath).then(function (fileEncoding) {
             switch (fileEncoding) {
                 case "UTF-16LE": {
-                    logMessage("fileEncoding is", fileEncoding);
+                    logMessage("fileEncoding is " + fileEncoding);
                     findMaxLength(filePath, fileEncoding).then(function (maxStringLength) {
                         formatUni(filePath, "utf16le", maxStringLength).then(function (fileString) {
                             writeBacktoFile(filePath, "utf16le", fileString); // Use correct BufferEncoding
@@ -111,7 +111,7 @@ export function Edk2Formatter() {
                     break;
                 }
                 default: {
-                    logMessage('Unsupported fileEncoding:', fileEncoding);
+                    logMessage(`Unsupported fileEncoding: ${fileEncoding}`);
                 }
             }
         }).catch(error => {

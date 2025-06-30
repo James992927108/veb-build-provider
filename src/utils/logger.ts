@@ -1,30 +1,68 @@
 // src/utils/logger.ts
-
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 
-// Create a global output channel
-export const outputChannel = vscode.window.createOutputChannel('Veb Build Provider');
+let outputChannel: vscode.OutputChannel;
+let logStream: fs.WriteStream | undefined;
 
-// Store original console.log
-const originalConsoleLog = console.log;
+/**
+ * Initialize logger, must be called once in activate(context)
+ */
+export function initLogger(context: vscode.ExtensionContext) {
+    outputChannel = vscode.window.createOutputChannel('veb-build-provider');
 
-// Define a unified logging function
-export function logMessage(...args: any[]): void {
-    const message = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-    ).join(' ');
-    
-    // Output to console (original behavior)
-    originalConsoleLog.apply(console, args);
-    
-    // Output to VS Code's output channel
-    outputChannel.appendLine(message);
+    // Generate log file name
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const fileName = `log-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}.txt`;
+
+    // Get log directory (ensure it exists)
+    const logDir = context.logUri.fsPath;
+    if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+    }
+    const logPath = path.join(logDir, fileName);
+
+    logStream = fs.createWriteStream(logPath, { flags: 'a', encoding: 'utf8' });
+    logMessage(`Logger initialized, writing to ${logPath}`);
 }
 
-// Error handling function
-export function handleError(error: Error, message: string): void {
-    const errorMsg = `${message}: ${error.message}`;
-    console.error(errorMsg);
-    logMessage(errorMsg);
-    vscode.window.showErrorMessage(errorMsg);
+/**
+ * Output message to Output Channel and log file
+ */
+export function logMessage(message: string) {
+    const now = new Date();
+    const timestamp = now.toISOString();
+    const fullMsg = `[${timestamp}] ${message}`;
+    if (outputChannel) {
+        outputChannel.appendLine(fullMsg);
+    }
+    if (logStream) {
+        logStream.write(fullMsg + '\n');
+    }
 }
+
+/**
+ * Output error message
+ */
+export function handleError(error: any) {
+    const msg = error instanceof Error ? error.stack || error.message : String(error);
+    logMessage(`ERROR: ${msg}`);
+}
+
+/**
+ * Close log stream
+ */
+export function disposeLogger() {
+    if (logStream) {
+        logStream.end();
+        logStream = undefined;
+    }
+    if (outputChannel) {
+        outputChannel.dispose();
+    }
+}
+
+// Export for extension.ts
+export { outputChannel };

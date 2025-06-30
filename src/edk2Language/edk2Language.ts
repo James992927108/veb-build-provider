@@ -236,7 +236,7 @@ export class Edk2InfDefinitionProvider implements vscode.DefinitionProvider {
             }
         }
 
-        logMessage(dest, dest.match(/^[a-zA-Z0-9_\/]+\.[a-zA-Z0-9]+$/g));
+        logMessage(`${dest} ${dest.match(/^[a-zA-Z0-9_\/]+\.[a-zA-Z0-9]+$/g)}`);
         if (dest.match(/^[\w\-\/]+\.[\w\-]+$/g)) {
             // format: ****.***
 

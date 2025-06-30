@@ -24,7 +24,7 @@ export async function readFile(filePath: string): Promise<string> {
         logMessage(`Successfully read file: ${filePath}`);
         return content;
     } catch (error) {
-        handleError(error as Error, `Failed to read file: ${filePath}`);
+        handleError(`Failed to read file: ${filePath}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
         return '';
     }
 }
@@ -39,7 +39,7 @@ export async function writeFile(filePath: string, content: string): Promise<void
         await fs.writeFile(filePath, content, 'utf8');
         logMessage(`Successfully wrote to file: ${filePath}`);
     } catch (error) {
-        handleError(error as Error, `Failed to write to file: ${filePath}`);
+        handleError(`Failed to write to file: ${filePath}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
 }
 
@@ -57,7 +57,7 @@ export async function copyFile(source: string, target: string): Promise<void> {
             await fs.copyFile(source, target);
             logMessage(`Copied ${source} to ${target} successfully`);
         } catch (error) {
-            handleError(error as Error, `Failed to copy file from ${source} to ${target}`);
+            handleError(`Failed to copy file from ${source} to ${target}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
         }
     }
 }

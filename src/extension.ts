@@ -1,10 +1,10 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { initLogger, disposeLogger, logMessage, handleError, outputChannel } from './utils/logger';
 import { Edk2FdfDefinitionProvider, Edk2DscDefinitionProvider, Edk2DecDefinitionProvider, Edk2InfDefinitionProvider, Edk2VfrDefinitionProvider } from './edk2Language/edk2Language';
 import { Edk2DscSymbolProvider, Edk2DecSymbolProvider, Edk2FdfSymbolProvider, Edk2InfSymbolProvider } from './edk2Language/edk2Language';
 import { Edk2CCompletionItemProvider as Edk2CCompletionProvider } from './edk2Language/edk2Language';
-import { logMessage, handleError, outputChannel } from './utils/logger';
 import { handleInitTask, handleVebBuild, handleVebReBuild } from './VebBuild/initTask';
 import { handleterminateTerminal } from './VebBuild/terminal';
 import { expandMakefileVars } from './tools/expandMakefileVars';
@@ -31,6 +31,7 @@ function registerCommandWithLog(
 
 
 export function activate(context: vscode.ExtensionContext): void {
+    initLogger(context);
     logMessage(`Extension activated at: ${new Date().toISOString()}`);
 
     outputChannel.show();
@@ -128,5 +129,5 @@ export function activate(context: vscode.ExtensionContext): void {
 
 export function deactivate(): void {
     logMessage(`Extension deactivated at: ${new Date().toISOString()}`);
-    outputChannel.dispose(); // Clean up output channel
+    disposeLogger();
 }

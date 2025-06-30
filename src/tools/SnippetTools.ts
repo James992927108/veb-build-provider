@@ -20,7 +20,7 @@ export class SnippetTools {
         if (activeEditor) {
             let filePath = activeEditor.document.uri.fsPath;
             let fileEncoding = "utf8";
-            logMessage('filePath', filePath);
+            logMessage('filePath: ' + filePath);
             this._DebugToAsusPrint(filePath, fileEncoding).then((fileString) => {
                 logMessage('DebugToAsusPrint');
                 this.writeBacktoFile(filePath, fileEncoding, fileString);
@@ -34,7 +34,7 @@ export class SnippetTools {
         if (activeEditor) {
             let filePath = activeEditor.document.uri.fsPath;
             let fileEncoding = "utf8";
-            logMessage('filePath', filePath);
+            logMessage('filePath: ' + filePath);
             this._AsusPrintToDebug(filePath, fileEncoding).then((fileString) => {
                 logMessage('AsusPrintToDebug');
                 this.writeBacktoFile(filePath, fileEncoding, fileString);
@@ -77,12 +77,12 @@ export class SnippetTools {
                 const patternTailString = new RegExp(/\s*\)\s*\)/);
                 // Replace DEBUG
                 if (line.match(patternDebugString)) {
-                    logMessage(lineno, line);
+                    logMessage(`[${lineno}] ${line}`);
                     line = line.replace(patternDebugString, 'ASUSPRINT(').replace(patternTailString, ')');
                     logMessage(line);
                 }
                 if (line.match(patternTraceString)) {
-                    logMessage(lineno, line);
+                    logMessage(`[${lineno}] ${line}`);
                     line = line.replace(patternTraceString, 'ASUSPRINT(').replace(patternTailString, ')');
                     logMessage(line);
                 }
@@ -138,7 +138,7 @@ export class SnippetTools {
                 const patternTailString = new RegExp(/\s*\);/);
                 // Replace DEBUG
                 if (line.match(patternDebugString)) {
-                    logMessage(lineno, line);
+                    logMessage(`[${lineno}] ${line}`);
                     line = line.replace(patternDebugString, 'DEBUG ((DEBUG_INFO, ').replace(patternTailString, '));');
                     logMessage(line);
                 }

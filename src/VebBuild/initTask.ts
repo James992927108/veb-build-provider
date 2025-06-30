@@ -155,7 +155,7 @@ async function createVscodeFolder(folderpath: string): Promise<void> {
         await fs.mkdir(vscodePath, { recursive: true });
         logMessage(".vscode folder created successfully");
     } catch (error) {
-        handleError(error as Error, "Failed to create .vscode folder");
+        handleError(`Failed to create .vscode folder: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
 }
 
@@ -165,13 +165,13 @@ async function writeTasksJson(folderpath: string, TaskfileUpdate: string): Promi
         logMessage("Successfully created tasks.json");
         vscode.window.showInformationMessage("Create tasks.json Success.");
     } catch (error) {
-        handleError(error as Error, "Failed to write tasks.json");
+        handleError(`Failed to write tasks.json: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
 }
 
 async function CreateBuildtask(folderpath: string, targetFiles: string[], start: number, end: number, showType: ShowType): Promise<void> {
     logMessage("Starting CreateBuildtask");
-    logMessage('Show Veb array from (%d) to (%d)', start, end);
+    logMessage(`Show Veb array from (${start}) to (${end})`);
     
     if (showType === ShowType.QuickPick) {
         const selection = await vscode.window.showQuickPick([...targetFiles.slice(start, end)], { placeHolder: 'Start Build for ?' });
@@ -223,7 +223,7 @@ export async function handleInitTask(): Promise<void> {
         } else {
             logMessage(`Error in handleInitTask: ${String(error)}`);
         }
-        handleError(error instanceof Error ? error : new Error(String(error)), "Unable to search for .veb files");
+        handleError(`Unable to search for .veb files: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
 }
 
@@ -248,7 +248,7 @@ async function checkAndExecuteTask(taskName: string, errorMessage: string): Prom
                 .filter(line => line.includes("label"))
                 .map(line => line.split(/"/)[3]);
 
-            logMessage(commandList);
+            logMessage(commandList.join(', '));
 
             const selection = await vscode.window.showQuickPick(commandList, { placeHolder: 'Select command from command list' });
             if (selection) {
