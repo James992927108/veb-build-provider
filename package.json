@@ -263,9 +263,21 @@
       },
       {
         "command": "vebBuild.edk2Debug.scanProject",
-        "title": "Scan EDK2 Project",
+        "title": "Rescan EDK2 Project",
+        "category": "VEB Build",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "vebBuild.edk2Debug.searchModules",
+        "title": "Search EDK2 Modules",
         "category": "VEB Build",
         "icon": "$(search)"
+      },
+      {
+        "command": "vebBuild.edk2Debug.clearSearch",
+        "title": "Clear Search",
+        "category": "VEB Build",
+        "icon": "$(close)"
       },
       {
         "command": "vebBuild.edk2Debug.enhanceModule",
@@ -331,7 +343,17 @@
         {
           "command": "vebBuild.edk2Debug.scanProject",
           "when": "view == vebBuildEdk2Modules",
-          "group": "navigation"
+          "group": "navigation@0"
+        },
+        {
+          "command": "vebBuild.edk2Debug.searchModules",
+          "when": "view == vebBuildEdk2Modules",
+          "group": "navigation@1"
+        },
+        {
+          "command": "vebBuild.edk2Debug.clearSearch",
+          "when": "view == vebBuildEdk2Modules",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [

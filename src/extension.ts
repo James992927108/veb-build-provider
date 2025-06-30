@@ -12,7 +12,7 @@ import { SnippetTools } from './tools/SnippetTools';
 import { Edk2Formatter } from './edk2Formatter/edk2Formatter';
 import { registerStatusBarItems } from './VebBuild/ui/statusBar';
 
-import { Edk2ModuleProvider } from './edk2Debug';
+import { Edk2ModuleProvider } from './edk2Debug/provider/edk2ModuleProvider';
 /**
  * Registers a VS Code command and adds it to the subscriptions.
  * @param context The extension context.
@@ -114,6 +114,33 @@ export function activate(context: vscode.ExtensionContext): void {
             scanEdk2Command,
             enhanceModuleCommand,
             showStatsCommand
+        );
+
+        // Inside activate function, after creating edk2ModuleProvider
+        const searchCommand = vscode.commands.registerCommand(
+            'vebBuild.edk2Debug.searchModules',
+            async () => {
+                const searchTerm = await vscode.window.showInputBox({
+                    prompt: 'Search EDK2 modules (name, type, path)',
+                    placeHolder: 'Enter search term'
+                });
+                
+                if (searchTerm !== undefined) { // User didn't cancel
+                    edk2ModuleProvider.searchModules(searchTerm);
+                }
+            }
+        );
+
+        const clearSearchCommand = vscode.commands.registerCommand(
+            'vebBuild.edk2Debug.clearSearch',
+            () => {
+                edk2ModuleProvider.clearSearch();
+            }
+        );
+        // Update context subscriptions
+        context.subscriptions.push(
+            searchCommand,
+            clearSearchCommand
         );
 
         // Set workspace context
