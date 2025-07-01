@@ -96,14 +96,14 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
     } else if (isLinux) {
         const Veb = selection.split('.')[0];
     
-        // 複製 Linux 用的環境設定腳本 PrepareEnvLinuxScript.sh
+        // Copy Linux environment setup script PrepareEnvLinuxScript.sh
         const sourceLinuxScript = path.join(vebExtension.extensionPath, "scripts", PREPARE_ENV_LINUX_SCRIPT);
         const targetLinuxScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_LINUX_SCRIPT));
         await copyFile(sourceLinuxScript, targetLinuxScriptPath);
         logMessage(`Copied Linux prepare script to ${targetLinuxScriptPath}`);
     
         const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
-        // 依需求可將 logFile 放置於 folderpath 或 folderpath/VSCODE_FOLDER (此處直接放在 folderpath)
+        // Place logFile in folderpath or folderpath/VSCODE_FOLDER as needed (here placed in folderpath)
         const logFilePath = escapePath(path.join(folderpath, logFile));
     
         const taskfileLinux = `{
@@ -141,7 +141,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
             targetLinuxScriptPath, logFilePath, Veb,
             targetLinuxScriptPath, logFilePath, Veb
         );
-    }else {
+    } else {
         throw new Error("Unsupported platform");
     }
 

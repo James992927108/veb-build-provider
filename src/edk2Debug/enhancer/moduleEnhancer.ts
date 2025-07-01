@@ -1,16 +1,15 @@
 // src/edk2Debug/enhancer/moduleEnhancer.ts
 import * as fs from 'fs';
-import * as path from 'path';
 import { Edk2InfMeta } from '../types';
 
 export class ModuleEnhancer {
   static async enhance(infMeta: Edk2InfMeta): Promise<boolean> {
-    // 1. 備份 INF
+    // 1. Backup INF file
     const infBackup = infMeta.filePath + '.bak';
     if (!fs.existsSync(infBackup)) {
       fs.copyFileSync(infMeta.filePath, infBackup);
     }
-    // 2. 讀取與修改 INF
+    // 2. Read and modify INF file
     let infContent = fs.readFileSync(infMeta.filePath, 'utf-8');
     if (!infContent.includes('EnhancedDebugLib')) {
       infContent = infContent.replace(
@@ -26,14 +25,14 @@ export class ModuleEnhancer {
     }
     fs.writeFileSync(infMeta.filePath, infContent, 'utf-8');
 
-    // 3. 處理 C 檔案
+    // 3. Process C source files
     for (const srcFile of infMeta.sourceFiles) {
       const cBackup = srcFile + '.bak';
       if (!fs.existsSync(cBackup)) {
         fs.copyFileSync(srcFile, cBackup);
       }
       let cContent = fs.readFileSync(srcFile, 'utf-8');
-      // 簡單範例：在 ENTRY_POINT 函數前插入 DEBUG_ENTRY，return 前插入 DEBUG_EXIT
+      // Simple example: Insert DEBUG_ENTRY before ENTRY_POINT function, insert DEBUG_EXIT before return
       if (infMeta.entryPoint && cContent.includes(infMeta.entryPoint)) {
         cContent = cContent.replace(
           new RegExp(`(${infMeta.entryPoint}\\s*\\([^)]*\\)\\s*\\{)`, 'm'),

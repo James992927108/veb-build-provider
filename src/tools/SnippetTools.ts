@@ -2,16 +2,14 @@ import * as vscode from 'vscode';
 import * as fs from "fs";
 import * as readline from "readline";
 import * as util from 'util';
-import { logMessage, handleError, outputChannel } from '../utils/logger';
+import { logMessage } from '../utils/logger';
 
 /**
- * 
- * @param filePath 
+ * SnippetTools provides methods to convert between DEBUG/TRACE and ASUSPRINT macros in source files.
  */
-
 export class SnippetTools {
     constructor(private vscodeInstance: typeof vscode) {
-        // 可以在构造函数中进行初始化操作
+        // Initialization can be performed in the constructor if needed
     }
 
     DebugToAsusPrint() {
@@ -46,12 +44,12 @@ export class SnippetTools {
         const line_counter = ((i = 0) => () => ++i)();
         return new Promise((resolve) => {
             /**
-             * create local variable
+             * Create local variable
              */
             let fileString: string = '';
 
             /**
-             * create read stream & readline interface
+             * Create read stream & readline interface
              */
             const readStream = fs.createReadStream(filepath);
             readStream.setEncoding(fileEncoding);
@@ -67,11 +65,10 @@ export class SnippetTools {
                 logMessage("readStream error");
                 resolve(null);
             });
-            //Add header file 
+            // Add header file 
             fileString = fileString + '#include <Library/AsusPrintLib.h>\r\n';
 
             rl.on("line", (line: string, lineno = line_counter()) => {
-                // 
                 const patternDebugString = new RegExp(/DEBUG\s*\(\s*\(.*?,\s*/);
                 const patternTraceString = new RegExp(/TRACE\s*\(\s*\(.*?,\s*/);
                 const patternTailString = new RegExp(/\s*\)\s*\)/);
@@ -93,7 +90,7 @@ export class SnippetTools {
              * readline event: `close` handler
              */
             rl.on("close", () => {
-                // closing readline and readStream
+                // Closing readline and readStream
                 rl.close();
                 readStream.destroy();
 
@@ -102,17 +99,17 @@ export class SnippetTools {
             });
         });
     }
-    private _AsusPrintToDebug(filepath: string, fileEncoding: any): Promise<any> {
 
+    private _AsusPrintToDebug(filepath: string, fileEncoding: any): Promise<any> {
         const line_counter = ((i = 0) => () => ++i)();
         return new Promise((resolve) => {
             /**
-             * create local variable
+             * Create local variable
              */
             let fileString: string = '';
 
             /**
-             * create read stream & readline interface
+             * Create read stream & readline interface
              */
             const readStream = fs.createReadStream(filepath);
             readStream.setEncoding(fileEncoding);
@@ -130,13 +127,13 @@ export class SnippetTools {
             });
 
             rl.on("line", (line: string, lineno = line_counter()) => {
-                //Remove header file 
+                // Remove header file 
                 if (lineno === 1) {
                     return;
                 }
                 const patternDebugString = new RegExp(/ASUSPRINT\s*\(/);
                 const patternTailString = new RegExp(/\s*\);/);
-                // Replace DEBUG
+                // Replace ASUSPRINT with DEBUG
                 if (line.match(patternDebugString)) {
                     logMessage(`[${lineno}] ${line}`);
                     line = line.replace(patternDebugString, 'DEBUG ((DEBUG_INFO, ').replace(patternTailString, '));');
@@ -149,7 +146,7 @@ export class SnippetTools {
              * readline event: `close` handler
              */
             rl.on("close", () => {
-                // closing readline and readStream
+                // Closing readline and readStream
                 rl.close();
                 readStream.destroy();
 
@@ -166,6 +163,5 @@ export class SnippetTools {
                 logMessage('File created success!');
             })
             .catch(error => logMessage(error));
-
     }
 }

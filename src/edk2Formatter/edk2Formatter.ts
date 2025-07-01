@@ -20,7 +20,6 @@ function detectFileEncoding(filepath: string): Promise<string> {
 }
 
 function writeBacktoFile(filepath: string, fileEncoding: any, fileString: string) {
-
     const writeFile = util.promisify(fs.writeFile);
 
     writeFile(filepath, fileString, { encoding: fileEncoding })
@@ -28,20 +27,15 @@ function writeBacktoFile(filepath: string, fileEncoding: any, fileString: string
             logMessage('File created!');
         })
         .catch(error => logMessage("error: " + error));
-
 }
 
 function findMaxLength(filepath: string, fileEncoding: any): Promise<any> {
     return new Promise((resolve) => {
-        /**
-         * create local variable
-         */
+        // Create local variable
         let maxLength = 0;
         let currentLength = 0;
 
-        /**
-         * create read stream & readline interface
-         */
+        // Create read stream & readline interface
         const readStream = fs.createReadStream(filepath);
         readStream.setEncoding(fileEncoding);
         const rl = readline.createInterface({
@@ -49,9 +43,7 @@ function findMaxLength(filepath: string, fileEncoding: any): Promise<any> {
             crlfDelay: Infinity,
         });
 
-        /**
-         * readline event: `line` handler
-         */
+        // readline event: `line` handler
         readStream.once("error", function (err) {
             logMessage("readStream error");
             resolve(null);
@@ -67,11 +59,9 @@ function findMaxLength(filepath: string, fileEncoding: any): Promise<any> {
             }
         });
 
-        /**
-         * readline event: `close` handler
-         */
+        // readline event: `close` handler
         rl.on("close", () => {
-            // closing readline and readStream
+            // Closing readline and readStream
             rl.close();
             readStream.destroy();
 
@@ -80,8 +70,9 @@ function findMaxLength(filepath: string, fileEncoding: any): Promise<any> {
         });
     });
 }
+
 /**
- * 
+ * Format the currently active file in the editor based on its encoding.
  * @param filePath 
  */
 export function Edk2Formatter() {

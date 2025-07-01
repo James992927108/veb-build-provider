@@ -6,7 +6,7 @@ import { ONE_SPACE, HASH_STRING, HASH_LANGUAGE } from "../constants";
 function formatUni(filepath: string, fileEncoding: any, maxStringLength: number): Promise<any> {
     return new Promise(resolve => {
         /**
-         * create local variable
+         * Create local variables
          */
         let genSpaceCurrentNum: number = 0;
         const config = vscode.workspace.getConfiguration('formatter');
@@ -20,7 +20,7 @@ function formatUni(filepath: string, fileEncoding: any, maxStringLength: number)
         let identifierValue: string;
 
         /**
-         * 產生user自行定義的空白數
+         * Generate user-defined number of spaces
          */
         for (genSpaceCurrentNum = 0; genSpaceCurrentNum < speceOnUniNum; genSpaceCurrentNum++) {
             speceOnUniStr += ONE_SPACE;
@@ -28,14 +28,14 @@ function formatUni(filepath: string, fileEncoding: any, maxStringLength: number)
 
         const langLineMaxSpaceAheadNum: number = maxStringLength + (HASH_STRING.length) + speceOnUniNum;
         /**
-         * 產生只有#language行的切齊點
+         * Generate alignment point for lines with only #language
          */
         for (genSpaceCurrentNum = 0; genSpaceCurrentNum < langLineMaxSpaceAheadNum; genSpaceCurrentNum++) {
             langLineMaxSpaceAhead += ONE_SPACE;
         }
 
         /**
-         * create read stream & readline interface
+         * Create read stream & readline interface
          */
         const readStream = fs.createReadStream(filepath);
         readStream.setEncoding(fileEncoding);
@@ -50,28 +50,28 @@ function formatUni(filepath: string, fileEncoding: any, maxStringLength: number)
         readStream.once('error', _ => resolve(null));
         rl.on("line", (line: string) => {
 
-            const patternString = new RegExp(/^#string/); //開頭是#string
-            const patternLanguage = new RegExp((/^#language/)); //開頭是#language
-            const patternComment = new RegExp(/^\/\//); //開頭是//
+            const patternString = new RegExp(/^#string/); // Line starts with #string
+            const patternLanguage = new RegExp((/^#language/)); // Line starts with #language
+            const patternComment = new RegExp(/^\/\//); // Line starts with //
             let spacesBetweenIdentifierAndLang: string = '';
-            if (line.match(patternString)) //這個判斷式處理開頭為#string的行
+            if (line.match(patternString)) // Handle lines starting with #string
             {
                 identifierName = line.split("#string")[1].trim().split(/\s+/)[0];
-                identifierNameLength = identifierName.length;//計算 #string後面接的字串的長度(e.g., #string ACPI_STR, 會計算ACPI_STR的長度，也就是8)
-                identifierLineMaxSpaceBehind = maxStringLength - identifierNameLength; //Calculate spaces that needed between identifierName and #language
+                identifierNameLength = identifierName.length; // Calculate the length of the string after #string (e.g., #string ACPI_STR, calculates length of ACPI_STR, which is 8)
+                identifierLineMaxSpaceBehind = maxStringLength - identifierNameLength; // Calculate spaces needed between identifierName and #language
                 for (genSpaceCurrentNum = 0; genSpaceCurrentNum < identifierLineMaxSpaceBehind; genSpaceCurrentNum++) {
                     spacesBetweenIdentifierAndLang += ONE_SPACE;
-                }// 此迴圈將當前identifierName後面的空白補得和該檔案內identifierName長度最長者一樣
+                } // This loop pads spaces after identifierName to match the longest identifierName in the file
 
-                spacesBetweenIdentifierAndLang = spacesBetweenIdentifierAndLang + speceOnUniStr; //將identifierName 和 #language中間加8個空白
-                identifierValue = line.trim().split(HASH_LANGUAGE)[1]; //!!!Notice!!! this string got ONE space ahead
+                spacesBetweenIdentifierAndLang = spacesBetweenIdentifierAndLang + speceOnUniStr; // Add user-defined spaces between identifierName and #language
+                identifierValue = line.trim().split(HASH_LANGUAGE)[1]; // !!!Notice!!! this string has ONE space ahead
                 fileString = fileString + HASH_STRING + identifierName + spacesBetweenIdentifierAndLang + HASH_LANGUAGE + identifierValue + '\r\n';
             }
-            else if (line.trim().match(patternLanguage)) //這段處理前面是一堆空白接#language的行
+            else if (line.trim().match(patternLanguage)) // Handle lines with leading spaces followed by #language
             {
                 fileString = fileString + langLineMaxSpaceAhead + line.trim() + '\r\n';
             }
-            else if (line.trim() === '') //將只有Tab或/和space的行換成一換行符號
+            else if (line.trim() === '') // Replace lines with only Tab or / and space with a newline
             {
                 fileString += '\r\n';
             }
@@ -84,7 +84,7 @@ function formatUni(filepath: string, fileEncoding: any, maxStringLength: number)
          * readline event: `close` handler
          */
         rl.on('close', () => {
-            // closing readline and readStream
+            // Closing readline and readStream
             rl.close();
             readStream.destroy();
 

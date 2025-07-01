@@ -13,6 +13,7 @@ import { Edk2Formatter } from './edk2Formatter/edk2Formatter';
 import { registerStatusBarItems } from './VebBuild/ui/statusBar';
 
 import { Edk2ModuleProvider } from './edk2Debug/provider/edk2ModuleProvider';
+
 /**
  * Registers a VS Code command and adds it to the subscriptions.
  * @param context The extension context.
@@ -28,7 +29,6 @@ function registerCommandWithLog(
     context.subscriptions.push(disposable);
     logMessage(`Registered command: ${commandId}`);
 }
-
 
 export function activate(context: vscode.ExtensionContext): void {
     initLogger(context);
@@ -77,7 +77,7 @@ export function activate(context: vscode.ExtensionContext): void {
             canSelectMany: true
         });
 
-        // 🔥 新增：讓 provider 知道 TreeView 參考，以便更新 message
+        // Let provider know TreeView reference for updating message
         edk2ModuleProvider.setTreeView(edk2TreeView);
 
         // Unified command registration for EDK2 debug features

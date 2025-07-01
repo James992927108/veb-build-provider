@@ -5,9 +5,11 @@ import { logMessage, handleError, outputChannel } from '../utils/logger';
 import { spawn } from 'child_process';
 import { EXTENSION_ID } from '../constants';
 
-// 處理擴展 Makefile 變數的函數
+/**
+ * Function to expand Makefile variables.
+ */
 export async function expandMakefileVars(): Promise<void> {
-    // 獲取當前活動的編輯器
+    // Get the currently active editor
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage("No active editor found.");
@@ -15,8 +17,8 @@ export async function expandMakefileVars(): Promise<void> {
         return;
     }
 
-    const filePath = editor.document.uri.fsPath; // 例如 "build\token.mak"
-    const fileDir = path.dirname(filePath); // 提取目錄 "build"
+    const filePath = editor.document.uri.fsPath; // e.g. "build\token.mak"
+    const fileDir = path.dirname(filePath); // Extract directory "build"
 
     logMessage(`Starting expandMakefileVars for file: ${filePath}`);
 

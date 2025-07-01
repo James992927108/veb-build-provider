@@ -51,13 +51,13 @@ export class ModuleScanner {
     }
   }
 
-  // Added missing scanWorkspace method
+  // Scan all INF files in the workspace
   async scanWorkspace(workspaceRoot?: string): Promise<string[]> {
     const targetRoot = workspaceRoot || this.workspaceRoot;
     return this.scanInfFiles();
   }
 
-  // Added missing rescanModule method
+  // Rescan a single INF module
   async rescanModule(infPath: string): Promise<Edk2InfMeta | null> {
     try {
       if (!await this.fileExists(infPath)) {
@@ -97,7 +97,7 @@ export class ModuleScanner {
       handleError(`Scan directory error ${directory}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
 
-    // 🔥 簡化 log 輸出，只記錄基本資訊
+    // Simplified log output, only record basic information
     logMessage(`Scanning completed: found ${infFiles.length} INF files in workspace.`);
 
     return infFiles;
@@ -126,9 +126,7 @@ export class ModuleScanner {
         const fullPath = path.join(directory, file.name);
         const relativePath = path.relative(this.workspaceRoot, fullPath);
 
-        // Log each directory and file being checked
-        // logMessage(`Checking: ${relativePath}`);
-
+        // Log excluded files by pattern
         if (this.matchesPatterns(relativePath, options.excludePatterns)) {
           logMessage(`Excluded by pattern: ${relativePath}`);
           continue;
@@ -136,13 +134,11 @@ export class ModuleScanner {
 
         if (file.isDirectory() && options.recursive) {
           progress?.report({ message: `Scanning directory: ${relativePath}` });
-          // logMessage(`Entering directory: ${relativePath}`);
           await this.scanDirectory(fullPath, infFiles, options, currentDepth + 1, progress, token);
         } else if (file.isFile()) {
           // Only files with the .inf extension (case-insensitive) are included
           if (path.extname(file.name).toLowerCase() === '.inf') {
             infFiles.push(fullPath);
-            // logMessage(`INF file found: ${fullPath}`);
             progress?.report?.({ message: `Module found: ${file.name}` });
           }
         }

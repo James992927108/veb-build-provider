@@ -20,7 +20,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
     private filterModuleType: string | undefined = undefined;
     private filterStatus: 'all' | 'enhanced' | 'notEnhanced' = 'all';
 
-    // 🔥 新增：TreeView 參考，用於更新訊息
+    // Reference to TreeView for updating messages
     private treeView?: vscode.TreeView<Edk2InfMeta>;
 
     constructor(private workspaceRoot: string) {
@@ -28,16 +28,16 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
         this.projectAnalyzer = new ProjectAnalyzer(workspaceRoot);
     }
 
-    // 🔥 新增：設定 TreeView 參考
+    // Set TreeView reference
     setTreeView(treeView: vscode.TreeView<Edk2InfMeta>) {
         this.treeView = treeView;
     }
 
-    // 🔥 修正：統一的篩選邏輯，並更新 TreeView 訊息
+    // Unified filter logic and update TreeView message
     private applyAllFilters(): Edk2InfMeta[] {
         let filtered = this.modules;
 
-        // 1. 套用搜尋條件
+        // 1. Apply search filter
         if (this.searchTerm) {
             const term = this.searchTerm.toLowerCase();
             filtered = filtered.filter(m =>
@@ -48,12 +48,12 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
             );
         }
 
-        // 2. 套用 ModuleType 篩選
+        // 2. Apply ModuleType filter
         if (this.filterModuleType) {
             filtered = filtered.filter(m => m.moduleType === this.filterModuleType);
         }
 
-        // 3. 套用 Status 篩選
+        // 3. Apply Status filter
         if (this.filterStatus === 'enhanced') {
             filtered = filtered.filter(m => m.enhanced);
         } else if (this.filterStatus === 'notEnhanced') {
@@ -65,7 +65,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
         return filtered;
     }
 
-    // 🔥 新增：更新 TreeView 訊息
+    // Update TreeView message
     private updateTreeViewMessage() {
         if (!this.treeView) return;
 
@@ -94,10 +94,9 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
         }
 
         this.treeView.message = message;
-
     }
 
-    // 🔥 修正：getChildren 使用統一篩選邏輯
+    // getChildren uses unified filter logic
     getChildren(element?: Edk2InfMeta): Thenable<Edk2InfMeta[]> {
         if (!element) {
             return Promise.resolve(this.applyAllFilters());
@@ -105,7 +104,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
         return Promise.resolve([]);
     }
 
-    // 🔥 修正：refresh 方法
+    // refresh method
     refresh(): Promise<void> {
         return this.scanModules().then(() => {
             this.applyAllFilters();
@@ -113,21 +112,21 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
         });
     }
 
-    // 🔥 修正：搜尋方法
+    // Search method
     searchModules(searchTerm: string): void {
         this.searchTerm = searchTerm.toLowerCase().trim();
         this.applyAllFilters();
         this._onDidChangeTreeData.fire();
     }
 
-    // 🔥 修正：清除搜尋方法
+    // Clear search method
     clearSearch(): void {
         this.searchTerm = '';
         this.applyAllFilters();
         this._onDidChangeTreeData.fire();
     }
 
-    // 🔥 修正：篩選方法
+    // Filter by module type
     setModuleTypeFilter(type: string | undefined) {
         this.filterModuleType = type;
         this.applyAllFilters();
@@ -144,7 +143,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
         return this.modules;
     }
 
-    // 🔥 方案一：增加詳細的錯誤記錄 - 修改 scanModules 方法
+    // Enhanced error logging - scanModules method
     async scanModules(): Promise<void> {
         try {
             if (this.workspaceRoot) {
@@ -156,7 +155,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                     const result = await this.moduleScanner.scanWorkspace(this.workspaceRoot);
                     const metas: Edk2InfMeta[] = [];
 
-                    // 🔥 新增：失敗檔案記錄
+                    // Record failed files
                     const failedFiles: Array<{ path: string, reason: string }> = [];
                     let successCount = 0;
 
@@ -176,7 +175,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                                 metas.push(meta);
                                 successCount++;
                             } else {
-                                // 🔥 記錄解析失敗但沒有拋出異常的檔案
+                                // Record files that failed to parse but did not throw
                                 failedFiles.push({
                                     path: infPath,
                                     reason: 'INF file parsing returned null (missing BASE_NAME or MODULE_TYPE)'
@@ -184,7 +183,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                                 logMessage(`INF Parse Failed: ${infPath} - Missing required fields`);
                             }
                         } catch (error) {
-                            // 🔥 記錄解析時拋出異常的檔案
+                            // Record files that threw during parsing
                             const errorMessage = error instanceof Error ? error.message : String(error);
                             failedFiles.push({
                                 path: infPath,
@@ -196,13 +195,13 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
 
                     this.modules = metas;
 
-                    // 🔥 詳細的統計記錄輸出
+                    // Detailed statistics log output
                     logMessage(`=== EDK2 Debug Scanning Results ===`);
                     logMessage(`Total INF files found by scanner: ${result.length}`);
                     logMessage(`Successfully parsed INF files: ${successCount}`);
                     logMessage(`Failed to parse INF files: ${failedFiles.length}`);
 
-                    // 🔥 輸出失敗檔案清單
+                    // Output failed file list
                     if (failedFiles.length > 0) {
                         logMessage(`\n=== Failed INF Files List ===`);
                         failedFiles.forEach((failed, index) => {
@@ -211,7 +210,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                         });
                         logMessage(`=== End of Failed Files List ===\n`);
 
-                        // 🔥 在 VSCode 通知中顯示摘要
+                        // Show summary in VSCode notification
                         logMessageWithLevel(
                             `EDK2 Scan completed: ${successCount} successful, ${failedFiles.length} failed. Check OUTPUT for details.`,
                             'warn'
@@ -224,7 +223,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                     }
                 });
             } else {
-                // 🔥 處理沒有 progress 的情況（同樣加入錯誤記錄）
+                // Handle case without progress (also with error logging)
                 const result = await this.moduleScanner.scanWorkspace(this.workspaceRoot);
                 const metas: Edk2InfMeta[] = [];
                 const failedFiles: Array<{ path: string, reason: string }> = [];
@@ -255,7 +254,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
 
                 this.modules = metas;
 
-                // 🔥 詳細統計記錄（無 progress 版本）
+                // Detailed statistics log (no progress version)
                 logMessage(`=== EDK2 Debug Scanning Results ===`);
                 logMessage(`Total INF files found by scanner: ${result.length}`);
                 logMessage(`Successfully parsed INF files: ${successCount}`);
@@ -281,7 +280,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                 }
             }
 
-            // 按模組類型和名稱排序
+            // Sort by module type and name
             this.modules.sort((a, b) => {
                 if (a.moduleType !== b.moduleType) {
                     return a.moduleType.localeCompare(b.moduleType);
@@ -289,7 +288,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                 return a.baseName.localeCompare(b.baseName);
             });
 
-            // 🔥 套用篩選並更新訊息
+            // Apply filters and update message
             this.applyAllFilters();
 
         } catch (error) {
@@ -299,7 +298,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
         }
     }
 
-    // 其他現有方法保持不變...
+    // Other existing methods remain unchanged...
     getTreeItem(element: Edk2InfMeta): vscode.TreeItem {
         const item = new vscode.TreeItem(element.baseName, vscode.TreeItemCollapsibleState.None);
 

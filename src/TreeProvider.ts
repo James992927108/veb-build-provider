@@ -1,43 +1,42 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { join } from 'path';
-import { log } from 'console';
 const path = require('path');
 
-let projectPath: string = ""; // 存project的路徑，例如:D:\BIOS\CometLake\
-let vebCifFile: string[] = []; // 存Veb裡所有的cif檔的路徑(不包含project路徑)
-let allCifFile: string[] = []; // 存veb檔[files]底下全部的cif檔案(文字檔轉成單一string)
-let openedCifPosition: number[] = []; // 存已經被加到treeview上的cif陣列位置，已利後續將其不再加到treeview上
+let projectPath: string = ""; // Store the project path, e.g.: D:\BIOS\CometLake\
+let vebCifFile: string[] = []; // Store all cif file paths in Veb (excluding project path)
+let allCifFile: string[] = []; // Store all cif files under [files] in veb (as single string)
+let openedCifPosition: number[] = []; // Store the positions of cif files already added to the treeview, to avoid duplicates
 let allTreesNode: MyTreeNode[] = [];
 let orphanCif: string[] = [], orphanName: string[] = [];
 let missingFile: string[] = [];
 missingFile.push("-----------------Missing File Log-----------------");
 
 /**
- * 匹配指定的正則並返回匹配項的索引
- * @param data - 要在其中進行匹配的字串
- * @param pattern - 正則表達式
- * @param startPosition - 查找開始的索引
- * @returns 如果匹配到則返回匹配字串的索引，否則返回 -1
+ * Match the specified regex and return the index of the match
+ * @param data - The string to match in
+ * @param pattern - Regular expression
+ * @param startPosition - Start index for search
+ * @returns Index of the matched string, or -1 if not found
  */
 function getMatchIndex(data: string, pattern: RegExp, startPosition: number = 0): number {
     const matchResult = data.match(pattern);
     if (matchResult && matchResult[0]) {
         return data.indexOf(matchResult[0], startPosition);
     }
-    return -1; // 如果沒有匹配到，返回 -1
+    return -1; // Return -1 if not matched
 }
 
 export class MyTreeProvider implements vscode.TreeDataProvider<MyTreeNode>
 {
-    public static tree: MyTreeNode[] = []; //第一層tree node
-    public static files: MyTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object
-    public static infFiles: MyTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (inf資料專用)
-    public static infSourcesFiles: MyTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (inf的[Sources]資料專用)
-    public static infSourcesFiles1: MyTreeFilesNode[] = []; //myTreeNode底下的Files屬性object (inf的[Sources]資料專用)
-    public static infBinariesFile: MyTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (inf的[Binaries]資料專用)
-    public static infBinariesFile1: MyTreeFilesNode[] = []; //myTreeNode底下的Files屬性object (inf的[Binaries]資料專用)
-    public static cifFiles: MyTreeFilesNode[][] = []; //myTreeNode底下的Files屬性object (cif資料專用)
+    public static tree: MyTreeNode[] = []; // First level tree node
+    public static files: MyTreeFilesNode[][] = []; // Files property object under myTreeNode
+    public static infFiles: MyTreeFilesNode[][] = []; // Files property object for inf data
+    public static infSourcesFiles: MyTreeFilesNode[][] = []; // Files property object for [Sources] in inf
+    public static infSourcesFiles1: MyTreeFilesNode[] = []; // Files property object for [Sources] in inf
+    public static infBinariesFile: MyTreeFilesNode[][] = []; // Files property object for [Binaries] in inf
+    public static infBinariesFile1: MyTreeFilesNode[] = []; // Files property object for [Binaries] in inf
+    public static cifFiles: MyTreeFilesNode[][] = []; // Files property object for cif data
     public static decFiles: MyTreeFilesNode[] = [];
 
     public static lastOpenedFile: string | undefined;
@@ -48,7 +47,7 @@ export class MyTreeProvider implements vscode.TreeDataProvider<MyTreeNode>
     public static initMyTreeList() {
         let myTreeProvider = new MyTreeProvider();
         const treeView = vscode.window.createTreeView("fileExplorer", { treeDataProvider: myTreeProvider, showCollapseAll: true });
-        vscode.commands.registerCommand('fileExplorer.openFile', (resource) => this.openResource(resource)); //註冊指令，按下treeitem後要開啟檔案的指令
+        vscode.commands.registerCommand('fileExplorer.openFile', (resource) => this.openResource(resource)); // Register command to open file when treeitem is clicked
         vscode.commands.registerCommand('rightclick.openFile', (resource) => this.openCifInfResource(resource));
         vscode.commands.registerCommand('rightclick.copyfilepath', (resource) => this.copyFilePath(resource));
         vscode.commands.registerCommand('rightclick.openFolder', (resource) => {
@@ -87,8 +86,8 @@ export class MyTreeProvider implements vscode.TreeDataProvider<MyTreeNode>
             }
         });
 
-        let editorUri: vscode.Uri | undefined = vscode.window.activeTextEditor?.document.uri; //取正在開啟中編輯頁面檔案的uri
-        let editorPath = editorUri?.fsPath; // 取開啟中編輯頁面檔案的檔案路徑
+        let editorUri: vscode.Uri | undefined = vscode.window.activeTextEditor?.document.uri; // Get the uri of the currently open editor file
+        let editorPath = editorUri?.fsPath; // Get the file path of the currently open editor file
         let tmpArr: string[] | undefined;
         if (editorPath) {
             if (editorPath.indexOf('.veb') !== -1) {
@@ -141,7 +140,7 @@ export class MyTreeProvider implements vscode.TreeDataProvider<MyTreeNode>
                     }
                     if (!exist) {
                         let cifPath = projectPath + vebCifFile[i];
-                        if (fs.existsSync(cifPath)) { //只找沒有在任何[parts]底下的
+                        if (fs.existsSync(cifPath)) { // Only find those not under any [parts]
                             handleOrphan(cifPath);
                         }
                     }
@@ -159,7 +158,7 @@ export class MyTreeProvider implements vscode.TreeDataProvider<MyTreeNode>
                     }
                     if (!exist) {
                         let cifPath = projectPath + vebCifFile[i];
-                        if (fs.existsSync(cifPath)) { //只找最上層的node(.cif)
+                        if (fs.existsSync(cifPath)) { // Only find top-level node (.cif)
                             let orphanPositionBack = 0;
                             orphanPositionBack = handleCif(cifPath, vebCifFile[i], index, i);
                             index++;
@@ -193,7 +192,7 @@ export class MyTreeProvider implements vscode.TreeDataProvider<MyTreeNode>
         if (file.charAt(0) === '/') {file = file.substr(1);}
         vscode.env.clipboard.writeText(file);
     }
-    static openResource(resource: vscode.Uri): void { //執行指令的method
+    static openResource(resource: vscode.Uri): void { // Method to execute command
         let file = resource.path;
         if (file.charAt(0) === '/') {file = file.substr(1);}
         let uri = vscode.Uri.parse('file:///' + file);
@@ -208,7 +207,7 @@ export class MyTreeProvider implements vscode.TreeDataProvider<MyTreeNode>
             vscode.commands.executeCommand('workbench.action.reloadWindow');
         }
     }
-    static openCifInfResource(resource: any): void { //執行指令的method
+    static openCifInfResource(resource: any): void { // Method to execute command
         let file = resource.Path;
         if (file.charAt(0) === '/') {file = file.substr(1);}
         let uri = vscode.Uri.parse('file:///' + file);
@@ -246,7 +245,7 @@ export class MyTreeProvider implements vscode.TreeDataProvider<MyTreeNode>
 
     public getTreeItem(element: MyTreeNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
         /*
-            !Condition Token 判斷寫在這
+            !Condition Token check here
         */
         let file = element.Path;
         if (file.charAt(0) === '/') {file = file.substr(1);}
@@ -753,7 +752,7 @@ export function handleParts(elementAllCifFile: string, count: number, index: num
                         .replace(/"/g, '') // 移除雙引號
                         .replace(/=/g, '') // 移除等號
                         .split('#')[0]     // 取井號前的內容
-                        .trim();            // 去除首尾空白
+                        .trim();           // 去除首尾空白
                     
                     partsSoureceFile.push(cleanedValue);
                 }
@@ -979,7 +978,7 @@ export function handleINF(elementLocalRoot: any, elementInfName: any, count: num
                 else { //沒有..
                     let tmpLocalRootSplit = tmpElementLocalRoot.split('\\');
                     let tmpLocalRoot: string[] = [];
-                    for (let j = 0, k = 0; j < tmpLocalRootSplit.length - 1; j++) {
+                    for (let j = 0, k = 0; j < tmpLocalRootSplit.length; j++) {
                         if (tmpLocalRootSplit[j] !== "") {
                             tmpLocalRoot[k] = tmpLocalRootSplit[j];
                             k++;
