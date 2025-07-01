@@ -14,7 +14,8 @@
   ],
   "main": "./out/extension.js",
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onLanguage:inf"
   ],
   "contributes": {
     "keybindings": [
@@ -79,14 +80,19 @@
         }
       },
       {
-        "command": "edk2Debug.scanProject",
+        "command": "vebBuild.edk2Debug.scanProject",
         "key": "ctrl+shift+f8",
         "mac": "cmd+shift+f8"
       },
       {
-        "command": "edk2Debug.enhanceModule",
+        "command": "vebBuild.edk2Debug.enhanceModule",
         "key": "ctrl+shift+f7",
         "mac": "cmd+shift+f7"
+      },
+      {
+        "command": "vebBuild.edk2Debug.restoreModuleEnhance",
+        "key": "ctrl+shift+f6",
+        "mac": "cmd+shift+f6"
       }
     ],
     "languages": [
@@ -286,6 +292,12 @@
         "icon": "$(debug-alt)"
       },
       {
+        "command": "vebBuild.edk2Debug.restoreModuleEnhance",
+        "title": "Restore Enhanced Module Debug",
+        "category": "VEB Build",
+        "icon": "$(history)"
+      },
+      {
         "command": "vebBuild.edk2Debug.showStatistics",
         "title": "Show EDK2 Statistics",
         "category": "VEB Build",
@@ -377,6 +389,18 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "vebBuild.edk2Debug.enhanceModule",
+          "when": "view == vebBuildEdk2Modules && viewItem == edk2Module",
+          "group": "navigation"
+        },
+        {
+          "command": "vebBuild.edk2Debug.restoreModuleEnhance",
+          "when": "view == vebBuildEdk2Modules && viewItem == edk2Module",
+          "group": "navigation"
+        }
+      ],
+      "view/item/inline": [
         {
           "command": "vebBuild.edk2Debug.enhanceModule",
           "when": "view == vebBuildEdk2Modules && viewItem == edk2Module",

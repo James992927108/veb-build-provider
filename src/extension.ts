@@ -13,6 +13,7 @@ import { Edk2Formatter } from './edk2Formatter/edk2Formatter';
 import { registerStatusBarItems } from './VebBuild/ui/statusBar';
 
 import { Edk2ModuleProvider } from './edk2Debug/provider/edk2ModuleProvider';
+import { ModuleEnhancer } from './edk2Debug/enhancer/moduleEnhancer';
 
 /**
  * Registers a VS Code command and adds it to the subscriptions.
@@ -80,6 +81,45 @@ export function activate(context: vscode.ExtensionContext): void {
         // Let provider know TreeView reference for updating message
         edk2ModuleProvider.setTreeView(edk2TreeView);
 
+        let lastActiveInfPath: string | undefined = undefined;
+
+        vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+            if (!editor) {
+                return;
+            }
+            const filePath = editor.document.uri.fsPath;
+            if (!filePath.toLowerCase().endsWith('.inf')) {
+                return;
+            }
+
+            lastActiveInfPath = filePath;
+
+            // If the Veb Build TreeView is visible, immediately sync highlight
+            if (edk2TreeView.visible) {
+                const module = await edk2ModuleProvider.getModuleByPath(filePath);
+                if (module) {
+                    try {
+                        await edk2TreeView.reveal(module, { select: true, focus: true, expand: false });
+                    } catch (err) {
+                        // ignore
+                    }
+                }
+            }
+        });
+
+        edk2TreeView.onDidChangeVisibility(async (e) => {
+            if (e.visible && lastActiveInfPath) {
+                const module = await edk2ModuleProvider.getModuleByPath(lastActiveInfPath);
+                if (module) {
+                    try {
+                        await edk2TreeView.reveal(module, { select: true, focus: true, expand: false });
+                    } catch (err) {
+                        // ignore
+                    }
+                }
+            }
+        });
+
         // Unified command registration for EDK2 debug features
         registerCommandWithLog(context, 'vebBuild.edk2Debug.scanProject', async () => {
             await edk2ModuleProvider.refresh();
@@ -92,6 +132,29 @@ export function activate(context: vscode.ExtensionContext): void {
                 vscode.window.showInformationMessage(`Enhanced module: ${moduleNode.baseName || moduleNode.filePath}`);
             }
         });
+
+        // Register restore command
+        const restoreEnhanceCommand = vscode.commands.registerCommand(
+            'vebBuild.edk2Debug.restoreModuleEnhance',
+            async (moduleNode) => {
+                if (!moduleNode?.filePath) {
+                    return;
+                }
+                const meta = await edk2ModuleProvider.getModuleByPath(moduleNode.filePath);
+                if (!meta) {
+                    vscode.window.showWarningMessage('Cannot restore: module not found.');
+                    return;
+                }
+                const result = await ModuleEnhancer.restore(meta);
+                if (result.success) {
+                    vscode.window.showInformationMessage('Restore complete.');
+                    await edk2ModuleProvider.refresh();
+                } else {
+                    vscode.window.showWarningMessage('Restore failed:\n' + result.errors.join('\n'));
+                }
+            }
+        );
+        context.subscriptions.push(restoreEnhanceCommand);
 
         registerCommandWithLog(context, 'vebBuild.edk2Debug.showStatistics', async () => {
             const stats = await edk2ModuleProvider.getProjectStatistics();

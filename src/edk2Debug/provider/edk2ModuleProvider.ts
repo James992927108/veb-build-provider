@@ -28,6 +28,11 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
         this.projectAnalyzer = new ProjectAnalyzer(workspaceRoot);
     }
 
+    getParent(element: Edk2InfMeta): Edk2InfMeta | undefined {
+        // Your modules are flat structure, no parent
+        return undefined;
+    }
+
     // Set TreeView reference
     setTreeView(treeView: vscode.TreeView<Edk2InfMeta>) {
         this.treeView = treeView;
@@ -67,7 +72,9 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
 
     // Update TreeView message
     private updateTreeViewMessage() {
-        if (!this.treeView) return;
+        if (!this.treeView) {
+            return;
+        }
 
         const totalCount = this.modules.length;
         const filteredCount = this.filteredModules.length;
@@ -141,6 +148,11 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
 
     getAllModulesSync(): Edk2InfMeta[] {
         return this.modules;
+    }
+
+    getElementByFilePath(filePath: string): Edk2InfMeta | undefined {
+        // Use modules for global search to ensure all modules are included
+        return this.modules.find(m => m.filePath === filePath);
     }
 
     // Enhanced error logging - scanModules method
