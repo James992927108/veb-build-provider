@@ -67,7 +67,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
         const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
 
         const TaskfileWindows = `{
-    "version": "2.0.0",
+    "version": "3.0.0",
     "tasks": [
         {
             "label": "VebBuildTask",
@@ -107,7 +107,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
         const logFilePath = escapePath(path.join(folderpath, logFile));
     
         const taskfileLinux = `{
-            "version": "2.0.0",
+            "version": "3.0.0",
             "tasks": [
                 {
                     "label": "VebBuildTask",
