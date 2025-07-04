@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { initLogger, disposeLogger, logMessage, handleError, outputChannel } from './utils/logger';
 import { Edk2FdfDefinitionProvider, Edk2DscDefinitionProvider, Edk2DecDefinitionProvider, Edk2InfDefinitionProvider, Edk2VfrDefinitionProvider } from './edk2Language/edk2Language';
 import { Edk2DscSymbolProvider, Edk2DecSymbolProvider, Edk2FdfSymbolProvider, Edk2InfSymbolProvider } from './edk2Language/edk2Language';
@@ -14,6 +15,11 @@ import { registerStatusBarItems } from './VebBuild/ui/statusBar';
 
 import { Edk2ModuleProvider } from './edk2Debug/provider/edk2ModuleProvider';
 import { ModuleEnhancer } from './edk2Debug/enhancer/moduleEnhancer';
+
+// 新增日誌分析相關import
+import { LogAnalyzer } from './edk2Debug/analyzer/logAnalyzer';
+import { HTMLReportGenerator } from './edk2Debug/visualization/htmlReportGenerator';
+import { JSONLogParser } from './edk2Debug/analyzer/jsonLogParser';
 
 /**
  * Registers a VS Code command and adds it to the subscriptions.
@@ -36,6 +42,7 @@ export function activate(context: vscode.ExtensionContext): void {
     logMessage(`Extension activated at: ${new Date().toISOString()}`);
 
     outputChannel.show();
+    
     // Edk2 language provider
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_fdf' }, new Edk2FdfDefinitionProvider());
     vscode.languages.registerDefinitionProvider({ scheme: 'file', language: 'edk2_dsc' }, new Edk2DscDefinitionProvider());
@@ -56,6 +63,7 @@ export function activate(context: vscode.ExtensionContext): void {
     registerCommandWithLog(context, 'extension.VebBuild', handleVebBuild);
     registerCommandWithLog(context, 'extension.VebReBuild', handleVebReBuild);
     registerCommandWithLog(context, 'extension.terminateTerminal', handleterminateTerminal);
+    
     // Register Status Bar (InitTask(F8), VebBuild(F7), VebReBuild(F9), terminateTerminal)
     registerStatusBarItems(context);
 
@@ -70,6 +78,10 @@ export function activate(context: vscode.ExtensionContext): void {
     if (workspaceRoot) {
         // Initialize EDK2 module provider
         const edk2ModuleProvider = new Edk2ModuleProvider(workspaceRoot);
+        
+        // Initialize Log Analyzer
+        const logAnalyzer = new LogAnalyzer(workspaceRoot);
+        const htmlReportGenerator = new HTMLReportGenerator();
 
         // Tree view for EDK2 modules
         const edk2TreeView = vscode.window.createTreeView('vebBuildEdk2Modules', {
@@ -162,9 +174,249 @@ export function activate(context: vscode.ExtensionContext): void {
             vscode.window.showInformationMessage(message);
         });
 
+        // === 新增日誌分析相關命令 ===
+        
+        // 1. 日誌檔案分析命令
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.analyzeLogFile', async () => {
+            const fileUri = await vscode.window.showOpenDialog({
+                canSelectFiles: true,
+                canSelectFolders: false,
+                canSelectMany: false,
+                openLabel: '選擇日誌檔案進行分析',
+                filters: {
+                    'Log Files': ['log', 'txt', 'json'],
+                    'All Files': ['*']
+                }
+            });
+
+            if (fileUri && fileUri[0]) {
+                const logFilePath = fileUri[0].fsPath;
+                logMessage(`開始分析日誌檔案: ${logFilePath}`);
+                
+                try {
+                    await vscode.window.withProgress({
+                        location: vscode.ProgressLocation.Notification,
+                        title: "分析日誌檔案中...",
+                        cancellable: false
+                    }, async (progress) => {
+                        progress.report({ increment: 10, message: "正在解析日誌格式..." });
+                        
+                        const analysisResult = await logAnalyzer.analyzeLogFile(logFilePath);
+                        
+                        progress.report({ increment: 50, message: "正在生成分析報告..." });
+                        
+                        const reportPath = path.join(path.dirname(logFilePath), `analysis_report_${Date.now()}.html`);
+                        await htmlReportGenerator.generateDebugReport(analysisResult, reportPath);
+                        
+                        progress.report({ increment: 100, message: "分析完成" });
+                        
+                        const openReport = await vscode.window.showInformationMessage(
+                            `日誌分析完成！\n總函數數量: ${analysisResult.performance.totalFunctions}\n錯誤數量: ${analysisResult.errors.length}`,
+                            '開啟報告', '在瀏覽器中開啟'
+                        );
+                        
+                        if (openReport === '開啟報告') {
+                            const doc = await vscode.workspace.openTextDocument(reportPath);
+                            await vscode.window.showTextDocument(doc);
+                        } else if (openReport === '在瀏覽器中開啟') {
+                            vscode.env.openExternal(vscode.Uri.file(reportPath));
+                        }
+                    });
+                } catch (error) {
+                    vscode.window.showErrorMessage(`日誌分析失敗: ${error}`);
+                    logMessage(`日誌分析錯誤: ${error}`);
+                }
+            }
+        });
+
+        // 2. 即時日誌解析命令
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.parseLogLine', async () => {
+            const logLine = await vscode.window.showInputBox({
+                prompt: '輸入日誌行進行解析測試',
+                placeHolder: '例如: 2024-01-01T12:00:00.000Z [MODULE] DEBUG_ENTRY: FunctionName()'
+            });
+
+            if (logLine) {
+                try {
+                    const parsedEntry = JSONLogParser.parseLogLine(logLine);
+                    if (parsedEntry) {
+                        const result = `解析結果:\n` +
+                            `時間戳: ${parsedEntry.timestamp}\n` +
+                            `模組: ${parsedEntry.module}\n` +
+                            `函數: ${parsedEntry.function}\n` +
+                            `等級: ${parsedEntry.level}\n` +
+                            `訊息: ${parsedEntry.message}`;
+                        vscode.window.showInformationMessage(result);
+                    } else {
+                        vscode.window.showWarningMessage('無法解析該日誌行，請檢查格式是否正確。');
+                    }
+                } catch (error) {
+                    vscode.window.showErrorMessage(`解析錯誤: ${error}`);
+                }
+            }
+        });
+
+        // 3. 效能分析命令
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.showPerformanceAnalysis', async () => {
+            const fileUri = await vscode.window.showOpenDialog({
+                canSelectFiles: true,
+                canSelectFolders: false,
+                canSelectMany: false,
+                openLabel: '選擇日誌檔案進行效能分析',
+                filters: {
+                    'Log Files': ['log', 'txt', 'json'],
+                    'All Files': ['*']
+                }
+            });
+
+            if (fileUri && fileUri[0]) {
+                try {
+                    const analysisResult = await logAnalyzer.analyzeLogFile(fileUri[0].fsPath);
+                    const perf = analysisResult.performance;
+                    
+                    let message = `效能分析結果:\n`;
+                    message += `總函數數量: ${perf.totalFunctions}\n`;
+                    if (perf.bootTime) {
+                        message += `啟動時間: ${perf.bootTime}ms\n`;
+                    }
+                    if (perf.criticalPath && perf.criticalPath.length > 0) {
+                        message += `關鍵路徑: ${perf.criticalPath.slice(0, 3).join(' -> ')}${perf.criticalPath.length > 3 ? '...' : ''}\n`;
+                    }
+                    
+                    // 顯示前5個最耗時的函數
+                    const topFunctions = Object.entries(perf.functionMetrics)
+                        .sort(([,a], [,b]) => b.avgDuration - a.avgDuration)
+                        .slice(0, 5);
+                    
+                    if (topFunctions.length > 0) {
+                        message += `\n最耗時函數 (前5名):\n`;
+                        topFunctions.forEach(([name, metrics], index) => {
+                            message += `${index + 1}. ${name}: 平均 ${metrics.avgDuration.toFixed(2)}ms\n`;
+                        });
+                    }
+                    
+                    vscode.window.showInformationMessage(message, { modal: true });
+                } catch (error) {
+                    vscode.window.showErrorMessage(`效能分析失敗: ${error}`);
+                }
+            }
+        });
+
+        // 4. 批量日誌分析命令
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.batchAnalyzeLogs', async () => {
+            const folderUri = await vscode.window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                openLabel: '選擇包含日誌檔案的資料夾'
+            });
+
+            if (folderUri && folderUri[0]) {
+                const folderPath = folderUri[0].fsPath;
+                const fs = require('fs');
+                const logFiles = fs.readdirSync(folderPath)
+                    .filter((file: string) => /\.(log|txt|json)$/i.test(file))
+                    .map((file: string) => path.join(folderPath, file));
+
+                if (logFiles.length === 0) {
+                    vscode.window.showWarningMessage('在指定資料夾中沒有找到日誌檔案。');
+                    return;
+                }
+
+                const batchReportPath = path.join(folderPath, `batch_analysis_${Date.now()}.html`);
+                let batchResults: any[] = [];
+
+                await vscode.window.withProgress({
+                    location: vscode.ProgressLocation.Notification,
+                    title: "批量分析日誌檔案...",
+                    cancellable: false
+                }, async (progress) => {
+                    for (let i = 0; i < logFiles.length; i++) {
+                        const logFile = logFiles[i];
+                        progress.report({ 
+                            increment: (i / logFiles.length) * 100, 
+                            message: `正在分析: ${path.basename(logFile)}` 
+                        });
+
+                        try {
+                            const result = await logAnalyzer.analyzeLogFile(logFile);
+                            batchResults.push({
+                                fileName: path.basename(logFile),
+                                filePath: logFile,
+                                summary: result.summary,
+                                performance: result.performance,
+                                errorCount: result.errors.length
+                            });
+                        } catch (error) {
+                            logMessage(`批量分析失敗 - ${logFile}: ${error}`);
+                        }
+                    }
+                });
+
+                // 生成批量分析報告
+                const batchSummary = {
+                    title: '批量日誌分析報告',
+                    generatedAt: new Date().toLocaleString('zh-TW'),
+                    totalFiles: logFiles.length,
+                    successfulAnalysis: batchResults.length,
+                    results: batchResults
+                };
+
+                // 簡單的批量報告模板
+                const batchReportHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>批量日誌分析報告</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .summary { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .file-result { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>${batchSummary.title}</h1>
+    <div class="summary">
+        <h2>摘要</h2>
+        <p>生成時間: ${batchSummary.generatedAt}</p>
+        <p>總檔案數: ${batchSummary.totalFiles}</p>
+        <p>成功分析: ${batchSummary.successfulAnalysis}</p>
+    </div>
+    <h2>詳細結果</h2>
+    ${batchResults.map(result => `
+        <div class="file-result">
+            <h3>${result.fileName}</h3>
+            <table>
+                <tr><th>項目</th><th>值</th></tr>
+                <tr><td>總函數數</td><td>${result.performance.totalFunctions}</td></tr>
+                <tr><td>錯誤數量</td><td>${result.errorCount}</td></tr>
+                ${result.performance.bootTime ? `<tr><td>啟動時間</td><td>${result.performance.bootTime}ms</td></tr>` : ''}
+            </table>
+        </div>
+    `).join('')}
+</body>
+</html>`;
+
+                fs.writeFileSync(batchReportPath, batchReportHtml, 'utf-8');
+                
+                const openReport = await vscode.window.showInformationMessage(
+                    `批量分析完成！成功分析 ${batchResults.length}/${logFiles.length} 個檔案`,
+                    '開啟批量報告'
+                );
+                
+                if (openReport === '開啟批量報告') {
+                    vscode.env.openExternal(vscode.Uri.file(batchReportPath));
+                }
+            }
+        });
+
         context.subscriptions.push(edk2TreeView);
 
-        // Inside activate function, after creating edk2ModuleProvider
+        // Existing search and filter commands
         const searchCommand = vscode.commands.registerCommand(
             'vebBuild.edk2Debug.searchModules',
             async () => {
@@ -173,7 +425,7 @@ export function activate(context: vscode.ExtensionContext): void {
                     placeHolder: 'Enter search term'
                 });
 
-                if (searchTerm !== undefined) { // User didn't cancel
+                if (searchTerm !== undefined) {
                     edk2ModuleProvider.searchModules(searchTerm);
                 }
             }
@@ -185,7 +437,7 @@ export function activate(context: vscode.ExtensionContext): void {
                 edk2ModuleProvider.clearSearch();
             }
         );
-        // Update context subscriptions
+
         context.subscriptions.push(
             searchCommand,
             clearSearchCommand
@@ -207,6 +459,7 @@ export function activate(context: vscode.ExtensionContext): void {
             }
             edk2ModuleProvider.setStatusFilter(status);
         });
+
         // Set workspace context
         vscode.commands.executeCommand('setContext', 'vebBuild.hasEdk2Workspace', true);
 

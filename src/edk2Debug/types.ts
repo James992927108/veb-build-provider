@@ -1,5 +1,7 @@
 // src/edk2Debug/types.ts
 
+// --- EDK2 專案核心型別 ---
+
 export interface Edk2InfMeta {
   baseName: string;
   moduleType: Edk2ModuleType;
@@ -63,3 +65,67 @@ export type InfMeta = Edk2InfMeta;
 export type ModuleType = Edk2ModuleType;
 export type Architecture = Edk2Architecture;
 export type ScanOptions = Edk2ScanOptions;
+
+// --- 日誌分析與可視化相關型別 ---
+
+export interface DebugLogEntry {
+  timestamp: string;
+  module: string;
+  function: string;
+  level: 'ENTRY' | 'EXIT' | 'INFO' | 'ERROR';
+  message: string;
+  data?: any;
+}
+
+export interface CallChainNode {
+  function: string;
+  module: string;
+  timestamp: string;
+  duration?: number;
+  children: CallChainNode[];
+  performance: {
+    entryTime: number;
+    exitTime?: number;
+    duration?: number;
+  };
+}
+
+export interface PerformanceMetrics {
+  totalFunctions: number;
+  functionMetrics: {
+    [functionName: string]: {
+      callCount: number;
+      totalDuration: number;
+      avgDuration: number;
+      maxDuration: number;
+      minDuration: number;
+    };
+  };
+  bootTime?: number;
+  criticalPath?: string[];
+}
+
+export interface AnalysisResult {
+  summary: {
+    totalEntries: number;
+    totalFunctions: number;
+    totalDuration: number;
+    errorCount: number;
+    analysisTime: string;
+  };
+  callChains: CallChainNode[];
+  performance: PerformanceMetrics;
+  errors: Array<{
+    timestamp: string;
+    function: string;
+    module: string;
+    message: string;
+  }>;
+  timeline: Array<{
+    timestamp: string;
+    function: string;
+    module: string;
+    type: 'entry' | 'exit';
+    duration?: number;
+  }>;
+}

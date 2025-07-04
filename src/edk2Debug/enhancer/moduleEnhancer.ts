@@ -140,8 +140,11 @@ export class ModuleEnhancer {
       let braceCnt = 1;
       let idx = funcRegex.lastIndex;
       while (braceCnt > 0 && idx < code.length) {
-        if (code[idx] === '{') braceCnt++;
-        else if (code[idx] === '}') braceCnt--;
+        if (code[idx] === '{') {
+          braceCnt++;
+        } else if (code[idx] === '}') {
+          braceCnt--;
+        }
         idx++;
       }
 

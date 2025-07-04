@@ -93,6 +93,11 @@
         "command": "vebBuild.edk2Debug.restoreModuleEnhance",
         "key": "ctrl+shift+f6",
         "mac": "cmd+shift+f6"
+      },
+      {
+        "command": "vebBuild.edk2Debug.analyzeLogFile",
+        "key": "ctrl+shift+f5",
+        "mac": "cmd+shift+f5"
       }
     ],
     "languages": [
@@ -312,6 +317,30 @@
         "command": "vebBuild.edk2Debug.filterByStatus",
         "title": "Filter by Enhancement Status",
         "icon": "$(filter)"
+      },
+      {
+        "command": "vebBuild.edk2Debug.analyzeLogFile",
+        "title": "Analyze Log File",
+        "category": "VEB Build",
+        "icon": "$(file-text)"
+      },
+      {
+        "command": "vebBuild.edk2Debug.parseLogLine",
+        "title": "Parse Log Line",
+        "category": "VEB Build",
+        "icon": "$(debug-line-by-line)"
+      },
+      {
+        "command": "vebBuild.edk2Debug.showPerformanceAnalysis",
+        "title": "Show Performance Analysis",
+        "category": "VEB Build",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "vebBuild.edk2Debug.batchAnalyzeLogs",
+        "title": "Batch Analyze Logs",
+        "category": "VEB Build",
+        "icon": "$(folder-opened)"
       }
     ],
     "viewsContainers": {
@@ -386,6 +415,11 @@
           "command": "vebBuild.edk2Debug.filterByStatus",
           "when": "view == vebBuildEdk2Modules",
           "group": "navigation@4"
+        },
+        {
+          "command": "vebBuild.edk2Debug.analyzeLogFile",
+          "when": "view == vebBuildEdk2Modules",
+          "group": "navigation@5"
         }
       ],
       "view/item/context": [
@@ -405,6 +439,24 @@
           "command": "vebBuild.edk2Debug.enhanceModule",
           "when": "view == vebBuildEdk2Modules && viewItem == edk2Module",
           "group": "inline"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "vebBuild.edk2Debug.analyzeLogFile",
+          "when": "vebBuild.hasEdk2Workspace"
+        },
+        {
+          "command": "vebBuild.edk2Debug.parseLogLine",
+          "when": "vebBuild.hasEdk2Workspace"
+        },
+        {
+          "command": "vebBuild.edk2Debug.showPerformanceAnalysis",
+          "when": "vebBuild.hasEdk2Workspace"
+        },
+        {
+          "command": "vebBuild.edk2Debug.batchAnalyzeLogs",
+          "when": "vebBuild.hasEdk2Workspace"
         }
       ]
     },
@@ -439,6 +491,21 @@
           "type": "boolean",
           "default": true,
           "description": "Show scan progress"
+        },
+        "vebBuild.logAnalyzer.pythonPath": {
+          "type": "string",
+          "default": "python3",
+          "description": "Path to Python executable for log analysis"
+        },
+        "vebBuild.logAnalyzer.autoOpenReport": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically open analysis report after completion"
+        },
+        "vebBuild.logAnalyzer.maxFileSize": {
+          "type": "number",
+          "default": 100,
+          "description": "Maximum log file size in MB for analysis"
         }
       }
     }
