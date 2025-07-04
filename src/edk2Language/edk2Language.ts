@@ -46,7 +46,7 @@ export class Common {
 
     static getRootPath(): string[] {
         if (vscode.workspace.workspaceFolders) {
-            let config = vscode.workspace.getConfiguration('edk2-vscode');
+            let config = vscode.workspace.getConfiguration('vebBuild.language');
             let folder: string[] = [vscode.workspace.workspaceFolders[0].uri.fsPath];
 
             if (config.has('root.extend.path')) {
@@ -62,7 +62,7 @@ export class Common {
 
     static buildDsc(...args: any[]) {
         let os = require('os');
-        let config = vscode.workspace.getConfiguration('edk2-vscode');
+        let config = vscode.workspace.getConfiguration('vebBuild.language');
         let parameter = ' -p ' +
             args[0].path.substring((os.platform() === 'win32' ? 1 : 0)) +   // windows: \d:\xxxxx ; linux /home/xxxxx
             ' -t ' +
@@ -81,7 +81,7 @@ export class Common {
     static goToBuild(...args: any[]) {
         let openExplorer = require('open-file-explorer');
         let os = require('os');
-        let config = vscode.workspace.getConfiguration('edk2-vscode');
+        let config = vscode.workspace.getConfiguration('vebBuild.language');
 
         if (vscode.workspace.workspaceFolders) {
             let inf = args[0].path.substring((os.platform() === 'win32' ? 1 : 0) + vscode.workspace.workspaceFolders[0].uri.fsPath.length).replace(/.inf$/g, '');
@@ -113,7 +113,7 @@ export class Common {
     }
 
     static getDebugMessage(): string {
-        let config = vscode.workspace.getConfiguration('edk2-vscode');
+        let config = vscode.workspace.getConfiguration('vebBuild.language');
         let prefix = config.get('debug.prefix');
         if (prefix !== '') {
             prefix = prefix + ' ';

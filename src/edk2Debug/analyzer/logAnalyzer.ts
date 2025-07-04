@@ -9,7 +9,7 @@ export class LogAnalyzer {
     private workspaceRoot: string;
 
     constructor(workspaceRoot: string) {
-        const config = vscode.workspace.getConfiguration('amiEdk2Debug');
+        const config = vscode.workspace.getConfiguration('vebBuild.logAnalyzer');
         this.pythonPath = config.get('pythonPath', 'python3');
         this.workspaceRoot = workspaceRoot;
     }

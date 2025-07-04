@@ -464,19 +464,19 @@
       "type": "object",
       "title": "veb-build-provider",
       "properties": {
-        "formatter.speceOnUni": {
+        "vebBuild.formatter.speceOnUni": {
           "type": "number",
           "default": 8,
           "minimum": 1,
           "description": "Provide space numbers between max length Token and LanguageCodes"
         },
-        "formatter.spaceOnSdlBefore": {
+        "vebBuild.formatter.spaceOnSdlBefore": {
           "type": "number",
           "default": 4,
           "minimum": 1,
           "description": "Provide space numbers before the string"
         },
-        "formatter.spaceOnSdlAfter": {
+        "vebBuild.formatter.spaceOnSdlAfter": {
           "type": "number",
           "default": 15,
           "minimum": 1,

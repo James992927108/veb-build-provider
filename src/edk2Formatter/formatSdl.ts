@@ -10,7 +10,7 @@ function formatSdl(filepath: string, fileEncoding: any): Promise<any> {
          * create local variable
          */
         let genSpaceCurrentNum: number = 0;
-        const config = vscode.workspace.getConfiguration('formatter');
+        const config = vscode.workspace.getConfiguration('vebBuild.formatter');
         const spaceOnSdlBeforeNum = config['spaceOnSdlBefore'];
         const spaceOnSdlAfterNum = config['spaceOnSdlAfter'];
         let spaceOnSdlStr: string = '';

@@ -9,7 +9,7 @@ function formatUni(filepath: string, fileEncoding: any, maxStringLength: number)
          * Create local variables
          */
         let genSpaceCurrentNum: number = 0;
-        const config = vscode.workspace.getConfiguration('formatter');
+        const config = vscode.workspace.getConfiguration('vebBuild.formatter');
         const speceOnUniNum = config['speceOnUni'];
         let speceOnUniStr: string = '';
         let langLineMaxSpaceAhead: string = '';
