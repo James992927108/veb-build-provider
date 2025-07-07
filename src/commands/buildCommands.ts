@@ -6,7 +6,7 @@ import * as util from 'util';
 import * as fs from 'fs/promises';
 import { logMessage, handleError } from '../utils/logger';
 import { readFile, writeFile, copyFile, escapePath } from '../utils/file';
-import { EXTENSION_ID } from '../constants';
+import { EXTENSION_ID } from '../utils/constants';
 import { registerCommandWithLog } from '../utils/commandRegistry';
 
 const VSCODE_FOLDER = ".vscode";

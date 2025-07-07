@@ -36,15 +36,15 @@ npm run compile
 
 ### 指令與快捷鍵
 
-| 指令名稱                   | 指令 ID                         | 預設快捷鍵   | 適用語言/條件                         | 功能說明                                 |
-| -------------------------- | ------------------------------- | ------------ | ------------------------------------- | ---------------------------------------- |
-| 初始化任務                 | `vebBuild.buildTool.initTask`            | F8           | 全域                                  | 初始化 VEB 專案相關任務                  |
-| 建置 VEB 專案              | `vebBuild.buildTool.vebBuild`            | F7           | 全域                                  | 執行 VEB 專案建置                        |
-| 重建 VEB 專案              | `vebBuild.buildTool.vebReBuild`          | F9           | 全域                                  | 清理並重新建置 VEB 專案                  |
-| EDK2/Bios 語言格式化       | `formatter.Edk2Formatter`       | Shift+Alt+F  | `BiosLanguage_sdl` 或 `edk2_uni` 檔案 | 格式化 EDK2/Bios 語言檔案                |
-| 插入 Debug User Snippet    | `editor.action.insertSnippet`   | Ctrl+F1      | C/C++ 檔案                            | 插入自定義 debug_user snippet            |
-| 插入 Debug Start Snippet   | `editor.action.insertSnippet`   | Ctrl+F2      | C/C++ 檔案                            | 插入自定義 debug_start snippet           |
-| 插入 Debug End Snippet     | `editor.action.insertSnippet`   | Ctrl+F3      | C/C++ 檔案                            | 插入自定義 debug_end snippet             |
+| 指令名稱                 | 指令 ID                         | 預設快捷鍵  | 適用語言/條件                         | 功能說明                       |
+| ------------------------ | ------------------------------- | ----------- | ------------------------------------- | ------------------------------ |
+| 初始化任務               | `vebBuild.buildTool.initTask`   | F8          | 全域                                  | 初始化 VEB 專案相關任務        |
+| 建置 VEB 專案            | `vebBuild.buildTool.vebBuild`   | F7          | 全域                                  | 執行 VEB 專案建置              |
+| 重建 VEB 專案            | `vebBuild.buildTool.vebReBuild` | F9          | 全域                                  | 清理並重新建置 VEB 專案        |
+| EDK2/Bios 語言格式化     | `vebBuild.formatter.formatEdk2` | Shift+Alt+F | `BiosLanguage_sdl` 或 `edk2_uni` 檔案 | 格式化 EDK2/Bios 語言檔案      |
+| 插入 Debug User Snippet  | `editor.action.insertSnippet`   | Ctrl+F1     | C/C++ 檔案                            | 插入自定義 debug_user snippet  |
+| 插入 Debug Start Snippet | `editor.action.insertSnippet`   | Ctrl+F2     | C/C++ 檔案                            | 插入自定義 debug_start snippet |
+| 插入 Debug End Snippet   | `editor.action.insertSnippet`   | Ctrl+F3     | C/C++ 檔案                            | 插入自定義 debug_end snippet   |
 
 - **命令面板呼叫**：按下 `Ctrl+Shift+P`，輸入 `VEB`，即可看到所有相關指令。
 - **自訂快捷鍵**：可於 VS Code 的 `keybindings.json` 新增或修改快捷鍵。
@@ -97,66 +97,33 @@ MIT License
 ## 專案結構
 
 ```專案結構
-├── scripts/                     # 外部腳本與自動化工具
-│   ├── ExpandMakefileVars.py
-│   ├── PrepareEnvLinuxScript.sh
-│   └── PrepareEnvScript.bat
-│
-├── src/                         # TypeScript 主程式碼
-│   ├── edk2Formatter/           # EDK2 格式化相關模組
-│   │   ├── edk2Formatter.ts
-│   │   ├── formatSdl.ts
-│   │   └── formatUni.ts
-│   │
-│   ├── edk2Language/            # EDK2 語言支援
-│   │   └── edk2Language.ts
-│   │
-│   ├── tools/                   # 開發輔助工具
-│   │   ├── expandMakefileVars.ts
-│   │   └── SnippetTools.ts
-│   │
-│   ├── utils/                   # 共用工具
-│   │   ├── file.ts
-│   │   └── logger.ts
-│   │
-│   ├── VebBuild/                # VEB 專案初始化與建置
-│   │   ├── initTask.ts
-│   │   └── terminal.ts
-│   │
-│   ├── constants.ts             # 全域常數
-│   ├── extension.ts             # VS Code Extension 入口
-│   └── TreeProvider.ts          # 樹狀結構 UI 元件
-│
-├── syntaxes/                    # VS Code 語法高亮設定
-│
-├── temp/                        # 暫存資料夾
-│
-├── Tool/                        # 外部工具（如 tee.exe）
-│   └── tee.exe
-│
-├── .eslintrc.json               # ESLint 設定
-├── .gitignore                   # Git 忽略清單
-├── package.json                 # NPM 專案設定
-├── package-lock.json            # NPM 鎖定檔
-└── README.md                    # 專案說明文件
-
-src/
-├── edk2Debug/                    # 新增的 EDK2 Debug 主模組
-│   ├── index.ts                 # 模組出口
-│   ├── types.ts                 # 型別定義
-│   ├── constants.ts             # 常數定義
-│   ├── scanner/                 # 掃描子模組
-│   │   ├── index.ts
-│   │   ├── infParser.ts         # INF 檔案解析器
-│   │   ├── moduleScanner.ts     # 模組掃描器
-│   │   └── projectAnalyzer.ts   # 專案分析器
-│   └── provider/                # 資料提供者
-│       ├── index.ts
-│       └── edk2ModuleProvider.ts # 模組樹狀視圖提供者
-├── utils/                       # 現有工具模組（擴展）
-│   ├── logger.ts               # 擴展日誌功能
-│   └── file.ts                 # 擴展檔案處理
-└── extension.ts                # 主擴展檔案（整合命令）
+.
+├── .vscode/                       # VSCode 設定
+├── .github/                       # GitHub Actions, Issue 與 PR 模板
+├── src/
+│   ├── commands/                  # 所有 VSCode Command 的註冊與實作
+│   │   ├── buildCommands.ts
+│   │   ├── formatterCommands.ts
+│   │   ├── edk2DebugCommands.ts
+│   │   ├── logAnalysisCommands.ts
+│   │   └── index.ts
+│   ├── providers/                 # 語言服務 Providers（Definition/Symbol/Completion）
+│   │   └── languageProviders.ts
+│   ├── utils/                     # 共用工具函式（Logger、Command Registry 等）
+│   │   ├── commandRegistry.ts
+│   │   ├── logger.ts
+│   │   ├── constants.ts           # 全域常數定義
+│   │   └── file.ts
+│   ├── edk2Debug/                 # EDK2 除錯相關核心邏輯
+│   ├── edk2Formatter/             # EDK2 程式碼格式化實作
+│   ├── edk2Language/              # EDK2 語言功能（Definition/Symbol/Completion Providers）
+│   ├── tools/                     # 各式輔助工具（SnippetTools、Makefile 變數展開等）
+│   ├── ui/                        # UI 元件（StatusBar, TreeView Icons 等）
+│   └── extension.ts               # Extension 啟動與停用程式碼
+├── README.md                      # 專案說明與此處結構文件
+├── package.json
+├── tsconfig.json
+└── .gitignore
 
 ```
 

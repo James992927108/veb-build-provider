@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { logMessage, handleError, outputChannel } from '../utils/logger';
 import { spawn } from 'child_process';
-import { EXTENSION_ID } from '../constants';
+import { EXTENSION_ID } from '../utils/constants';
 
 /**
  * Function to expand Makefile variables.

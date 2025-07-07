@@ -6,7 +6,7 @@ import { registerCommandWithLog } from '../utils/commandRegistry';
 import { Edk2Formatter } from '../edk2Formatter/edk2Formatter';
 
 export function registerFormatterCommands(context: vscode.ExtensionContext): void {
-    registerCommandWithLog(context, 'formatter.Edk2Formatter', handleEdk2Formatter);
+    registerCommandWithLog(context, 'vebBuild.formatter.formatEdk2', handleEdk2Formatter);
 }
 
 async function handleEdk2Formatter(): Promise<void> {

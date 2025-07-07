@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as readline from "readline";
 import * as vscode from 'vscode';
-import { ONE_SPACE, HASH_STRING, HASH_LANGUAGE } from "../constants";
+import { ONE_SPACE, HASH_STRING, HASH_LANGUAGE } from "../utils/constants";
 
 function formatUni(filepath: string, fileEncoding: any, maxStringLength: number): Promise<any> {
     return new Promise(resolve => {

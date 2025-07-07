@@ -35,7 +35,7 @@
         "mac": "F9"
       },
       {
-        "command": "formatter.Edk2Formatter",
+        "command": "vebBuild.formatter.formatEdk2",
         "key": "shift+alt+F",
         "mac": "shift+alt+F",
         "when": "resourceLangId == BiosLanguage_sdl || resourceLangId == edk2_uni"
@@ -257,7 +257,7 @@
         "title": "Run Veb ReBuild."
       },
       {
-        "command": "formatter.Edk2Formatter",
+        "command": "vebBuild.formatter.formatEdk2",
         "title": "Format Document"
       },
       {
@@ -366,12 +366,12 @@
       "editor/context": [
         {
           "when": "resourceLangId == edk2_uni",
-          "command": "formatter.Edk2Formatter",
+          "command": "vebBuild.formatter.formatEdk2",
           "group": "navigation"
         },
         {
           "when": "resourceLangId == BiosLanguage_sdl",
-          "command": "formatter.Edk2Formatter",
+          "command": "vebBuild.formatter.formatEdk2",
           "group": "navigation"
         },
         {
