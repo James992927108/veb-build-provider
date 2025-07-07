@@ -20,17 +20,17 @@
   "contributes": {
     "keybindings": [
       {
-        "command": "extension.InitTask",
+        "command": "vebBuild.buildTool.initTask",
         "key": "F8",
         "mac": "F8"
       },
       {
-        "command": "extension.VebBuild",
+        "command": "vebBuild.buildTool.vebBuild",
         "key": "F7",
         "mac": "F7"
       },
       {
-        "command": "extension.VebReBuild",
+        "command": "vebBuild.buildTool.vebReBuild",
         "key": "F9",
         "mac": "F9"
       },
@@ -245,15 +245,15 @@
     ],
     "commands": [
       {
-        "command": "extension.InitTask",
+        "command": "vebBuild.buildTool.initTask",
         "title": "Run Veb initial task program."
       },
       {
-        "command": "extension.VebBuild",
+        "command": "vebBuild.buildTool.vebBuild",
         "title": "Run Veb Build."
       },
       {
-        "command": "extension.VebReBuild",
+        "command": "vebBuild.buildTool.vebReBuild",
         "title": "Run Veb ReBuild."
       },
       {

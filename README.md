@@ -38,9 +38,9 @@ npm run compile
 
 | 指令名稱                   | 指令 ID                         | 預設快捷鍵   | 適用語言/條件                         | 功能說明                                 |
 | -------------------------- | ------------------------------- | ------------ | ------------------------------------- | ---------------------------------------- |
-| 初始化任務                 | `extension.InitTask`            | F8           | 全域                                  | 初始化 VEB 專案相關任務                  |
-| 建置 VEB 專案              | `extension.VebBuild`            | F7           | 全域                                  | 執行 VEB 專案建置                        |
-| 重建 VEB 專案              | `extension.VebReBuild`          | F9           | 全域                                  | 清理並重新建置 VEB 專案                  |
+| 初始化任務                 | `vebBuild.buildTool.initTask`            | F8           | 全域                                  | 初始化 VEB 專案相關任務                  |
+| 建置 VEB 專案              | `vebBuild.buildTool.vebBuild`            | F7           | 全域                                  | 執行 VEB 專案建置                        |
+| 重建 VEB 專案              | `vebBuild.buildTool.vebReBuild`          | F9           | 全域                                  | 清理並重新建置 VEB 專案                  |
 | EDK2/Bios 語言格式化       | `formatter.Edk2Formatter`       | Shift+Alt+F  | `BiosLanguage_sdl` 或 `edk2_uni` 檔案 | 格式化 EDK2/Bios 語言檔案                |
 | 插入 Debug User Snippet    | `editor.action.insertSnippet`   | Ctrl+F1      | C/C++ 檔案                            | 插入自定義 debug_user snippet            |
 | 插入 Debug Start Snippet   | `editor.action.insertSnippet`   | Ctrl+F2      | C/C++ 檔案                            | 插入自定義 debug_start snippet           |
