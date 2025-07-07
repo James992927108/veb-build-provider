@@ -1,0 +1,26 @@
+[PEI_ENHANCED_DEBUG] Library Initialized
+
+[ENTRY] c:\1-tpe_bios_code\turin-a8isbios-1s\AmiIpmi2Pkg\Ipmi2\Frb\PeiFrb.c:235 InitializePeiFrb() Time=535531178862
+[CALL_PUSH] InitializePeiFrb:235 TPL=UNKNOWN Depth=1 Time=535559915097
+{"event":"call_push","function":"InitializePeiFrb","line":235,"timestamp":535559915097,"tpl":0,"depth":1}
+
+[ENTRY] c:\1-tpe_bios_code\turin-a8isbios-1s\AmiIpmi2Pkg\Ipmi2\Frb\PeiFrb.c:156 GetFrbSetupOptions() Time=535600906227
+[CALL_PUSH] GetFrbSetupOptions:156 TPL=UNKNOWN Depth=2 Time=535629848391
+{"event":"call_push","function":"GetFrbSetupOptions","line":156,"timestamp":535629848391,"tpl":0,"depth":2}
+
+[EXIT] c:\1-tpe_bios_code\turin-a8isbios-1s\AmiIpmi2Pkg\Ipmi2\Frb\PeiFrb.c:215 GetFrbSetupOptions() Status=Success Time=535671786843
+[CALL_POP] GetFrbSetupOptions Duration=75071826 Depth=1 TPL=UNKNOWN
+{"event":"call_pop","function":"GetFrbSetupOptions","duration":75071826,"depth":1,"tpl":0}
+
+[EXIT] c:\1-tpe_bios_code\turin-a8isbios-1s\AmiIpmi2Pkg\Ipmi2\Frb\PeiFrb.c:420 InitializePeiFrb() Status=Success Time=535757090940
+[CALL_POP] InitializePeiFrb Duration=227316510 Depth=0 TPL=UNKNOWN
+{"event":"call_pop","function":"InitializePeiFrb","duration":227316510,"depth":0,"tpl":0}
+
+[DXE_ENHANCED_DEBUG] Library Initialized
+{"event":"lib_init","timestamp":632016450792,"module":"DxeEnhancedDebugLib"}
+[ENTRY] c:\1-tpe_bios_code\turin-a8isbios-1s\AmiModulePkg\PCI\PciBus.c:570 PciBusEntryPoint() Time=632037079008
+[CALL_PUSH] PciBusEntryPoint:570 TPL=UNKNOWN Depth=1 Time=632066969871
+{"event":"call_push","function":"PciBusEntryPoint","line":570,"timestamp":632066969871,"tpl":0,"depth":1}
+[EXIT] c:\1-tpe_bios_code\turin-a8isbios-1s\AmiModulePkg\PCI\PciBus.c:654 PciBusEntryPoint() Status=Success Time=632114559045
+[CALL_POP] PciBusEntryPoint Duration=80930934 Depth=0 TPL=UNKNOWN
+{"event":"call_pop","function":"PciBusEntryPoint","duration":80930934,"depth":0,"tpl":0}

@@ -1,0 +1,1003 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Debug Report</title>
+</head>
+<body>
+  <h1>Log Analysis Report</h1>
+  <h2>Summary</h2>
+  <pre>{
+  "total_lines": 266,
+  "parsed": 21,
+  "errors": 242,
+  "stats": {
+    "entry": 3,
+    "exit": 3,
+    "call_push": 3,
+    "call_pop": 3,
+    "json_event": 7,
+    "lib_init": 2
+  }
+}</pre>
+  <h2>Performance</h2>
+  <pre>{
+  "totalFunctions": 0,
+  "functionMetrics": {},
+  "criticalPath": []
+}</pre>
+  <h2>Errors</h2>
+  <pre>[
+  {
+    "line_num": 1,
+    "content": "[SOL Session operational.  Use ~? for help]"
+  },
+  {
+    "line_num": 2,
+    "content": "\u001bc"
+  },
+  {
+    "line_num": 5,
+    "content": "Socket 0: DDR training passed at all channels"
+  },
+  {
+    "line_num": 6,
+    "content": "PeiCore.Entry(75CC694B)"
+  },
+  {
+    "line_num": 7,
+    "content": "Register PPI Notify: EfiPeiSecurity2"
+  },
+  {
+    "line_num": 8,
+    "content": "Install PPI: 8C8CE578-8A3D-4F1C-9935-896185C32DD3"
+  },
+  {
+    "line_num": 9,
+    "content": "Install PPI: 5473C07A-3DCB-4DCA-BD6F-1E9689E7349A"
+  },
+  {
+    "line_num": 10,
+    "content": "The 0th FV start address is 0x00075CC0000, size is 0x00340000, handle is 0x75CC0000"
+  },
+  {
+    "line_num": 11,
+    "content": "Register PPI Notify: EfiPeiFirmwareVolumeInfo"
+  },
+  {
+    "line_num": 12,
+    "content": "Register PPI Notify: EfiPeiFirmwareVolumeInfo2"
+  },
+  {
+    "line_num": 13,
+    "content": "Install PPI: EfiPeiLoadFile"
+  },
+  {
+    "line_num": 14,
+    "content": "Install PPI: EfiTemporaryRamSupport"
+  },
+  {
+    "line_num": 15,
+    "content": "DiscoverPeimsAndOrderWithApriori(): Found 0x70 PEI FFS files in the 0th FV"
+  },
+  {
+    "line_num": 16,
+    "content": "Evaluate PEI DEPEX for FFS(7A6DF3DB-1C0A-45C2-8251-AFE794D7D6B3)"
+  },
+  {
+    "line_num": 17,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 18,
+    "content": "Loading PEIM 7A6DF3DB-1C0A-45C2-8251-AFE794D7D6B3"
+  },
+  {
+    "line_num": 19,
+    "content": "PciExpressPciCfg2.Entry(75E79DD9)"
+  },
+  {
+    "line_num": 20,
+    "content": "Install PPI: EfiPciCfg2"
+  },
+  {
+    "line_num": 21,
+    "content": "Install PPI: EfiPciCfg2"
+  },
+  {
+    "line_num": 22,
+    "content": "Install PPI: EfiPciCfg2"
+  },
+  {
+    "line_num": 23,
+    "content": "Install PPI: EfiPciCfg2"
+  },
+  {
+    "line_num": 24,
+    "content": "Install PPI: EfiPciCfg2"
+  },
+  {
+    "line_num": 25,
+    "content": "Install PPI: EfiPciCfg2"
+  },
+  {
+    "line_num": 26,
+    "content": "Install PPI: EfiPciCfg2"
+  },
+  {
+    "line_num": 27,
+    "content": "Install PPI: EfiPciCfg2"
+  },
+  {
+    "line_num": 28,
+    "content": "Evaluate PEI DEPEX for FFS(E9DD7F62-25EC-4F9D-A4AB-AAD20BF59A10)"
+  },
+  {
+    "line_num": 29,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 30,
+    "content": "Loading PEIM E9DD7F62-25EC-4F9D-A4AB-AAD20BF59A10"
+  },
+  {
+    "line_num": 31,
+    "content": "StatusCodePei.Ent�Install PPI: AmiDebugService"
+  },
+  {
+    "line_num": 32,
+    "content": "Install PPI: EfiPeiRscHandler"
+  },
+  {
+    "line_num": 33,
+    "content": "Install PPI: EfiPeiStatusCode"
+  },
+  {
+    "line_num": 34,
+    "content": "Evaluate PEI DEPEX for FFS(9B3ADA4F-AE56-4C24-8DEA-F03B7558AE50)"
+  },
+  {
+    "line_num": 35,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 36,
+    "content": "Loading PEIM 9B3ADA4F-AE56-4C24-8DEA-F03B7558AE50"
+  },
+  {
+    "line_num": 37,
+    "content": "PcdPeim.Entry(75E4158D)"
+  },
+  {
+    "line_num": 38,
+    "content": "Install PPI: Pcd"
+  },
+  {
+    "line_num": 39,
+    "content": "Install PPI: EfiPeiPcd"
+  },
+  {
+    "line_num": 40,
+    "content": "Install PPI: GetPcdInfo"
+  },
+  {
+    "line_num": 41,
+    "content": "Install PPI: EfiGetPcdInfo"
+  },
+  {
+    "line_num": 42,
+    "content": "Register PPI Notify: EfiEndOfPeiSignal"
+  },
+  {
+    "line_num": 43,
+    "content": "Evaluate PEI DEPEX for FFS(BB25AD54-C39B-46E9-AC65-118005D157AB)"
+  },
+  {
+    "line_num": 44,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 45,
+    "content": "Loading PEIM BB25AD54-C39B-46E9-AC65-118005D157AB"
+  },
+  {
+    "line_num": 46,
+    "content": "SramAccessPei.Entry(75E44C75)"
+  },
+  {
+    "line_num": 47,
+    "content": "[Early Video] Assign Bus Number 1: Bus: A0 | Dev: 3 | Fun 4"
+  },
+  {
+    "line_num": 48,
+    "content": "[Early Video] Assign Bus Number 1: Bus: A1 | Dev: 0 | Fun 0"
+  },
+  {
+    "line_num": 49,
+    "content": "[Early Video] Assign Bus Number 2: Bus: A1 | Dev: 0 | Fun 0"
+  },
+  {
+    "line_num": 50,
+    "content": "BMC device bus number= 0xA2"
+  },
+  {
+    "line_num": 51,
+    "content": "SramMmioAddress @ 0x0A208010 = 0xC9100000"
+  },
+  {
+    "line_num": 52,
+    "content": "Install PPI: SramAccess"
+  },
+  {
+    "line_num": 53,
+    "content": "Evaluate PEI DEPEX for FFS(838DCF34-907B-4D55-9A4B-A0EF7167B5F4)"
+  },
+  {
+    "line_num": 54,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 55,
+    "content": "Loading PEIM 838DCF34-907B-4D55-9A4B-A0EF7167B5F4"
+  },
+  {
+    "line_num": 56,
+    "content": "NvramPei.Entry(75E46C5C)"
+  },
+  {
+    "line_num": 57,
+    "content": "NVRAM PEI: NVRAM Address: FF021000; NVRAM Backup Address: FF041000; NVRAM Size: 20000; Header Size: 90"
+  },
+  {
+    "line_num": 58,
+    "content": "PreserveSetupPassword:GetVariable Setup Not Found"
+  },
+  {
+    "line_num": 59,
+    "content": "PreserveSetupPassword PEI Entry"
+  },
+  {
+    "line_num": 60,
+    "content": "IsIpmiCmosClear Entry..."
+  },
+  {
+    "line_num": 61,
+    "content": "ReadVariablePpi->GetVariable Status Not Found"
+  },
+  {
+    "line_num": 62,
+    "content": "IsSramLoadDefault Entry"
+  },
+  {
+    "line_num": 63,
+    "content": "IsSramLoadDefault flag 0xFF, Exit"
+  },
+  {
+    "line_num": 64,
+    "content": "IsLoadDefaultByGpio () Entry"
+  },
+  {
+    "line_num": 65,
+    "content": "XCradleGpioLibGetInputValue () Entry"
+  },
+  {
+    "line_num": 66,
+    "content": "XCradleGpioLibReadGpio () Entry"
+  },
+  {
+    "line_num": 67,
+    "content": "Pin.Value        : 0x74"
+  },
+  {
+    "line_num": 68,
+    "content": "Pin.Field.Socket : 0x0"
+  },
+  {
+    "line_num": 69,
+    "content": "Pin.Field.Die    : 0x0"
+  },
+  {
+    "line_num": 70,
+    "content": "Pin.Field.Gpio   : 0x74"
+  },
+  {
+    "line_num": 71,
+    "content": "XCradleGpioLibConvertGpio () Entry"
+  },
+  {
+    "line_num": 72,
+    "content": "XCradleGpioLibConvertGpio () Exit"
+  },
+  {
+    "line_num": 73,
+    "content": "Pin.Value        : 0x74"
+  },
+  {
+    "line_num": 74,
+    "content": "Pin.Field.Socket : 0x0"
+  },
+  {
+    "line_num": 75,
+    "content": "Pin.Field.Die    : 0x0"
+  },
+  {
+    "line_num": 76,
+    "content": "Pin.Field.Gpio   : 0x74"
+  },
+  {
+    "line_num": 77,
+    "content": "Data32           : 0x150000"
+  },
+  {
+    "line_num": 78,
+    "content": "*GpioValue       : 0x150000"
+  },
+  {
+    "line_num": 79,
+    "content": "XCradleGpioLibReadGpio () Exit"
+  },
+  {
+    "line_num": 80,
+    "content": "Data32     : 0x150000"
+  },
+  {
+    "line_num": 81,
+    "content": "*GpioValue : 0x1"
+  },
+  {
+    "line_num": 82,
+    "content": "XCradleGpioLibGetInputValue () Exit"
+  },
+  {
+    "line_num": 83,
+    "content": "Result : 0x0"
+  },
+  {
+    "line_num": 84,
+    "content": "IsLoadDefaultByGpio () Exit"
+  },
+  {
+    "line_num": 85,
+    "content": "NULL Parameter"
+  },
+  {
+    "line_num": 86,
+    "content": "Install PPI: EfiPeiReadOnlyVariable2"
+  },
+  {
+    "line_num": 87,
+    "content": "Install PPI: EfiPeiReadOnlyVariable"
+  },
+  {
+    "line_num": 88,
+    "content": "Evaluate PEI DEPEX for FFS(76864548-0261-410E-A8B4-01615BFA3E0A)"
+  },
+  {
+    "line_num": 89,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 90,
+    "content": "Loading PEIM 76864548-0261-410E-A8B4-01615BFA3E0A"
+  },
+  {
+    "line_num": 91,
+    "content": "FwKeyHobPei.Entry(75E4EE19)"
+  },
+  {
+    "line_num": 92,
+    "content": "Install FwKeyHob..."
+  },
+  {
+    "line_num": 93,
+    "content": "Find Key Ffs 5B85965C-455D-4CC6-9C4C-7F086967D2B0, Success"
+  },
+  {
+    "line_num": 94,
+    "content": "(addr 75CC01E4, len 0x20) [17B6B38C...]"
+  },
+  {
+    "line_num": 95,
+    "content": "KeyHob 10AB78 [HobSz 58, KeyHobSz 34], KeyAddr 10ABAC[17B6B38C...]"
+  },
+  {
+    "line_num": 96,
+    "content": "Install PPI: AmiFwKeyHob"
+  },
+  {
+    "line_num": 97,
+    "content": "Evaluate PEI DEPEX for FFS(E03E6451-297A-4FE9-B1F7-639B70327C52)"
+  },
+  {
+    "line_num": 98,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 99,
+    "content": "Loading PEIM E03E6451-297A-4FE9-B1F7-639B70327C52"
+  },
+  {
+    "line_num": 100,
+    "content": "EnhancePeiVariable.Entry(75E71C40)"
+  },
+  {
+    "line_num": 101,
+    "content": "NULL Parameter"
+  },
+  {
+    "line_num": 102,
+    "content": "Register PPI Notify: EfiPeiMemoryDiscovered"
+  },
+  {
+    "line_num": 103,
+    "content": "Evaluate PEI DEPEX for FFS(3DDDBF6F-7457-4F20-9F2C-886721C28030)"
+  },
+  {
+    "line_num": 104,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 105,
+    "content": "Loading PEIM 3DDDBF6F-7457-4F20-9F2C-886721C28030"
+  },
+  {
+    "line_num": 106,
+    "content": "XCradleWaitForBmcPei.Entry(75E80481)"
+  },
+  {
+    "line_num": 107,
+    "content": "XCradleWaitForBmcPeiiEntry() Entry."
+  },
+  {
+    "line_num": 108,
+    "content": "WaitForBmcTime 300 Seconds."
+  },
+  {
+    "line_num": 109,
+    "content": "XCradleWaitForBmcPeiiEntry() Exit."
+  },
+  {
+    "line_num": 110,
+    "content": "Evaluate PEI DEPEX for FFS(7942EDD0-C023-4357-93ED-F6626D711E9E)"
+  },
+  {
+    "line_num": 111,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 112,
+    "content": "Loading PEIM 7942EDD0-C023-4357-93ED-F6626D711E9E"
+  },
+  {
+    "line_num": 113,
+    "content": "PeiIpmiInitialize.Entry(75E58BD4)"
+  },
+  {
+    "line_num": 114,
+    "content": "InitializeIpmiPhysicalLayer - InitHostBmcInterfaceHook Success!"
+  },
+  {
+    "line_num": 115,
+    "content": "Register PPI Notify: EfiPeiMemoryDiscovered"
+  },
+  {
+    "line_num": 116,
+    "content": "IPMI Interface Type PCD value is: 1"
+  },
+  {
+    "line_num": 117,
+    "content": "EfiIpmiSendCommand - InterfaceType = 1."
+  },
+  {
+    "line_num": 118,
+    "content": "EfiIpmiSendCommand - gIpmiSendCommand[0] Status = Success."
+  },
+  {
+    "line_num": 119,
+    "content": "ResponseData.InputMessageSize FF"
+  },
+  {
+    "line_num": 120,
+    "content": "AmiInitKcsInterfaceData Initialized Status = Success"
+  },
+  {
+    "line_num": 121,
+    "content": "InitInterfaceDataHook[0] Status = Success"
+  },
+  {
+    "line_num": 122,
+    "content": "XCradleWaitForBmc() Entry."
+  },
+  {
+    "line_num": 123,
+    "content": "PcdGet16 PcdXCradleWaitForBmcTime [300]."
+  },
+  {
+    "line_num": 124,
+    "content": "EfiIpmiSendCommand - InterfaceType = 1."
+  },
+  {
+    "line_num": 125,
+    "content": "EfiIpmiSendCommand - gIpmiSendCommand[0] Status = Success."
+  },
+  {
+    "line_num": 126,
+    "content": "Get Self test results status Success"
+  },
+  {
+    "line_num": 127,
+    "content": "AmiIpmiGetSelfTestResults Pass [Success]."
+  },
+  {
+    "line_num": 128,
+    "content": "WaitForBmcTime [0] Seconds."
+  },
+  {
+    "line_num": 129,
+    "content": "XCradleWaitForBmc() Exit."
+  },
+  {
+    "line_num": 130,
+    "content": "InitInterfaceDataHook[1] Status = Success"
+  },
+  {
+    "line_num": 131,
+    "content": "InitializeIpmiPhysicalLayer - Default AmiSysInterfaceKcs InterfaceInitialized"
+  },
+  {
+    "line_num": 132,
+    "content": "EfiIpmiSendCommand - InterfaceType = 1."
+  },
+  {
+    "line_num": 133,
+    "content": "EfiIpmiSendCommand - gIpmiSendCommand[0] Status = Success."
+  },
+  {
+    "line_num": 134,
+    "content": "Get Self test results status Success"
+  },
+  {
+    "line_num": 135,
+    "content": "IpmiInstallPpi BMC Status 0"
+  },
+  {
+    "line_num": 136,
+    "content": "EfiIpmiSendCommand - InterfaceType = 1."
+  },
+  {
+    "line_num": 137,
+    "content": "EfiIpmiSendCommand - gIpmiSendCommand[0] Status = Success."
+  },
+  {
+    "line_num": 138,
+    "content": "AmiIpmiGetDeviceId - Get Device ID Command: Status Success"
+  },
+  {
+    "line_num": 139,
+    "content": "BMC Status in GET DEVICE ID : 0"
+  },
+  {
+    "line_num": 140,
+    "content": "Install PPI: PeiIpmiTransport2"
+  },
+  {
+    "line_num": 141,
+    "content": "InitializeIpmiPhysicalLayer - IpmiInstallPpi Status = Success"
+  },
+  {
+    "line_num": 142,
+    "content": "Evaluate PEI DEPEX for FFS(7C69E035-60D9-4782-AAAA-B05F2F8C1B09)"
+  },
+  {
+    "line_num": 143,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 144,
+    "content": "Loading PEIM 7C69E035-60D9-4782-AAAA-B05F2F8C1B09"
+  },
+  {
+    "line_num": 145,
+    "content": "PeiReportStatusConOut.Entry(75E813CD)"
+  },
+  {
+    "line_num": 146,
+    "content": "Register PPI Notify: EfiPeiRscHandler"
+  },
+  {
+    "line_num": 147,
+    "content": "Notify: PPI: EfiPeiRscHandler, Peim notify entry point: 75E813DF"
+  },
+  {
+    "line_num": 148,
+    "content": "PeiReportStatusConOutWorker : Locate AmiEarlyConsoleOutPpi : Not Found"
+  },
+  {
+    "line_num": 149,
+    "content": "Evaluate PEI DEPEX for FFS(6C4E2116-0C0E-4521-A720-8E80C8BDD465)"
+  },
+  {
+    "line_num": 150,
+    "content": "RESULT = TRUE (Apriori)"
+  },
+  {
+    "line_num": 151,
+    "content": "Loading PEIM 6C4E2116-0C0E-4521-A720-8E80C8BDD465"
+  },
+  {
+    "line_num": 152,
+    "content": "OemDebugLevelPeiInit.Entry(75E86065)"
+  },
+  {
+    "line_num": 153,
+    "content": "PeiReportStatusConOutWorker : Locate AmiEarlyConsoleOutPpi : Not Found"
+  },
+  {
+    "line_num": 154,
+    "content": "EfiIpmiSendCommand - InterfaceType = 1."
+  },
+  {
+    "line_num": 155,
+    "content": "EfiIpmiSendCommand - gIpmiSendCommand[0] Status = Success."
+  },
+  {
+    "line_num": 156,
+    "content": "Oem Pei SendIpmiCommand Status: Success, Num#:0"
+  },
+  {
+    "line_num": 157,
+    "content": "Get LocalOemDebugLevel is 1 from Bmc"
+  },
+  {
+    "line_num": 179,
+    "content": "gNvmeInt13BinData : E9C50"
+  },
+  {
+    "line_num": 180,
+    "content": "DST_BUG DriverBindingStart Entry"
+  },
+  {
+    "line_num": 181,
+    "content": "\u001b[2J\u001b[1;1H\u001b[8;25;80t\u001b[2J\u001b[1;1H\u001b[1;1HDiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/000000E0/9214ACA0"
+  },
+  {
+    "line_num": 182,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/000000E0/9214B000/9214ACA0"
+  },
+  {
+    "line_num": 183,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000400/00000150/9214A620"
+  },
+  {
+    "line_num": 184,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000002/00000000/00000150/9214B000/9214A620"
+  },
+  {
+    "line_num": 185,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/9214A618"
+  },
+  {
+    "line_num": 186,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/9214A618"
+  },
+  {
+    "line_num": 187,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000008000/00000800/92149018"
+  },
+  {
+    "line_num": 188,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000040/00000000/00000800/00000000/92149018"
+  },
+  {
+    "line_num": 189,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/9214A618"
+  },
+  {
+    "line_num": 190,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/9214A618"
+  },
+  {
+    "line_num": 191,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/0000005A/9D04F960"
+  },
+  {
+    "line_num": 192,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/0000005A/9214B000/9D04F960"
+  },
+  {
+    "line_num": 193,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/000000E0/9213D520"
+  },
+  {
+    "line_num": 194,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/000000E0/92135000/9213D520"
+  },
+  {
+    "line_num": 195,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000400/00000150/9213D520"
+  },
+  {
+    "line_num": 196,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000002/00000000/00000150/92135000/9213D520"
+  },
+  {
+    "line_num": 197,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/92134018"
+  },
+  {
+    "line_num": 198,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/92134018"
+  },
+  {
+    "line_num": 199,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000008000/00000800/92134018"
+  },
+  {
+    "line_num": 200,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000040/00000000/00000800/00000000/92134018"
+  },
+  {
+    "line_num": 201,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/92134018"
+  },
+  {
+    "line_num": 202,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/92134018"
+  },
+  {
+    "line_num": 203,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/0000005A/9D04F960"
+  },
+  {
+    "line_num": 204,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/0000005A/92135000/9D04F960"
+  },
+  {
+    "line_num": 205,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/000000E0/920FC7A0"
+  },
+  {
+    "line_num": 206,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/000000E0/920F2000/920FC7A0"
+  },
+  {
+    "line_num": 207,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000400/00000150/920F1020"
+  },
+  {
+    "line_num": 208,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000002/00000000/00000150/920F2000/920F1020"
+  },
+  {
+    "line_num": 209,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/920F1B98"
+  },
+  {
+    "line_num": 210,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/920F1B98"
+  },
+  {
+    "line_num": 211,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000008000/00000800/920F0018"
+  },
+  {
+    "line_num": 212,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000040/00000000/00000800/00000000/920F0018"
+  },
+  {
+    "line_num": 213,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/920F1B98"
+  },
+  {
+    "line_num": 214,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/920F1B98"
+  },
+  {
+    "line_num": 215,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/0000005A/9D04F960"
+  },
+  {
+    "line_num": 216,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/0000005A/920F2000/9D04F960"
+  },
+  {
+    "line_num": 217,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/000000E0/920DCCA0"
+  },
+  {
+    "line_num": 218,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/000000E0/920DD000/920DCCA0"
+  },
+  {
+    "line_num": 219,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000400/00000150/920DC620"
+  },
+  {
+    "line_num": 220,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000002/00000000/00000150/920DD000/920DC620"
+  },
+  {
+    "line_num": 221,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/920DC618"
+  },
+  {
+    "line_num": 222,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/920DC618"
+  },
+  {
+    "line_num": 223,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000008000/00000800/920DB018"
+  },
+  {
+    "line_num": 224,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000040/00000000/00000800/00000000/920DB018"
+  },
+  {
+    "line_num": 225,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/920DC618"
+  },
+  {
+    "line_num": 226,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/920DC618"
+  },
+  {
+    "line_num": 227,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/0000005A/9D04F960"
+  },
+  {
+    "line_num": 228,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/0000005A/920DD000/9D04F960"
+  },
+  {
+    "line_num": 229,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/000000E0/920C5020"
+  },
+  {
+    "line_num": 230,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/000000E0/920C6000/920C5020"
+  },
+  {
+    "line_num": 231,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000400/00000150/920C5120"
+  },
+  {
+    "line_num": 232,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000002/00000000/00000150/920C6000/920C5120"
+  },
+  {
+    "line_num": 233,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/920C5798"
+  },
+  {
+    "line_num": 234,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/920C5798"
+  },
+  {
+    "line_num": 235,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000008000/00000800/920C4018"
+  },
+  {
+    "line_num": 236,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000040/00000000/00000800/00000000/920C4018"
+  },
+  {
+    "line_num": 237,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/920C5798"
+  },
+  {
+    "line_num": 238,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/920C5798"
+  },
+  {
+    "line_num": 239,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/0000005A/9D04F960"
+  },
+  {
+    "line_num": 240,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/0000005A/920C6000/9D04F960"
+  },
+  {
+    "line_num": 241,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/000000E0/920B0220"
+  },
+  {
+    "line_num": 242,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/000000E0/920B1000/920B0220"
+  },
+  {
+    "line_num": 243,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000400/00000150/920B0220"
+  },
+  {
+    "line_num": 244,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000002/00000000/00000150/920B1000/920B0220"
+  },
+  {
+    "line_num": 245,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/920B0218"
+  },
+  {
+    "line_num": 246,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/920B0218"
+  },
+  {
+    "line_num": 247,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000008000/00000800/920AF018"
+  },
+  {
+    "line_num": 248,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000040/00000000/00000800/00000000/920AF018"
+  },
+  {
+    "line_num": 249,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/00000200/920B0218"
+  },
+  {
+    "line_num": 250,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/00000200/00000000/920B0218"
+  },
+  {
+    "line_num": 251,
+    "content": "DiskIo: Create subtasks for task: Offset/BufferSize/Buffer = 0000000000000000/0000005A/9D04F960"
+  },
+  {
+    "line_num": 252,
+    "content": "R:Lba/Offset/Length/WorkingBuffer/Buffer = 0000000000000000/00000000/0000005A/920B1000/9D04F960"
+  },
+  {
+    "line_num": 253,
+    "content": "BaseClass 0x1,SubClass 0x8"
+  },
+  {
+    "line_num": 254,
+    "content": "BaseClass 0x1,SubClass 0x8"
+  },
+  {
+    "line_num": 255,
+    "content": "BaseClass 0x1,SubClass 0x8"
+  },
+  {
+    "line_num": 256,
+    "content": "BaseClass 0x1,SubClass 0x8"
+  },
+  {
+    "line_num": 257,
+    "content": "BaseClass 0x1,SubClass 0x8"
+  },
+  {
+    "line_num": 258,
+    "content": "BaseClass 0x1,SubClass 0x8"
+  },
+  {
+    "line_num": 259,
+    "content": "\u001b[0;37;40m\u001b[2J\u001b[1;1H\u001b[1;1H\u001b[1;1HVersion 2.22.1294. Copyright (C) 2025 AMI                                       \u001b[2;1HBIOS Version: 06.03.01 Build Date: 07/03/2025 15:23:38                          \u001b[3;1HPress <DEL> to Setup or <F11> to Boot Menu or <F12> to PXE Boot.                \u001b[4;1HDEL is Pressed, Going To Setup                                                  \u001b[5;1H                                                                                \u001b[6;1H                                                                                \u001b[7;1H                                                                                \u001b[8;1H                                                                                \u001b[9;1H                                                                                \u001b[10;1H                                                                                \u001b[11;1H                                                                                \u001b[12;1H                                                                                \u001b[13;1H                                                                                \u001b[14;1H                                                                                \u001b[15;1H                                                                                \u001b[16;1H                                                                                \u001b[17;1H                                                                                \u001b[18;1H                                                                                \u001b[19;1H                                                                                \u001b[20;1H                                                                                \u001b[21;1H                                                                                \u001b[22;1H                                                                                \u001b[23;1H                                                                                \u001b[24;1H                                                                                \u001b[25;1H                                                                               \u001b[7;1H\u001b[7;1HProduct Name: NULL\u001b[9;1H\u001b[9;1HSocket0: AMD EPYC 9755 128-Core Processor, Speed: 2700MHz\u001b[11;1H\u001b[11;1HDRAM Memory Size: 128GB, Count: 2, Speed: 6000MT/s\u001b[12;1H\u001b[12;1HDRAM Memory Manufacturer: Samsung\u001b[14;1H\u001b[14;1HBMC Version:3.06.00\u001b[15;1H\u001b[15;1HBMC Dedicated IP: 172.16.122.170\u001b[18;1H\u001b[18;1HThere is no SATA device.CreateEfiOsBootOption :: LocateHandleBuffer: Not Found"
+  },
+  {
+    "line_num": 260,
+    "content": "AddBackupBootOptionBack :: BootOptionLinkList->Size is 0"
+  },
+  {
+    "line_num": 261,
+    "content": "AdjustNewUefiOsOptionPriority :: Update new Uefi OS option priority"
+  },
+  {
+    "line_num": 262,
+    "content": "AddBackupBootOptionBack :: BootOptionLinkList->Size is 0"
+  },
+  {
+    "line_num": 264,
+    "content": "Dump Boot Options:"
+  },
+  {
+    "line_num": 265,
+    "content": "MediaSanitizationInitDynamicMainFormContents"
+  },
+  {
+    "line_num": 266,
+    "content": "\u001b[25;78HA9\u001b[18;25H\u001b[2J\u001b[1;1H\u001b[1;37;40m\u001b[2J\u001b[1;1H\u001b[1;37;44m\u001b[2J\u001b[1;1H\u001b[25;78HAB\u001b[1;1H\u001b[1;1H\u001b[1;1H                               Aptio Setup - AMI                                \u001b[2;1H\u001b[0;37;44m   \u001b[0;34;47m Main \u001b[0;37;44m Advanced  Chipset  AMD CBS  AMD PBS  Server Mgmt  Security  Boot     >\u001b[3;1H\u001b[0;34;47m/----------------------------------------------------+-------------------------\\\u001b[4;1H|  \u001b[1;30;47mProduct Name\u001b[0;34;47m             \u001b[1;30;47mNULL                  \u001b[0;34;47m  ^|                         |\u001b[5;1H|                           \u001b[1;30;47m                      \u001b[0;34;47m  *|                         |\u001b[6;1H|                           \u001b[1;30;47m                 \u001b[0;34;47m       *|                         |\u001b[7;1H|  \u001b[1;30;47mSerial Number\u001b[0;34;47m            \u001b[1;30;47m0                     \u001b[0;34;47m  *|                         |\u001b[8;1H|                           \u001b[1;30;47m                      \u001b[0;34;47m  *|                         |\u001b[9;1H|                           \u001b[1;30;47m                 \u001b[0;34;47m       *|                         |\u001b[10;1H|  \u001b[1;30;47mCustomer ID\u001b[0;34;47m              \u001b[1;30;47mStandard\u001b[0;34;47m                *|                         |\u001b[11;1H|                                                   *|                         |\u001b[12;1H|  \u001b[1;30;47mBIOS Version\u001b[0;34;47m             \u001b[1;30;47m06.03.01\u001b[0;34;47m                *|                         |\u001b[13;1H|  \u001b[1;30;47mBuild Date\u001b[0;34;47m               \u001b[1;30;47m07/03/2025 15:23:38\u001b[0;34;47m     *|-------------------------|\u001b[14;1H|  \u001b[1;30;47mBMC Firmware Version\u001b[0;34;47m     \u001b[1;30;47m3.06.00\u001b[0;34;47m                 *|><: Select Screen        |\u001b[15;1H|  \u001b[1;30;47mPSP BootLoader Version\u001b[0;34;47m   \u001b[1;30;47m00.3D.00.73\u001b[0;34;47m             *|^v: Select Item          |\u001b[16;1H|  \u001b[1;30;47mAccess Level\u001b[0;34;47m             \u001b[1;30;47mAdministrator\u001b[0;34;47m           +|Enter: Select            |\u001b[17;1H|                                                   +|+/-: Change Opt.         |\u001b[18;1H|  \u001b[0;30;47mPlatform Information                           \u001b[0;34;47m  +|F1: General Help         |\u001b[19;1H|  \u001b[1;30;47mCPU Type\u001b[0;34;47m                 \u001b[1;30;47m1 * AMD EPYC 9755\u001b[0;34;47m       +|F2: Previous Values      |\u001b[20;1H|                           \u001b[1;30;47m128-Core Processor    \u001b[0;34;47m  +|F9: Optimized Defaults   |\u001b[21;1H|                           \u001b[1;30;47m          \u001b[0;34;47m              v|F10: Save & Exit         |\u001b[22;1H|                                                    |ESC: Exit                |\u001b[23;1H\\----------------------------------------------------+-------------------------/\u001b[24;1H\u001b[0;37;44m                    Version 2.22.1294 Copyright (C) 2025 AMI"
+  }
+]</pre>
+</body>
+</html>
+        

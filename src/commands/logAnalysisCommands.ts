@@ -10,7 +10,7 @@ import { JSONLogParser } from '../edk2Debug/analyzer/jsonLogParser';
 
 export function registerLogAnalysisCommands(context: vscode.ExtensionContext): void {
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    
+
     if (!workspaceRoot) {
         logMessage("No workspace root found, skipping log analysis commands registration");
         return;
@@ -34,9 +34,9 @@ async function handleAnalyzeLogFile(logAnalyzer: LogAnalyzer, htmlReportGenerato
             canSelectFiles: true,
             canSelectFolders: false,
             canSelectMany: false,
-            openLabel: '選擇日誌檔案進行分析',
+            openLabel: '選擇 EDK2 Debug 日誌檔案進行分析',
             filters: {
-                'Log Files': ['log', 'txt', 'json'],
+                'Log Files': ['log', 'txt'],
                 'All Files': ['*']
             }
         });
@@ -46,26 +46,33 @@ async function handleAnalyzeLogFile(logAnalyzer: LogAnalyzer, htmlReportGenerato
         }
 
         const logFilePath = fileUri[0].fsPath;
-        logMessage(`Starting log file analysis: ${logFilePath}`);
+        logMessage(`Starting enhanced log file analysis: ${logFilePath}`);
 
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: "分析日誌檔案中...",
+            title: "分析 EDK2 Debug 日誌中...",
             cancellable: false
         }, async (progress) => {
-            progress.report({ increment: 10, message: "正在解析日誌格式..." });
+            progress.report({ increment: 10, message: "正在解析 PEI/DXE 階段..." });
 
             const analysisResult = await logAnalyzer.analyzeLogFile(logFilePath);
 
-            progress.report({ increment: 50, message: "正在生成分析報告..." });
+            progress.report({ increment: 50, message: "正在建立時間軸和呼叫鏈..." });
 
-            const reportPath = path.join(path.dirname(logFilePath), `analysis_report_${Date.now()}.html`);
+            const reportPath = path.join(path.dirname(logFilePath), `edk2_analysis_report_${Date.now()}.html`);
             await htmlReportGenerator.generateDebugReport(analysisResult, reportPath);
 
             progress.report({ increment: 100, message: "分析完成" });
 
+            const peiEvents = analysisResult.detailedTimeline?.filter(e => e.phase === 'PEI').length || 0;
+            const dxeEvents = analysisResult.detailedTimeline?.filter(e => e.phase === 'DXE').length || 0;
+
             const openReport = await vscode.window.showInformationMessage(
-                `日誌分析完成！\n總函數數量: ${analysisResult.performance.totalFunctions}\n錯誤數量: ${analysisResult.errors.length}`,
+                `EDK2 日誌分析完成！\n` +
+                `總函數數量: ${analysisResult.performance.totalFunctions}\n` +
+                `PEI 階段事件: ${peiEvents}\n` +
+                `DXE 階段事件: ${dxeEvents}\n` +
+                `錯誤數量: ${analysisResult.errors.length}`,
                 '開啟報告', '在瀏覽器中開啟'
             );
 
@@ -77,7 +84,7 @@ async function handleAnalyzeLogFile(logAnalyzer: LogAnalyzer, htmlReportGenerato
             }
         });
     } catch (error) {
-        handleError(`Log file analysis failed: ${error instanceof Error ? error.message : String(error)}`);
+        handleError(`Enhanced log file analysis failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
@@ -131,11 +138,11 @@ async function handleShowPerformanceAnalysis(logAnalyzer: LogAnalyzer): Promise<
 
         let message = `效能分析結果:\n`;
         message += `總函數數量: ${perf.totalFunctions}\n`;
-        
+
         if (perf.bootTime) {
             message += `啟動時間: ${perf.bootTime}ms\n`;
         }
-        
+
         if (perf.criticalPath && perf.criticalPath.length > 0) {
             message += `關鍵路徑: ${perf.criticalPath.slice(0, 3).join(' -> ')}${perf.criticalPath.length > 3 ? '...' : ''}\n`;
         }
@@ -229,7 +236,7 @@ async function handleBatchAnalyzeLogs(logAnalyzer: LogAnalyzer): Promise<void> {
 
 async function generateBatchReport(batchReportPath: string, logFiles: string[], batchResults: any[]): Promise<void> {
     const fs = require('fs');
-    
+
     const batchSummary = {
         title: '批量日誌分析報告',
         generatedAt: new Date().toLocaleString('zh-TW'),

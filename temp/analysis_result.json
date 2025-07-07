@@ -1,0 +1,348 @@
+{
+  "summary": {
+    "total_events": 36,
+    "pei_events": 28,
+    "dxe_events": 8,
+    "call_pairs": 10,
+    "event_types": {
+      "lib_init": 6,
+      "call_push": 10,
+      "call_pop": 10,
+      "entry": 5,
+      "exit": 5
+    }
+  },
+  "timeline": [
+    {
+      "timestamp": 804876735859,
+      "event_type": "lib_init",
+      "phase": "PEI",
+      "function": "",
+      "module": "PeiEnhancedDebugLib",
+      "duration": null,
+      "depth": 0,
+      "status": ""
+    },
+    {
+      "timestamp": 804903337438,
+      "event_type": "entry",
+      "phase": "PEI",
+      "function": "InitializePeiFrb",
+      "module": "",
+      "duration": null,
+      "depth": 0,
+      "status": ""
+    },
+    {
+      "timestamp": 804948884625,
+      "event_type": "call_push",
+      "phase": "PEI",
+      "function": "InitializePeiFrb",
+      "module": "",
+      "duration": null,
+      "depth": 1,
+      "status": ""
+    },
+    {
+      "timestamp": 804948884625,
+      "event_type": "call_push",
+      "phase": "PEI",
+      "function": "InitializePeiFrb",
+      "module": "",
+      "duration": null,
+      "depth": 1,
+      "status": ""
+    },
+    {
+      "timestamp": 805027309876,
+      "event_type": "entry",
+      "phase": "PEI",
+      "function": "GetFrbSetupOptions",
+      "module": "",
+      "duration": null,
+      "depth": 0,
+      "status": ""
+    },
+    {
+      "timestamp": 805072553745,
+      "event_type": "call_push",
+      "phase": "PEI",
+      "function": "GetFrbSetupOptions",
+      "module": "",
+      "duration": null,
+      "depth": 2,
+      "status": ""
+    },
+    {
+      "timestamp": 805072553745,
+      "event_type": "call_push",
+      "phase": "PEI",
+      "function": "GetFrbSetupOptions",
+      "module": "",
+      "duration": null,
+      "depth": 2,
+      "status": ""
+    },
+    {
+      "timestamp": 805193940641,
+      "event_type": "exit",
+      "phase": "PEI",
+      "function": "GetFrbSetupOptions",
+      "module": "",
+      "duration": null,
+      "depth": 0,
+      "status": "Success"
+    },
+    {
+      "timestamp": 805507220001,
+      "event_type": "exit",
+      "phase": "PEI",
+      "function": "InitializePeiFrb",
+      "module": "",
+      "duration": null,
+      "depth": 0,
+      "status": "Success"
+    },
+    {
+      "timestamp": 807467420530,
+      "event_type": "lib_init",
+      "phase": "PEI",
+      "function": "",
+      "module": "PeiEnhancedDebugLib",
+      "duration": null,
+      "depth": 0,
+      "status": ""
+    },
+    {
+      "timestamp": 807493876026,
+      "event_type": "entry",
+      "phase": "PEI",
+      "function": "InitializePeiFrb",
+      "module": "",
+      "duration": null,
+      "depth": 0,
+      "status": ""
+    },
+    {
+      "timestamp": 807538926744,
+      "event_type": "call_push",
+      "phase": "PEI",
+      "function": "InitializePeiFrb",
+      "module": "",
+      "duration": null,
+      "depth": 1,
+      "status": ""
+    },
+    {
+      "timestamp": 807538926744,
+      "event_type": "call_push",
+      "phase": "PEI",
+      "function": "InitializePeiFrb",
+      "module": "",
+      "duration": null,
+      "depth": 1,
+      "status": ""
+    },
+    {
+      "timestamp": 807616504443,
+      "event_type": "entry",
+      "phase": "PEI",
+      "function": "GetFrbSetupOptions",
+      "module": "",
+      "duration": null,
+      "depth": 0,
+      "status": ""
+    },
+    {
+      "timestamp": 807661184562,
+      "event_type": "call_push",
+      "phase": "PEI",
+      "function": "GetFrbSetupOptions",
+      "module": "",
+      "duration": null,
+      "depth": 2,
+      "status": ""
+    },
+    {
+      "timestamp": 807661184562,
+      "event_type": "call_push",
+      "phase": "PEI",
+      "function": "GetFrbSetupOptions",
+      "module": "",
+      "duration": null,
+      "depth": 2,
+      "status": ""
+    },
+    {
+      "timestamp": 807805652039,
+      "event_type": "exit",
+      "phase": "PEI",
+      "function": "GetFrbSetupOptions",
+      "module": "",
+      "duration": null,
+      "depth": 0,
+      "status": "Success"
+    },
+    {
+      "timestamp": 808118993760,
+      "event_type": "exit",
+      "phase": "PEI",
+      "function": "InitializePeiFrb",
+      "module": "",
+      "duration": null,
+      "depth": 0,
+      "status": "Success"
+    },
+    {
+      "timestamp": 1027132304548,
+      "event_type": "lib_init",
+      "phase": "DXE",
+      "function": "",
+      "module": "DxeEnhancedDebugLib",
+      "duration": null,
+      "depth": 0,
+      "status": ""
+    },
+    {
+      "timestamp": 1027164019155,
+      "event_type": "entry",
+      "phase": "DXE",
+      "function": "PciBusEntryPoint",
+      "module": "",
+      "duration": null,
+      "depth": 0,
+      "status": ""
+    },
+    {
+      "timestamp": 1027209815294,
+      "event_type": "call_push",
+      "phase": "DXE",
+      "function": "PciBusEntryPoint",
+      "module": "",
+      "duration": null,
+      "depth": 1,
+      "status": ""
+    },
+    {
+      "timestamp": 1027209815294,
+      "event_type": "call_push",
+      "phase": "DXE",
+      "function": "PciBusEntryPoint",
+      "module": "",
+      "duration": null,
+      "depth": 1,
+      "status": ""
+    },
+    {
+      "timestamp": 1027384242824,
+      "event_type": "exit",
+      "phase": "DXE",
+      "function": "PciBusEntryPoint",
+      "module": "",
+      "duration": null,
+      "depth": 0,
+      "status": "Success"
+    }
+  ],
+  "call_chains": [
+    {
+      "function": "GetFrbSetupOptions",
+      "phase": "PEI",
+      "entry_time": 807661184562,
+      "exit_time": 0,
+      "duration": null,
+      "status": "",
+      "depth": 2
+    },
+    {
+      "function": "GetFrbSetupOptions",
+      "phase": "PEI",
+      "entry_time": 807661184562,
+      "exit_time": 0,
+      "duration": null,
+      "status": "",
+      "depth": 2
+    },
+    {
+      "function": "InitializePeiFrb",
+      "phase": "PEI",
+      "entry_time": 807538926744,
+      "exit_time": 0,
+      "duration": null,
+      "status": "",
+      "depth": 1
+    },
+    {
+      "function": "InitializePeiFrb",
+      "phase": "PEI",
+      "entry_time": 807538926744,
+      "exit_time": 0,
+      "duration": null,
+      "status": "",
+      "depth": 1
+    },
+    {
+      "function": "GetFrbSetupOptions",
+      "phase": "PEI",
+      "entry_time": 805072553745,
+      "exit_time": 0,
+      "duration": null,
+      "status": "",
+      "depth": 2
+    },
+    {
+      "function": "GetFrbSetupOptions",
+      "phase": "PEI",
+      "entry_time": 805072553745,
+      "exit_time": 0,
+      "duration": null,
+      "status": "",
+      "depth": 2
+    },
+    {
+      "function": "InitializePeiFrb",
+      "phase": "PEI",
+      "entry_time": 804948884625,
+      "exit_time": 0,
+      "duration": null,
+      "status": "",
+      "depth": 1
+    },
+    {
+      "function": "InitializePeiFrb",
+      "phase": "PEI",
+      "entry_time": 804948884625,
+      "exit_time": 0,
+      "duration": null,
+      "status": "",
+      "depth": 1
+    },
+    {
+      "function": "PciBusEntryPoint",
+      "phase": "DXE",
+      "entry_time": 1027209815294,
+      "exit_time": 0,
+      "duration": null,
+      "status": "",
+      "depth": 1
+    },
+    {
+      "function": "PciBusEntryPoint",
+      "phase": "DXE",
+      "entry_time": 1027209815294,
+      "exit_time": 0,
+      "duration": null,
+      "status": "",
+      "depth": 1
+    }
+  ],
+  "performance": {
+    "function_metrics": {},
+    "total_functions": 0,
+    "total_call_pairs": 10
+  },
+  "phases": {
+    "pei_start": 804876735859,
+    "dxe_start": 1027132304548
+  }
+}

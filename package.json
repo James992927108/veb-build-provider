@@ -512,11 +512,10 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "lint": "eslint src --ext ts",
+    "compile": "tsc -p ./ && npm run copy-scripts",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "test": "node ./out/test/runTest.js"
+    "copy-scripts": "xcopy scripts out\\scripts /E /I /Y",
+    "copy-templates": "xcopy templates out\\templates /E /I /Y"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",
