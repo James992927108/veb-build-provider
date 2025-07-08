@@ -94,13 +94,9 @@ async function handleRestoreModuleEnhance(edk2ModuleProvider: Edk2ModuleProvider
             return;
         }
 
-        const result = await ModuleEnhancer.restore(meta);
-        if (result.success) {
-            vscode.window.showInformationMessage('Restore complete.');
-            await edk2ModuleProvider.refresh();
-        } else {
-            vscode.window.showWarningMessage('Restore failed:\n' + result.errors.join('\n'));
-        }
+        await ModuleEnhancer.restore(meta);
+        vscode.window.showInformationMessage('Restore complete.');
+        await edk2ModuleProvider.refresh();
     } catch (error) {
         handleError(`Module restoration failed: ${error instanceof Error ? error.message : String(error)}`);
     }

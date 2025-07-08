@@ -1,260 +1,187 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
-import Parser from 'tree-sitter';
-import C from 'tree-sitter-c';
 import { Edk2InfMeta } from '../types';
 import { logMessage } from '../../utils/logger';
 import { ENHANCED_DEBUG_CONSTANTS } from '../constants';
 
 export class ModuleEnhancer {
+  /** 
+   * 入口：增強 INF 與 C 檔案，插入偵錯巨集 
+   */
   static async enhance(
     infMeta: Edk2InfMeta,
     maxDepth: number = 3
   ): Promise<boolean> {
-    // 1. 備份 INF
-    const infBackup = `${infMeta.filePath}.bak`;
-    if (!fs.existsSync(infBackup)) {
-      fs.copyFileSync(infMeta.filePath, infBackup);
-    }
-
-    // 2. 更新 INF
+    // 1. INF 備份與更新
+    const infBak = `${infMeta.filePath}.bak`;
+    if (!fs.existsSync(infBak)) { fs.copyFileSync(infMeta.filePath, infBak); }
     let infContent = fs.readFileSync(infMeta.filePath, 'utf-8');
     if (!infContent.includes(ENHANCED_DEBUG_CONSTANTS.LIBRARY_NAME)) {
       infContent = infContent.replace(
         /\[LibraryClasses\][\r\n]+/,
-        (m) => `${m} ${ENHANCED_DEBUG_CONSTANTS.LIBRARY_NAME}\n`
+        m => `${m}${ENHANCED_DEBUG_CONSTANTS.LIBRARY_NAME}\n`
       );
     }
     if (!infContent.includes(ENHANCED_DEBUG_CONSTANTS.AMI_MODULE_PKG)) {
       infContent = infContent.replace(
         /\[Packages\][\r\n]+/,
-        (m) => `${m} ${ENHANCED_DEBUG_CONSTANTS.AMI_MODULE_PKG}\n`
+        m => `${m}${ENHANCED_DEBUG_CONSTANTS.AMI_MODULE_PKG}\n`
       );
     }
     fs.writeFileSync(infMeta.filePath, infContent, 'utf-8');
 
-    // 3. 處理所有 C Source
+    // 2. 處理所有 C 檔
     for (const srcFile of infMeta.sourceFiles) {
-      const cBackup = `${srcFile}.bak`;
-      if (!fs.existsSync(cBackup)) {
-        fs.copyFileSync(srcFile, cBackup);
-      }
-      let cContent = fs.readFileSync(srcFile, 'utf-8');
+      // 備份
+      const cBak = `${srcFile}.bak`;
+      if (!fs.existsSync(cBak)) { fs.copyFileSync(srcFile, cBak); }
 
-      // 插入 include EnhancedDebugLib.h
-      const includeLine = ENHANCED_DEBUG_CONSTANTS.HEADER_FILE;
-      if (!cContent.includes(includeLine)) {
-        const includeRegex = /^(#include.*\n)+/;
-        if (includeRegex.test(cContent)) {
-          cContent = cContent.replace(includeRegex, (m) => `${m}${includeLine}\n`);
-        } else {
-          cContent = `${includeLine}\n${cContent}`;
-        }
-        logMessage(`Inserted include for EnhancedDebugLib.h in: ${srcFile}`);
+      let code = fs.readFileSync(srcFile, 'utf-8');
+      // 插入 include
+      const inc = ENHANCED_DEBUG_CONSTANTS.HEADER_FILE;
+      if (!code.includes(inc)) {
+        code = code.replace(
+          /^(#include.*\n)+/m,
+          m => `${m}${inc}\n`
+        );
       }
 
-      // AST 解析與巨集插入
-      cContent = await this.insertDebugMacrosTreeSitter(
-        cContent,
-        infMeta.entryPoint,
-        maxDepth
-      );
-      fs.writeFileSync(srcFile, cContent, 'utf-8');
+      // 3. 插入巨集
+      code = this.insertDebugMacros(code, infMeta.entryPoint, maxDepth);
+      fs.writeFileSync(srcFile, code, 'utf-8');
+      logMessage(`Enhanced ${path.basename(srcFile)}`);
     }
 
     return true;
   }
 
-  static async restore(
-    infMeta: Edk2InfMeta
-  ): Promise<{ success: boolean; errors: string[] }> {
+  /** 還原備份 */
+  static async restore(infMeta: Edk2InfMeta): Promise<{ success: boolean; errors?: string[] }> {
     const errors: string[] = [];
-    // 還原 INF
-    const infBackup = `${infMeta.filePath}.bak`;
-    if (fs.existsSync(infBackup)) {
+    const infBak = `${infMeta.filePath}.bak`;
+    try {
+      if (fs.existsSync(infBak)) {
+        fs.copyFileSync(infBak, infMeta.filePath);
+        fs.unlinkSync(infBak);
+      }
+    } catch (e) {
+      errors.push(`Failed to restore or remove backup for INF: ${infBak} (${e instanceof Error ? e.message : e})`);
+    }
+
+    for (const srcFile of infMeta.sourceFiles) {
+      const cBak = `${srcFile}.bak`;
       try {
-        fs.copyFileSync(infBackup, infMeta.filePath);
-        logMessage(`Restored INF: ${infMeta.filePath}`);
-        try {
-          fs.unlinkSync(infBackup);
-        } catch (e) {
-          errors.push(`Delete INF backup failed: ${e}`);
+        if (fs.existsSync(cBak)) {
+          fs.copyFileSync(cBak, srcFile);
+          fs.unlinkSync(cBak);
         }
       } catch (e) {
-        errors.push(`Restore INF failed: ${e}`);
-      }
-    } else {
-      errors.push(`No backup found for INF: ${infMeta.filePath}`);
-    }
-    // 還原所有 C 檔
-    for (const srcFile of infMeta.sourceFiles) {
-      const cBackup = `${srcFile}.bak`;
-      if (fs.existsSync(cBackup)) {
-        try {
-          fs.copyFileSync(cBackup, srcFile);
-          try {
-            fs.unlinkSync(cBackup);
-          } catch (e) {
-            errors.push(`Delete C backup failed: ${srcFile} (${e})`);
-          }
-        } catch (e) {
-          errors.push(`Restore C file failed: ${srcFile} (${e})`);
-        }
-      } else {
-        errors.push(`No backup found for C file: ${srcFile}`);
+        errors.push(`Failed to restore or remove backup for source: ${cBak} (${e instanceof Error ? e.message : e})`);
       }
     }
-    return { success: errors.length === 0, errors };
+
+    return { success: errors.length === 0, errors: errors.length ? errors : undefined };
   }
 
-  // ====== Tree-sitter AST 巨集插入 ======
-  private static async insertDebugMacrosTreeSitter(
+  /** 核心：正則 + 括號計數，定位函式並遞迴插入 */
+  private static insertDebugMacros(
     code: string,
     entryPoint: string,
     maxDepth: number
-  ): Promise<string> {
-    const parser = new Parser();
-    parser.setLanguage(C as any);
-    const tree = parser.parse(code);
-
-    // 1. 收集所有函式定義
-    const funcDefs = this.collectFunctionDefinitions(tree.rootNode, code);
-
-    // 2. 以 entryPoint 為起點，遞迴插入巨集
-    const visited = new Set<string>();
-    let newCode = code;
-    await this.insertDebugRecursiveTreeSitter(
-      funcDefs,
-      entryPoint,
-      maxDepth,
-      visited,
-      (fnName, fnRange) => {
-        newCode = this.insertDebugMacrosForFunction(newCode, fnName, fnRange, funcDefs);
-      },
-      code  // 傳遞原始程式碼
-    );
-    return newCode;
-  }
-
-  private static collectFunctionDefinitions(rootNode: any, code: string) {
-    const funcDefs: Record<
-      string,
-      { startIndex: number; endIndex: number; bodyStart: number; bodyEnd: number }
-    > = {};
-
-    // 加入安全檢查
-    const functionDefs = rootNode.descendantsOfType?.('function_definition') || [];
-
-    functionDefs.forEach((fn: any) => {
-      const nameNode = fn.childForFieldName?.('declarator')?.descendantForType?.('identifier');
-      if (!nameNode) {
-        return;
-      }
-      const name = nameNode.text;
-      const bodyNode = fn.childForFieldName?.('body');
-      if (!bodyNode) {
-        return;
-      }
-      funcDefs[name] = {
-        startIndex: fn.startIndex,
-        endIndex: fn.endIndex,
-        bodyStart: bodyNode.startIndex,
-        bodyEnd: bodyNode.endIndex,
-      };
-    });
-    return funcDefs;
-  }
-
-  private static async insertDebugRecursiveTreeSitter(
-    funcDefs: Record<
-      string,
-      { startIndex: number; endIndex: number; bodyStart: number; bodyEnd: number }
-    >,
-    funcName: string,
-    depth: number,
-    visited: Set<string>,
-    insertFn: (
-      fnName: string,
-      fnRange: { startIndex: number; endIndex: number; bodyStart: number; bodyEnd: number }
-    ) => void,
-    originalCode: string  // 新增參數
-  ) {
-    if (depth <= 0 || visited.has(funcName) || !funcDefs[funcName]) {
-      return;
-    }
-    visited.add(funcName);
-
-    insertFn(funcName, funcDefs[funcName]);
-
-    // 找出第一層呼叫 - 修正這部分
-    const bodyCode = originalCode.slice(
-      funcDefs[funcName].bodyStart,
-      funcDefs[funcName].bodyEnd
-    );
-
-    const parser = new Parser();
-    parser.setLanguage(C as any);
-    const bodyTree = parser.parse(bodyCode);
-
-    // 加入安全檢查
-    const callExpressions = bodyTree.rootNode.descendantsOfType?.('call_expression') || [];
-    const called = new Set<string>();
-
-    callExpressions.forEach((call: any) => {
-      const callee = call.childForFieldName('function');
-      if (callee && funcDefs[callee.text]) {
-        called.add(callee.text);
-      }
-    });
-
-    for (const callee of called) {
-      await this.insertDebugRecursiveTreeSitter(
-        funcDefs,
-        callee,
-        depth - 1,
-        visited,
-        insertFn,
-        originalCode  // 傳遞原始程式碼
-      );
-    }
-  }
-
-  private static insertDebugMacrosForFunction(
-    code: string,
-    funcName: string,
-    fnRange: { startIndex: number; endIndex: number; bodyStart: number; bodyEnd: number },
-    funcDefs: Record<string, any>
   ): string {
-    // 取得函式主體
-    const before = code.slice(0, fnRange.bodyStart + 1);
-    const body = code.slice(fnRange.bodyStart + 1, fnRange.bodyEnd - 1);
-    const after = code.slice(fnRange.bodyEnd - 1);
+    // 1. 解析所有函式範圍
+    const funcMap = this.parseAllFunctions(code);
+    // 2. 從 entryPoint 開始遞迴
+    const visited = new Set<string>();
+    return this.insertRecursive(code, funcMap, entryPoint, maxDepth, visited);
+  }
 
-    // 插入 DEBUG_ENTRY
-    const debugEntry =
-      ENHANCED_DEBUG_CONSTANTS.DEBUG_ENTRY_PATTERN.replace('{functionName}', funcName) +
-      '\n';
-    let newBody = debugEntry + body;
-
-    // 插入 DEBUG_EXIT（每個 return 前）
-    newBody = newBody.replace(
-      /return\s+([^;]+);/g,
-      (_match, retExpr: string) => {
-        const debugExitForRet = ENHANCED_DEBUG_CONSTANTS.DEBUG_EXIT_PATTERN
-          .replace('{functionName}', funcName)
-          .replace('{returnValue}', retExpr.trim());
-        return `${debugExitForRet}\n return ${retExpr};`;
+  /** 用正則找所有函式定義，並記錄 start/end 索引 */
+  private static parseAllFunctions(
+    code: string
+  ): Map<string, { start: number; end: number }> {
+    const map = new Map<string, { start: number; end: number }>();
+    const regex = /([A-Za-z_][A-Za-z0-9_\s\*]+)\s+([A-Za-z_][A-Za-z0-9_]*)\s*\([^)]*\)\s*\{/g;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(code)) !== null) {
+      const name = match[2];
+      let brace = 1;
+      let idx = regex.lastIndex;
+      while (brace > 0 && idx < code.length) {
+        if (code[idx] === '{') { brace++; }
+        else if (code[idx] === '}') { brace--; }
+        idx++;
       }
+      if (brace === 0) { map.set(name, { start: match.index, end: idx }); }
+    }
+    return map;
+  }
+
+  /** 遞迴插入 DEBUG 巨集 */
+  private static insertRecursive(
+    code: string,
+    funcMap: Map<string, { start: number; end: number }>,
+    fn: string,
+    depth: number,
+    visited: Set<string>
+  ): string {
+    if (depth <= 0 || visited.has(fn) || !funcMap.has(fn)) { return code; }
+    visited.add(fn);
+
+    const { start, end } = funcMap.get(fn)!;
+    let body = code.slice(start, end);
+
+    // 1. 插入 DEBUG_ENTRY
+    const entry = ENHANCED_DEBUG_CONSTANTS.DEBUG_ENTRY_PATTERN.replace(
+      '{functionName}', fn
     );
-    // 若無 return，於結尾插入
-    if (!/return\s+[^;]+;/.test(newBody)) {
-      const debugExitNoRet = ENHANCED_DEBUG_CONSTANTS.DEBUG_EXIT_PATTERN
-        .replace('{functionName}', funcName)
+    body = body.replace('{', `{\n  ${entry}`);
+
+    // 2. 處理 return，包含三種情境
+    //    - 單行 if(cond) return ret;
+    //    - if(cond)\n    return ret;
+    //    - 一般 return ret;
+    const returnRegex = /(?:if\s*\(\s*([^)]+)\s*\)\s*)(?:\{\s*)?(?:\r?\n\s*|)\s*return\s+([^;]+);|return\s+([^;]+);/g;
+    body = body.replace(returnRegex, (_m, cond, ret1, ret2) => {
+      const ret = (ret1 || ret2).trim();
+      const exit = ENHANCED_DEBUG_CONSTANTS.DEBUG_EXIT_PATTERN
+        .replace('{functionName}', fn)
+        .replace('{returnValue}', ret);
+
+      if (cond) {
+        // 有條件的 return，補上大括號區塊
+        return [
+          `if(${cond}) {`,
+          `    ${exit}`,
+          `    return ${ret};`,
+          `  }`
+        ].join('\n');
+      } else {
+        // 凡是一般 return，直接插入 EXIT
+        return `${exit}\n  return ${ret};`;
+      }
+    });
+
+    // 3. 若函式內根本沒有 return，則於結尾插入一次 DEBUG_EXIT
+    if (!/return\s+[^;]+;/.test(body)) {
+      const exitNoRet = ENHANCED_DEBUG_CONSTANTS.DEBUG_EXIT_PATTERN
+        .replace('{functionName}', fn)
         .replace('{returnValue}', 'EFI_SUCCESS');
-      newBody = newBody.replace(/\}\s*$/, `\n ${debugExitNoRet}\n}`);
+      body = body.replace(/\}\s*$/, `  ${exitNoRet}\n}`);
     }
 
-    // 合併
-    return before + newBody + after;
+    // 4. 用修改後 body 取代原函式範圍
+    code = code.slice(0, start) + body + code.slice(end);
+
+    // 5. 遞迴處理下一層呼叫
+    for (const callee of funcMap.keys()) {
+      if (callee !== fn && new RegExp(`\\b${callee}\\s*\\(`).test(body)) {
+        code = this.insertRecursive(code, funcMap, callee, depth - 1, visited);
+      }
+    }
+
+    return code;
   }
+
 }
