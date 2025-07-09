@@ -106,14 +106,14 @@
         "extensions": [
           ".veb"
         ],
-        "configuration": "./confs/language-configuration_veb.json"
+        "configuration": "./config/languages/language-configuration_veb.json"
       },
       {
         "id": "BiosLanguage_sdl",
         "extensions": [
           ".sdl"
         ],
-        "configuration": "./confs/language-configuration_sdl.json"
+        "configuration": "./config/languages/language-configuration_sdl.json"
       },
       {
         "id": "edk2_dsc",
@@ -121,14 +121,14 @@
           ".dsc",
           ".dsc.inc"
         ],
-        "configuration": "./confs/edk2_dsc.conf.json"
+        "configuration": "./config/languages/edk2_dsc.conf.json"
       },
       {
         "id": "edk2_dec",
         "extensions": [
           ".dec"
         ],
-        "configuration": "./confs/edk2_dec.conf.json"
+        "configuration": "./config/languages/edk2_dec.conf.json"
       },
       {
         "id": "edk2_fdf",
@@ -136,21 +136,21 @@
           ".fdf",
           ".fdf.inc"
         ],
-        "configuration": "./confs/edk2_fdf.conf.json"
+        "configuration": "./config/languages/edk2_fdf.conf.json"
       },
       {
         "id": "edk2_inf",
         "extensions": [
           ".inf"
         ],
-        "configuration": "./confs/edk2_inf.conf.json"
+        "configuration": "./config/languages/edk2_inf.conf.json"
       },
       {
         "id": "edk2_uni",
         "extensions": [
           ".uni"
         ],
-        "configuration": "./confs/edk2_uni.conf.json"
+        "configuration": "./config/languages/edk2_uni.conf.json"
       },
       {
         "id": "edk2_vfr",
@@ -160,7 +160,7 @@
           ".hfr",
           ".sd"
         ],
-        "configuration": "./confs/edk2_vfr.conf.json"
+        "configuration": "./config/languages/edk2_vfr.conf.json"
       },
       {
         "id": "asm",
@@ -175,54 +175,54 @@
           ".inc",
           ".s"
         ],
-        "configuration": "./confs/language-configuration_asm.json"
+        "configuration": "./config/languages/language-configuration_asm.json"
       }
     ],
     "grammars": [
       {
         "language": "BiosLanguage_veb",
         "scopeName": "source.veb",
-        "path": "./syntaxes/BiosLanguage.tmLanguage_veb.json"
+        "path": "./config/syntaxes/BiosLanguage.tmLanguage_veb.json"
       },
       {
         "language": "BiosLanguage_sdl",
         "scopeName": "source.sdl",
-        "path": "./syntaxes/BiosLanguage.tmLanguage_sdl.json"
+        "path": "./config/syntaxes/BiosLanguage.tmLanguage_sdl.json"
       },
       {
         "language": "edk2_dsc",
         "scopeName": "source.edk2_dsc",
-        "path": "./syntaxes/edk2_dsc.tmLanguage.json"
+        "path": "./config/syntaxes/edk2_dsc.tmLanguage.json"
       },
       {
         "language": "edk2_dec",
         "scopeName": "source.edk2_dec",
-        "path": "./syntaxes/edk2_dec.tmLanguage.json"
+        "path": "./config/syntaxes/edk2_dec.tmLanguage.json"
       },
       {
         "language": "edk2_fdf",
         "scopeName": "source.edk2_fdf",
-        "path": "./syntaxes/edk2_fdf.tmLanguage.json"
+        "path": "./config/syntaxes/edk2_fdf.tmLanguage.json"
       },
       {
         "language": "edk2_inf",
         "scopeName": "source.edk2_inf",
-        "path": "./syntaxes/edk2_inf.tmLanguage.json"
+        "path": "./config/syntaxes/edk2_inf.tmLanguage.json"
       },
       {
         "language": "edk2_uni",
         "scopeName": "source.edk2_uni",
-        "path": "./syntaxes/edk2_uni.tmLanguage.json"
+        "path": "./config/syntaxes/edk2_uni.tmLanguage.json"
       },
       {
         "language": "edk2_vfr",
         "scopeName": "source.edk2_vfr",
-        "path": "./syntaxes/edk2_vfr.tmLanguage.json"
+        "path": "./config/syntaxes/edk2_vfr.tmLanguage.json"
       },
       {
         "language": "asm",
         "scopeName": "source.asm.x86_64",
-        "path": "./syntaxes/language-x86_64-assembly.tmLanguage"
+        "path": "./config/syntaxes/language-x86_64-assembly.tmLanguage"
       }
     ],
     "snippets": [

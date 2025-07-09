@@ -1,7 +1,7 @@
 // src/edk2Debug/visualization/htmlReportGenerator.ts
 import * as fs from 'fs';
 import * as path from 'path';
-import { AnalysisResult} from '../types';
+import { AnalysisResult } from '../types';
 
 export class HTMLReportGenerator {
     private templatePath: string;
@@ -14,7 +14,7 @@ export class HTMLReportGenerator {
         const template = await this.loadTemplate('debug_report.html');
         
         const reportData = {
-            title: 'EDK2 Enhanced Debug 分析報告',
+            title: 'EDK2 Enhanced Debug Analysis Report',
             generatedAt: new Date().toLocaleString('zh-TW'),
             summary: analysisResult.summary,
             callChains: JSON.stringify(analysisResult.callChains),

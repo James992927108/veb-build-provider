@@ -20,7 +20,7 @@ enum ShowType {
   QuickPick = 1
 }
 
-// ----------- VSBuild 任務相關函式 -----------
+// ----------- VSBuild task related functions -----------
 
 function getFormattedTimestamp(): string {
   const now = new Date();
@@ -177,7 +177,7 @@ function getFolderPath(): string {
   return workspaceFolder.uri.fsPath;
 }
 
-// ----------- VSBuild 命令註冊 -----------
+// ----------- VSBuild command registration -----------
 
 export function registerBuildCommands(context: vscode.ExtensionContext): void {
   registerCommandWithLog(context, 'vebBuild.buildTool.initTask', handleInitTask);
@@ -186,7 +186,7 @@ export function registerBuildCommands(context: vscode.ExtensionContext): void {
   registerCommandWithLog(context, 'vebBuild.buildTool.stopTerminal', handleterminateTerminal);
 }
 
-// ----------- VSBuild 命令處理函式 -----------
+// ----------- VSBuild command handler functions -----------
 
 export async function handleInitTask(): Promise<void> {
   logMessage("Starting handleInitTask");

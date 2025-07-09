@@ -34,7 +34,7 @@ async function handleAnalyzeLogFile(logAnalyzer: LogAnalyzer, htmlReportGenerato
             canSelectFiles: true,
             canSelectFolders: false,
             canSelectMany: false,
-            openLabel: '選擇 EDK2 Debug 日誌檔案進行分析',
+            openLabel: 'Select EDK2 Debug log file for analysis',
             filters: {
                 'Log Files': ['log', 'txt'],
                 'All Files': ['*']
@@ -50,36 +50,36 @@ async function handleAnalyzeLogFile(logAnalyzer: LogAnalyzer, htmlReportGenerato
 
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: "分析 EDK2 Debug 日誌中...",
+            title: "Analyzing EDK2 Debug log...",
             cancellable: false
         }, async (progress) => {
-            progress.report({ increment: 10, message: "正在解析 PEI/DXE 階段..." });
+            progress.report({ increment: 10, message: "Parsing PEI/DXE phase..." });
 
             const analysisResult = await logAnalyzer.analyzeLogFile(logFilePath);
 
-            progress.report({ increment: 50, message: "正在建立時間軸和呼叫鏈..." });
+            progress.report({ increment: 50, message: "Building timeline and call chain..." });
 
             const reportPath = path.join(path.dirname(logFilePath), `edk2_analysis_report_${Date.now()}.html`);
             await htmlReportGenerator.generateDebugReport(analysisResult, reportPath);
 
-            progress.report({ increment: 100, message: "分析完成" });
+            progress.report({ increment: 100, message: "Analysis complete" });
 
             const peiEvents = analysisResult.detailedTimeline?.filter(e => e.phase === 'PEI').length || 0;
             const dxeEvents = analysisResult.detailedTimeline?.filter(e => e.phase === 'DXE').length || 0;
 
             const openReport = await vscode.window.showInformationMessage(
-                `EDK2 日誌分析完成！\n` +
-                `總函數數量: ${analysisResult.performance.totalFunctions}\n` +
-                `PEI 階段事件: ${peiEvents}\n` +
-                `DXE 階段事件: ${dxeEvents}\n` +
-                `錯誤數量: ${analysisResult.errors.length}`,
-                '開啟報告', '在瀏覽器中開啟'
+                `EDK2 log analysis complete!\n` +
+                `Total functions: ${analysisResult.performance.totalFunctions}\n` +
+                `PEI phase events: ${peiEvents}\n` +
+                `DXE phase events: ${dxeEvents}\n` +
+                `Error count: ${analysisResult.errors.length}`,
+                'Open Report', 'Open in Browser'
             );
 
-            if (openReport === '開啟報告') {
+            if (openReport === 'Open Report') {
                 const doc = await vscode.workspace.openTextDocument(reportPath);
                 await vscode.window.showTextDocument(doc);
-            } else if (openReport === '在瀏覽器中開啟') {
+            } else if (openReport === 'Open in Browser') {
                 vscode.env.openExternal(vscode.Uri.file(reportPath));
             }
         });
@@ -91,8 +91,8 @@ async function handleAnalyzeLogFile(logAnalyzer: LogAnalyzer, htmlReportGenerato
 async function handleParseLogLine(): Promise<void> {
     try {
         const logLine = await vscode.window.showInputBox({
-            prompt: '輸入日誌行進行解析測試',
-            placeHolder: '例如: 2024-01-01T12:00:00.000Z [MODULE] DEBUG_ENTRY: FunctionName()'
+            prompt: 'Enter a log line to parse',
+            placeHolder: 'e.g.: 2024-01-01T12:00:00.000Z [MODULE] DEBUG_ENTRY: FunctionName()'
         });
 
         if (!logLine) {
@@ -101,15 +101,15 @@ async function handleParseLogLine(): Promise<void> {
 
         const parsedEntry = JSONLogParser.parseLogLine(logLine);
         if (parsedEntry) {
-            const result = `解析結果:\n` +
-                `時間戳: ${parsedEntry.timestamp}\n` +
-                `模組: ${parsedEntry.module}\n` +
-                `函數: ${parsedEntry.function}\n` +
-                `等級: ${parsedEntry.level}\n` +
-                `訊息: ${parsedEntry.message}`;
+            const result = `Parse result:\n` +
+                `Timestamp: ${parsedEntry.timestamp}\n` +
+                `Module: ${parsedEntry.module}\n` +
+                `Function: ${parsedEntry.function}\n` +
+                `Level: ${parsedEntry.level}\n` +
+                `Message: ${parsedEntry.message}`;
             vscode.window.showInformationMessage(result);
         } else {
-            vscode.window.showWarningMessage('無法解析該日誌行，請檢查格式是否正確。');
+            vscode.window.showWarningMessage('Unable to parse the log line, please check the format.');
         }
     } catch (error) {
         handleError(`Log line parsing failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -122,7 +122,7 @@ async function handleShowPerformanceAnalysis(logAnalyzer: LogAnalyzer): Promise<
             canSelectFiles: true,
             canSelectFolders: false,
             canSelectMany: false,
-            openLabel: '選擇日誌檔案進行效能分析',
+            openLabel: 'Select log file for performance analysis',
             filters: {
                 'Log Files': ['log', 'txt', 'json'],
                 'All Files': ['*']
@@ -136,26 +136,26 @@ async function handleShowPerformanceAnalysis(logAnalyzer: LogAnalyzer): Promise<
         const analysisResult = await logAnalyzer.analyzeLogFile(fileUri[0].fsPath);
         const perf = analysisResult.performance;
 
-        let message = `效能分析結果:\n`;
-        message += `總函數數量: ${perf.totalFunctions}\n`;
+        let message = `Performance analysis result:\n`;
+        message += `Total functions: ${perf.totalFunctions}\n`;
 
         if (perf.bootTime) {
-            message += `啟動時間: ${perf.bootTime}ms\n`;
+            message += `Boot time: ${perf.bootTime}ms\n`;
         }
 
         if (perf.criticalPath && perf.criticalPath.length > 0) {
-            message += `關鍵路徑: ${perf.criticalPath.slice(0, 3).join(' -> ')}${perf.criticalPath.length > 3 ? '...' : ''}\n`;
+            message += `Critical path: ${perf.criticalPath.slice(0, 3).join(' -> ')}${perf.criticalPath.length > 3 ? '...' : ''}\n`;
         }
 
-        // 顯示前5個最耗時的函數
+        // Show top 5 most time-consuming functions
         const topFunctions = Object.entries(perf.functionMetrics)
             .sort(([, a], [, b]) => b.avgDuration - a.avgDuration)
             .slice(0, 5);
 
         if (topFunctions.length > 0) {
-            message += `\n最耗時函數 (前5名):\n`;
+            message += `\nTop 5 most time-consuming functions:\n`;
             topFunctions.forEach(([name, metrics], index) => {
-                message += `${index + 1}. ${name}: 平均 ${metrics.avgDuration.toFixed(2)}ms\n`;
+                message += `${index + 1}. ${name}: avg ${metrics.avgDuration.toFixed(2)}ms\n`;
             });
         }
 
@@ -171,7 +171,7 @@ async function handleBatchAnalyzeLogs(logAnalyzer: LogAnalyzer): Promise<void> {
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
-            openLabel: '選擇包含日誌檔案的資料夾'
+            openLabel: 'Select a folder containing log files'
         });
 
         if (!folderUri || !folderUri[0]) {
@@ -185,7 +185,7 @@ async function handleBatchAnalyzeLogs(logAnalyzer: LogAnalyzer): Promise<void> {
             .map((file: string) => path.join(folderPath, file));
 
         if (logFiles.length === 0) {
-            vscode.window.showWarningMessage('在指定資料夾中沒有找到日誌檔案。');
+            vscode.window.showWarningMessage('No log files found in the specified folder.');
             return;
         }
 
@@ -194,14 +194,14 @@ async function handleBatchAnalyzeLogs(logAnalyzer: LogAnalyzer): Promise<void> {
 
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: "批量分析日誌檔案...",
+            title: "Batch analyzing log files...",
             cancellable: false
         }, async (progress) => {
             for (let i = 0; i < logFiles.length; i++) {
                 const logFile = logFiles[i];
                 progress.report({
                     increment: (i / logFiles.length) * 100,
-                    message: `正在分析: ${path.basename(logFile)}`
+                    message: `Analyzing: ${path.basename(logFile)}`
                 });
 
                 try {
@@ -222,11 +222,11 @@ async function handleBatchAnalyzeLogs(logAnalyzer: LogAnalyzer): Promise<void> {
         await generateBatchReport(batchReportPath, logFiles, batchResults);
 
         const openReport = await vscode.window.showInformationMessage(
-            `批量分析完成！成功分析 ${batchResults.length}/${logFiles.length} 個檔案`,
-            '開啟批量報告'
+            `Batch analysis complete! Successfully analyzed ${batchResults.length}/${logFiles.length} files`,
+            'Open Batch Report'
         );
 
-        if (openReport === '開啟批量報告') {
+        if (openReport === 'Open Batch Report') {
             vscode.env.openExternal(vscode.Uri.file(batchReportPath));
         }
     } catch (error) {
@@ -238,7 +238,7 @@ async function generateBatchReport(batchReportPath: string, logFiles: string[], 
     const fs = require('fs');
 
     const batchSummary = {
-        title: '批量日誌分析報告',
+        title: 'Batch Log Analysis Report',
         generatedAt: new Date().toLocaleString('zh-TW'),
         totalFiles: logFiles.length,
         successfulAnalysis: batchResults.length,
@@ -248,7 +248,7 @@ async function generateBatchReport(batchReportPath: string, logFiles: string[], 
     const batchReportHtml = `<!DOCTYPE html>
 <html>
 <head>
-    <title>批量日誌分析報告</title>
+    <title>Batch Log Analysis Report</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         table { border-collapse: collapse; width: 100%; }
@@ -262,21 +262,21 @@ async function generateBatchReport(batchReportPath: string, logFiles: string[], 
     <h1>${batchSummary.title}</h1>
     
     <div class="summary">
-        <h2>摘要</h2>
-        <p>生成時間: ${batchSummary.generatedAt}</p>
-        <p>總檔案數: ${batchSummary.totalFiles}</p>
-        <p>成功分析: ${batchSummary.successfulAnalysis}</p>
+        <h2>Summary</h2>
+        <p>Generated at: ${batchSummary.generatedAt}</p>
+        <p>Total files: ${batchSummary.totalFiles}</p>
+        <p>Successfully analyzed: ${batchSummary.successfulAnalysis}</p>
     </div>
     
-    <h2>詳細結果</h2>
+    <h2>Detailed Results</h2>
     ${batchResults.map(result => `
         <div class="file-section">
             <h3>${result.fileName}</h3>
             <table>
-                <tr><th>項目</th><th>值</th></tr>
-                <tr><td>總函數數</td><td>${result.performance.totalFunctions}</td></tr>
-                <tr><td>錯誤數量</td><td>${result.errorCount}</td></tr>
-                ${result.performance.bootTime ? `<tr><td>啟動時間</td><td>${result.performance.bootTime}ms</td></tr>` : ''}
+                <tr><th>Item</th><th>Value</th></tr>
+                <tr><td>Total functions</td><td>${result.performance.totalFunctions}</td></tr>
+                <tr><td>Error count</td><td>${result.errorCount}</td></tr>
+                ${result.performance.bootTime ? `<tr><td>Boot time</td><td>${result.performance.bootTime}ms</td></tr>` : ''}
             </table>
         </div>
     `).join('')}

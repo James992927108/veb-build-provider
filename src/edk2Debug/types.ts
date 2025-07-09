@@ -1,6 +1,6 @@
 // src/edk2Debug/types.ts
 
-// --- EDK2 專案核心型別 ---
+// --- EDK2 project core types ---
 
 export interface Edk2InfMeta {
   baseName: string;
@@ -66,7 +66,7 @@ export type ModuleType = Edk2ModuleType;
 export type Architecture = Edk2Architecture;
 export type ScanOptions = Edk2ScanOptions;
 
-// --- 日誌分析與可視化相關型別 ---
+// --- Log analysis and visualization related types ---
 
 export interface DebugLogEntry {
   timestamp: string;
@@ -128,4 +128,51 @@ export interface AnalysisResult {
     type: 'entry' | 'exit';
     duration?: number;
   }>;
+}
+
+export interface EnhancedAnalysisResult extends AnalysisResult {
+  phases: {
+    pei_start: number;
+    dxe_start: number;
+  };
+  detailedTimeline: Array<{
+    timestamp: number;
+    event_type: string;
+    phase: string;
+    function: string;
+    module: string;
+    duration?: number;
+    depth: number;
+    status: string;
+  }>;
+  callChainPairs: Array<{
+    function: string;
+    phase: string;
+    entry_time: number;
+    exit_time: number;
+    duration?: number;
+    status: string;
+    depth: number;
+  }>;
+}
+
+export interface JSONLogFormat {
+  timestamp: string;
+  level: string;
+  module: string;
+  function: string;
+  message: string;
+  metadata?: {
+    phase: 'PEI' | 'DXE' | 'BDS' | 'TSL';
+    guid?: string;
+    returnValue?: any;
+    parameters?: any[];
+  };
+}
+
+export interface StructInfo {
+  name: string;
+  members: string[];
+  start: number;
+  end: number;
 }

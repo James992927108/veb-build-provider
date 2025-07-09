@@ -6,41 +6,15 @@ import * as fs from 'fs';
 import { spawn } from 'child_process';
 import {
     AnalysisResult,
-    DebugLogEntry,
     CallChainNode,
-    PerformanceMetrics
+    PerformanceMetrics,
+    EnhancedAnalysisResult
 } from '../types';
 
 function ensureDirExists(dirPath: string) {
     if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath, { recursive: true });
     }
-}
-
-export interface EnhancedAnalysisResult extends AnalysisResult {
-    phases: {
-        pei_start: number;
-        dxe_start: number;
-    };
-    detailedTimeline: Array<{
-        timestamp: number;
-        event_type: string;
-        phase: string;
-        function: string;
-        module: string;
-        duration?: number;
-        depth: number;
-        status: string;
-    }>;
-    callChainPairs: Array<{
-        function: string;
-        phase: string;
-        entry_time: number;
-        exit_time: number;
-        duration?: number;
-        status: string;
-        depth: number;
-    }>;
 }
 
 export class LogAnalyzer {
@@ -125,7 +99,7 @@ export class LogAnalyzer {
         const content = await fsPromises.readFile(resultPath, 'utf-8');
         const data = JSON.parse(content);
 
-        // 確保各陣列欄位至少為空陣列
+        // Ensure each array field is at least an empty array
         const rawTimeline = Array.isArray(data.timeline) ? data.timeline : [];
         const rawCallChains = Array.isArray(data.call_chains)
             ? data.call_chains
@@ -290,7 +264,7 @@ export class LogAnalyzer {
         )}`;
         const generatedTime = new Date().toLocaleString('zh-TW');
 
-        // 內部函式：安全篩選
+        // Internal function: safe filter
         const safeFilter = (
             arr: any[],
             phase: string
@@ -301,24 +275,24 @@ export class LogAnalyzer {
         return `
 <!DOCTYPE html>
 <html>
-<head> …  // 保留原樣式
+<head> …  // Keep original styles
 </head>
 <body>
   <div class="header"> … </div>
   <div class="section">
-    <h2>⏱️ 階段時間軸</h2>
+    <h2>⏱️ Phase Timeline</h2>
     <div class="phase-section pei-phase">
-      <h3>PEI 階段</h3>
-      <p>開始時間: ${result.phases.pei_start}</p>
+      <h3>PEI Phase</h3>
+      <p>Start time: ${result.phases.pei_start}</p>
       ${this.generatePhaseTimeline(safeFilter(result.detailedTimeline, 'PEI'))}
     </div>
     <div class="phase-section dxe-phase">
-      <h3>DXE 階段</h3>
-      <p>開始時間: ${result.phases.dxe_start}</p>
+      <h3>DXE Phase</h3>
+      <p>Start time: ${result.phases.dxe_start}</p>
       ${this.generatePhaseTimeline(safeFilter(result.detailedTimeline, 'DXE'))}
     </div>
   </div>
-  …  // 其餘區段同樣用 safeFilter(result.detailedTimeline, 'DXE')、呼叫鏈等
+  …  // Other sections also use safeFilter(result.detailedTimeline, 'DXE'), call chains, etc.
 </body>
 </html>
 `;
@@ -326,7 +300,7 @@ export class LogAnalyzer {
 
     private generatePhaseTimeline(events: any[]): string {
         if (!Array.isArray(events) || events.length === 0) {
-            return '<p>此階段無事件記錄</p>';
+            return '<p>No events recorded in this phase</p>';
         }
         const sorted = [...events].sort((a, b) => a.timestamp - b.timestamp);
         const top = sorted.slice(0, 20);
@@ -337,12 +311,12 @@ export class LogAnalyzer {
         <strong>${e.function || 'Unknown'}</strong>
         (${e.event_type})
         <div class="duration">
-          時間: ${e.timestamp}, 深度: ${e.depth}
-          ${e.duration ? `, 執行時間: ${e.duration}μs` : ''}
+          Time: ${e.timestamp}, Depth: ${e.depth}
+          ${e.duration ? `, Duration: ${e.duration}μs` : ''}
         </div>
       </div>`
             )
             .join('') +
-            (sorted.length > 20 ? '<p>... 顯示前20個事件</p>' : '');
+            (sorted.length > 20 ? '<p>... Showing first 20 events</p>' : '');
     }
 }
