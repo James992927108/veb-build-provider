@@ -512,7 +512,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./ && npm run copy-scripts",
+    "compile": "tsc -p ./ && npm run copy-scripts && npm run copy-templates",
     "watch": "tsc -watch -p ./",
     "copy-scripts": "xcopy scripts out\\scripts /E /I /Y",
     "copy-templates": "xcopy templates out\\templates /E /I /Y"

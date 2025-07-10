@@ -41,7 +41,6 @@ export class LogAnalyzer {
                 path.dirname(logFilePath),
                 'analysis_result.json'
             );
-
             const process = spawn(this.pythonPath, [
                 scriptPath,
                 '--input',
@@ -49,38 +48,18 @@ export class LogAnalyzer {
                 '--output',
                 outputPath
             ]);
-
             let output = '';
             let errors = '';
-
             process.stdout.on('data', (data) => {
                 output += data.toString();
             });
             process.stderr.on('data', (data) => {
                 errors += data.toString();
             });
-
             process.on('close', async (code) => {
                 if (code === 0) {
                     try {
                         const result = await this.loadAnalysisResult(outputPath);
-                        const htmlContent = this.generateEnhancedHtmlReport(
-                            result,
-                            logFilePath
-                        );
-                        const outTemplatesDir = path.join(
-                            __dirname,
-                            '..',
-                            '..',
-                            '..',
-                            'templates'
-                        );
-                        ensureDirExists(outTemplatesDir);
-                        const reportPath = path.join(
-                            outTemplatesDir,
-                            'debug_report.html'
-                        );
-                        fs.writeFileSync(reportPath, htmlContent, 'utf-8');
                         resolve(result);
                     } catch (error) {
                         reject(error);
@@ -253,70 +232,5 @@ export class LogAnalyzer {
                     : 'exit',
             duration: e.duration
         }));
-    }
-
-    private generateEnhancedHtmlReport(
-        result: EnhancedAnalysisResult,
-        logFilePath: string
-    ): string {
-        const reportTitle = `EDK2 Debug Log Analysis Report - ${path.basename(
-            logFilePath
-        )}`;
-        const generatedTime = new Date().toLocaleString('zh-TW');
-
-        // Internal function: safe filter
-        const safeFilter = (
-            arr: any[],
-            phase: string
-        ): any[] => Array.isArray(arr)
-                ? arr.filter((e) => e.phase === phase)
-                : [];
-
-        return `
-<!DOCTYPE html>
-<html>
-<head> …  // Keep original styles
-</head>
-<body>
-  <div class="header"> … </div>
-  <div class="section">
-    <h2>⏱️ Phase Timeline</h2>
-    <div class="phase-section pei-phase">
-      <h3>PEI Phase</h3>
-      <p>Start time: ${result.phases.pei_start}</p>
-      ${this.generatePhaseTimeline(safeFilter(result.detailedTimeline, 'PEI'))}
-    </div>
-    <div class="phase-section dxe-phase">
-      <h3>DXE Phase</h3>
-      <p>Start time: ${result.phases.dxe_start}</p>
-      ${this.generatePhaseTimeline(safeFilter(result.detailedTimeline, 'DXE'))}
-    </div>
-  </div>
-  …  // Other sections also use safeFilter(result.detailedTimeline, 'DXE'), call chains, etc.
-</body>
-</html>
-`;
-    }
-
-    private generatePhaseTimeline(events: any[]): string {
-        if (!Array.isArray(events) || events.length === 0) {
-            return '<p>No events recorded in this phase</p>';
-        }
-        const sorted = [...events].sort((a, b) => a.timestamp - b.timestamp);
-        const top = sorted.slice(0, 20);
-        return top
-            .map(
-                (e) => `
-      <div class="timeline-item">
-        <strong>${e.function || 'Unknown'}</strong>
-        (${e.event_type})
-        <div class="duration">
-          Time: ${e.timestamp}, Depth: ${e.depth}
-          ${e.duration ? `, Duration: ${e.duration}μs` : ''}
-        </div>
-      </div>`
-            )
-            .join('') +
-            (sorted.length > 20 ? '<p>... Showing first 20 events</p>' : '');
     }
 }

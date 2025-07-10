@@ -46,7 +46,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
   logMessage(`Detected platform: ${process.platform}`);
 
   if (isWindows) {
-    const teePath = escapePath(path.join(vebExtension.extensionPath, "Tool", "tee.exe"));
+    const teePath = escapePath(path.join(vebExtension.extensionPath, "tools", "tee.exe"));
     const sourceScriptPath = path.join(vebExtension.extensionPath, "scripts", PREPARE_ENV_WIN_SCRIPT);
     const targetScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_WIN_SCRIPT));
     await copyFile(sourceScriptPath, targetScriptPath);

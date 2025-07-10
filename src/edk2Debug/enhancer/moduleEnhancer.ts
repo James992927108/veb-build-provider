@@ -330,8 +330,8 @@ export class ModuleEnhancer {
       let depth = 0;
       let condEnd = -1;
       for (let i = condStart; i < rawLine.length; i++) {
-        if (rawLine[i] === '(') depth++;
-        else if (rawLine[i] === ')') depth--;
+        if (rawLine[i] === '(') {depth++;}
+        else if (rawLine[i] === ')') {depth--;}
         if (depth === 0) {
           condEnd = i;
           break;
