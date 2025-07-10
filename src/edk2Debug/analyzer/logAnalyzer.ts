@@ -35,7 +35,7 @@ export class LogAnalyzer {
                 '..',
                 '..',
                 'scripts',
-                'log_analyzer.py'
+                'sol_log_analyzer.py'
             );
             const outputPath = path.join(
                 path.dirname(logFilePath),

@@ -1,7 +1,6 @@
 // src/edk2Debug/types.ts
 
 // --- EDK2 project core types ---
-
 export interface Edk2InfMeta {
   baseName: string;
   moduleType: Edk2ModuleType;
@@ -68,6 +67,71 @@ export type ScanOptions = Edk2ScanOptions;
 
 // --- Log analysis and visualization related types ---
 
+/**
+ * 時間軸事件型別，用於前端 vis.js Timeline
+ */
+export interface TimelineEvent {
+  timestamp: string;       // 原始時間戳字串（微秒或毫秒）
+  function: string;        // 函數名稱
+  module?: string;         // 模組名，可選
+  type: 'entry' | 'exit' | 'event';  // 事件類型
+  duration?: number;       // 若已計算，則為毫秒數
+  status?: string;         // EXIT 時的狀態（如 Success、Error）
+  depth?: number;          // 呼叫深度
+}
+
+/**
+ * 分析結果的標準格式
+ */
+export interface AnalysisResult {
+  summary: {
+    totalEntries: number;
+    totalFunctions: number;
+    totalDuration: number;
+    errorCount: number;
+    analysisTime: string;
+  };
+  callChains: CallChainNode[];
+  performance: PerformanceMetrics;
+  errors: Array<{
+    timestamp: string;
+    function: string;
+    module?: string;
+    message: string;
+  }>;
+  timeline: TimelineEvent[];
+}
+
+/**
+ * 強化後的分析結果，包含階段與詳細呼叫對應
+ */
+export interface EnhancedAnalysisResult extends AnalysisResult {
+  phases: {
+    pei_start: number;
+    dxe_start: number;
+  };
+  detailedTimeline: Array<{
+    timestamp: number;
+    event_type: string;
+    phase: string;
+    function: string;
+    module?: string;
+    duration?: number;
+    depth: number;
+    status: string;
+  }>;
+  callChainPairs: Array<{
+    function: string;
+    phase: string;
+    entry_time: number;
+    exit_time: number;
+    duration?: number;
+    status: string;
+    depth: number;
+  }>;
+}
+
+// 其他輔助型別
 export interface DebugLogEntry {
   timestamp: string;
   module: string;
@@ -79,7 +143,7 @@ export interface DebugLogEntry {
 
 export interface CallChainNode {
   function: string;
-  module: string;
+  module?: string;
   timestamp: string;
   duration?: number;
   children: CallChainNode[];
@@ -103,57 +167,6 @@ export interface PerformanceMetrics {
   };
   bootTime?: number;
   criticalPath?: string[];
-}
-
-export interface AnalysisResult {
-  summary: {
-    totalEntries: number;
-    totalFunctions: number;
-    totalDuration: number;
-    errorCount: number;
-    analysisTime: string;
-  };
-  callChains: CallChainNode[];
-  performance: PerformanceMetrics;
-  errors: Array<{
-    timestamp: string;
-    function: string;
-    module: string;
-    message: string;
-  }>;
-  timeline: Array<{
-    timestamp: string;
-    function: string;
-    module: string;
-    type: 'entry' | 'exit';
-    duration?: number;
-  }>;
-}
-
-export interface EnhancedAnalysisResult extends AnalysisResult {
-  phases: {
-    pei_start: number;
-    dxe_start: number;
-  };
-  detailedTimeline: Array<{
-    timestamp: number;
-    event_type: string;
-    phase: string;
-    function: string;
-    module: string;
-    duration?: number;
-    depth: number;
-    status: string;
-  }>;
-  callChainPairs: Array<{
-    function: string;
-    phase: string;
-    entry_time: number;
-    exit_time: number;
-    duration?: number;
-    status: string;
-    depth: number;
-  }>;
 }
 
 export interface JSONLogFormat {

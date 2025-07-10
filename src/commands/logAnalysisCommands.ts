@@ -30,22 +30,23 @@ export function registerLogAnalysisCommands(context: vscode.ExtensionContext): v
 // Command handlers
 async function handleAnalyzeLogFile(logAnalyzer: LogAnalyzer, htmlReportGenerator: HTMLReportGenerator): Promise<void> {
     try {
-        const fileUri = await vscode.window.showOpenDialog({
-            canSelectFiles: true,
-            canSelectFolders: false,
-            canSelectMany: false,
-            openLabel: 'Select EDK2 Debug log file for analysis',
-            filters: {
-                'Log Files': ['log', 'txt'],
-                'All Files': ['*']
-            }
-        });
+        // const fileUri = await vscode.window.showOpenDialog({
+        //     canSelectFiles: true,
+        //     canSelectFolders: false,
+        //     canSelectMany: false,
+        //     openLabel: 'Select EDK2 Debug log file for analysis',
+        //     filters: {
+        //         'Log Files': ['log', 'txt'],
+        //         'All Files': ['*']
+        //     }
+        // });
 
-        if (!fileUri || !fileUri[0]) {
-            return;
-        }
+        // if (!fileUri || !fileUri[0]) {
+        //     return;
+        // }
 
-        const logFilePath = fileUri[0].fsPath;
+        // const logFilePath = fileUri[0].fsPath;
+        const logFilePath = "d:\\IpmiTool16-Jeff\\SoLLog\\172.16.122.170_20250710-12-47-28_log.txt";
         logMessage(`Starting enhanced log file analysis: ${logFilePath}`);
 
         await vscode.window.withProgress({
