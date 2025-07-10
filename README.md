@@ -56,8 +56,10 @@ npm run compile
 ### 1. 編譯失敗或無法啟動
 
 請嘗試清除 node_modules 與編譯產物後重裝：
-rm -rf node_modules
-rm -rf out
+rd /s /q node_modules
+rd /s /q out
+del package-lock.json
+
 npm install
 npm run compile
 
