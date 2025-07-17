@@ -98,11 +98,15 @@ export const DEFAULT_SCAN_OPTIONS = {
     '**/build/**',
     '**/BUILD/**',
     '**/BuildBrh/**',
+    'Build/**',
+    'build/**',
+    'BUILD/**',
+    'BuildBrh/**',
     '**/Conf/**',
+    'Conf/**',
     '**/.git/**',
     '**/node_modules/**',
-    '**/.vscode/**',
-    '**/.*'
+    '**/.vscode/**'
   ],
   includePatterns: ['**/*.inf'],
   showProgress: true,
