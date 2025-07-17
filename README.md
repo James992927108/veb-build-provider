@@ -1,5 +1,4 @@
-# VEB Build Provider
-
+# VEB Build Provider v3.2.0
 VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James992927108/veb-build-provider) 打造的 Visual Studio Code 擴充套件，提供一鍵建置與清理功能，協助開發者更高效地管理 VEB 專案的常見開發流程。
 
 ## 📋 目錄
@@ -144,6 +143,7 @@ npm run compile
 
 | 版本號 | 發布日期 |
 |--------|----------|
+| v3.2.0 | 2025-07-17 |
 | v3.1.0 | 2025-07-10 |
 
 ---
