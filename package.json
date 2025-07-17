@@ -234,14 +234,6 @@
       {
         "language": "cpp",
         "path": "./resource/snippets/edk2_c.snippet.json"
-      },
-      {
-        "language": "c",
-        "path": "./resource/snippets/edk2_gtest.snippet.json"
-      },
-      {
-        "language": "cpp",
-        "path": "./resource/snippets/edk2_gtest.snippet.json"
       }
     ],
     "commands": [

@@ -7,6 +7,9 @@ import { Edk2ScanOptions, Edk2InfMeta } from '../types';
 
 const DEFAULT_EXCLUDE_PATTERNS = [
   "**/Build/**",
+  "**/build/**",
+  "**/BUILD/**",
+  "**/BuildBrh/**",
   "**/Conf/**",
   "**/.git/**",
   "**/node_modules/**",
@@ -32,8 +35,8 @@ export class ModuleScanner {
   async scanInfFiles(options: Partial<Edk2ScanOptions> = {}): Promise<string[]> {
     const scanOptions: Edk2ScanOptions = {
       recursive: options.recursive ?? DEFAULT_SCAN_OPTIONS.recursive,
-      excludePatterns: options.excludePatterns ?? [...DEFAULT_SCAN_OPTIONS.excludePatterns],
-      includePatterns: options.includePatterns ?? [...DEFAULT_SCAN_OPTIONS.includePatterns],
+      excludePatterns: options.excludePatterns ?? [...DEFAULT_EXCLUDE_PATTERNS],
+      includePatterns: options.includePatterns ?? [...DEFAULT_INCLUDE_PATTERNS],
       showProgress: options.showProgress ?? DEFAULT_SCAN_OPTIONS.showProgress,
       maxDepth: options.maxDepth ?? DEFAULT_SCAN_OPTIONS.maxDepth
     };

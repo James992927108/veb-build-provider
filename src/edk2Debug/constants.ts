@@ -95,6 +95,9 @@ export const DEFAULT_SCAN_OPTIONS = {
   recursive: true,
   excludePatterns: [
     '**/Build/**',
+    '**/build/**',
+    '**/BUILD/**',
+    '**/BuildBrh/**',
     '**/Conf/**',
     '**/.git/**',
     '**/node_modules/**',
