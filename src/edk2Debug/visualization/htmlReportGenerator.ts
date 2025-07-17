@@ -12,7 +12,7 @@ export class HTMLReportGenerator {
     }
 
     /**
-     * 產生互動式時間軸 HTML 報告
+     * Generate interactive timeline HTML report
      */
     async generateDebugReport(analysisResult: AnalysisResult, outputPath: string): Promise<void> {
         const htmlContent = this.generateInteractiveTimelineReport(analysisResult);
@@ -20,7 +20,7 @@ export class HTMLReportGenerator {
     }
 
     /**
-     * 建構完整的 HTML 字串
+     * Construct complete HTML string
      */
     private generateInteractiveTimelineReport(analysisResult: AnalysisResult): string {
         const timelineData = this.prepareTimelineData(analysisResult);
@@ -35,7 +35,7 @@ export class HTMLReportGenerator {
   <title>EDK2 Debug Timeline Analysis</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/vis-timeline/7.7.4/vis-timeline-graph2d.min.css" rel="stylesheet">
   <style>
-    /* ...（略，保留原有樣式）... */
+    /* ...(omitted, keeping original styles)... */
   </style>
 </head>
 <body>
@@ -77,7 +77,7 @@ export class HTMLReportGenerator {
       if (item) showItemDetails(items.get(item));
     });
 
-    // 控制按鈕
+    // Control buttons
     document.getElementById('zoomIn').addEventListener('click', () => timeline.zoomIn(0.2));
     document.getElementById('zoomOut').addEventListener('click', () => timeline.zoomOut(0.2));
     document.getElementById('fit').addEventListener('click', () => timeline.fit());
@@ -106,12 +106,12 @@ export class HTMLReportGenerator {
 
     function showItemDetails(item) {
       alert(\`
-函數: \${item.content}
-模組: \${item.group}
-開始: \${new Date(item.start).toLocaleString()}
-結束: \${item.end ? new Date(item.end).toLocaleString() : 'N/A'}
-狀態: \${item.className}
-持續時間: \${item.duration}ms
+Function: \${item.content}
+Module: \${item.group}
+Start: \${new Date(item.start).toLocaleString()}
+End: \${item.end ? new Date(item.end).toLocaleString() : 'N/A'}
+Status: \${item.className}
+Duration: \${item.duration}ms
 \`);
     }
 
@@ -146,7 +146,7 @@ export class HTMLReportGenerator {
     }
 
     /**
-     * 將 AnalysisResult.timeline 轉為 vis.js DataSet
+     * Convert AnalysisResult.timeline to vis.js DataSet
      */
     private prepareTimelineData(analysisResult: AnalysisResult): Array<any> {
         const items: any[] = [];
@@ -172,7 +172,7 @@ export class HTMLReportGenerator {
     }
 
     /**
-     * 建立模組分組清單
+     * Create module group list
      */
     private prepareGroupsData(analysisResult: AnalysisResult): Array<any> {
         const modules = Array.from(new Set(analysisResult.timeline.map(ev => ev.module || 'Unknown')));
@@ -180,7 +180,7 @@ export class HTMLReportGenerator {
     }
 
     /**
-     * 在一系列事件中，尋找與指定 entry 事件匹配的 exit 事件
+     * Find matching exit event for specified entry event in a series of events
      */
     private findMatchingExit(timeline: TimelineEvent[], entry: TimelineEvent): TimelineEvent | undefined {
         return timeline.find(ev =>
@@ -191,7 +191,7 @@ export class HTMLReportGenerator {
     }
 
     /**
-     * 根據事件類型與狀態，決定該 item 的 CSS class
+     * Determine CSS class for the item based on event type and status
      */
     private getEventClassification(ev: TimelineEvent): string {
         if (ev.type === 'exit' && ev.status !== 'Success') { return 'error'; }
@@ -201,22 +201,22 @@ export class HTMLReportGenerator {
     }
 
     /**
-     * 產生 Tooltip 模板
+     * Generate Tooltip template
      */
     private generateEventTooltipTemplate(): string {
         return `
 <div>
   <strong>\${content}</strong><br>
-  開始: \${start}<br>
-  結束: \${end}<br>
-  模組: \${module}<br>
-  狀態: \${status}<br>
-  持續時間: \${duration}
+  Start: \${start}<br>
+  End: \${end}<br>
+  Module: \${module}<br>
+  Status: \${status}<br>
+  Duration: \${duration}
 </div>`;
     }
 
     /**
-     * 計算總執行時間
+     * Calculate total execution time
      */
     private calculateTotalDuration(timeline: TimelineEvent[]): number {
         const ts = timeline

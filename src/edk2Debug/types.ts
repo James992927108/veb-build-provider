@@ -68,20 +68,20 @@ export type ScanOptions = Edk2ScanOptions;
 // --- Log analysis and visualization related types ---
 
 /**
- * 時間軸事件型別，用於前端 vis.js Timeline
+ * Timeline event type for frontend vis.js Timeline
  */
 export interface TimelineEvent {
-  timestamp: string;       // 原始時間戳字串（微秒或毫秒）
-  function: string;        // 函數名稱
-  module?: string;         // 模組名，可選
-  type: 'entry' | 'exit' | 'event';  // 事件類型
-  duration?: number;       // 若已計算，則為毫秒數
-  status?: string;         // EXIT 時的狀態（如 Success、Error）
-  depth?: number;          // 呼叫深度
+  timestamp: string;       // Original timestamp string (microseconds or milliseconds)
+  function: string;        // Function name
+  module?: string;         // Module name, optional
+  type: 'entry' | 'exit' | 'event';  // Event type
+  duration?: number;       // If calculated, duration in milliseconds
+  status?: string;         // Status when EXIT (e.g., Success, Error)
+  depth?: number;          // Call depth
 }
 
 /**
- * 分析結果的標準格式
+ * Standard format for analysis results
  */
 export interface AnalysisResult {
   summary: {
@@ -103,7 +103,7 @@ export interface AnalysisResult {
 }
 
 /**
- * 強化後的分析結果，包含階段與詳細呼叫對應
+ * Enhanced analysis result with phases and detailed call mappings
  */
 export interface EnhancedAnalysisResult extends AnalysisResult {
   phases: {
@@ -131,7 +131,7 @@ export interface EnhancedAnalysisResult extends AnalysisResult {
   }>;
 }
 
-// 其他輔助型別
+// Other auxiliary types
 export interface DebugLogEntry {
   timestamp: string;
   module: string;

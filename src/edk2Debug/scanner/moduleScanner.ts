@@ -1,5 +1,5 @@
 // src/edk2Debug/scanner/moduleScanner.ts
-import { logMessage, handleError } from '../../utils/logger';
+import { logMessage, logDebug, logInfo, logSummary, logError, handleError, LogLevel } from '../../utils/logger';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -72,6 +72,7 @@ export class ModuleScanner {
     const targetRoot = workspaceRoot || this.workspaceRoot;
     const infPaths = await this.scanInfFiles();
     const metas: Edk2InfMeta[] = [];
+    let failedCount = 0;
 
     for (const infPath of infPaths) {
       try {
@@ -81,9 +82,15 @@ export class ModuleScanner {
           metas.push(meta);
         }
       } catch (error) {
-        handleError(`Failed to parse INF file ${infPath}: ${error instanceof Error ? error.message : String(error)}`);
+        failedCount++;
+        logError(`Failed to parse INF file ${infPath}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
+
+    logSummary(`=== EDK2 Debug Scanning Results ===`);
+    logSummary(`Total INF files found by scanner: ${infPaths.length}`);
+    logSummary(`Successfully parsed INF files: ${metas.length}`);
+    logSummary(`Failed to parse INF files: ${failedCount}`);
 
     return metas;
   }
@@ -119,15 +126,19 @@ export class ModuleScanner {
     token?: vscode.CancellationToken
   ): Promise<string[]> {
     const infFiles: string[] = [];
+    let excludedCount = 0;
 
     try {
-      await this.scanDirectory(directory, infFiles, options, 0, progress, token);
+      excludedCount = await this.scanDirectory(directory, infFiles, options, 0, progress, token);
     } catch (error) {
       handleError(`Scan directory error ${directory}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
 
-    // Simplified log output, only record basic information
-    logMessage(`Scanning completed: found ${infFiles.length} INF files in workspace.`);
+    // Show summary information only
+    logSummary(`Scanning completed: found ${infFiles.length} INF files in workspace.`);
+    if (excludedCount > 0) {
+      logInfo(`Excluded ${excludedCount} files/directories by pattern matching.`);
+    }
 
     return infFiles;
   }
@@ -139,10 +150,12 @@ export class ModuleScanner {
     currentDepth: number,
     progress?: vscode.Progress<{ message?: string; increment?: number }>,
     token?: vscode.CancellationToken
-  ): Promise<void> {
+  ): Promise<number> {
     if (token?.isCancellationRequested || currentDepth >= options.maxDepth) {
-      return;
+      return 0;
     }
+
+    let excludedCount = 0;
 
     try {
       const files = await fs.promises.readdir(directory, { withFileTypes: true });
@@ -155,19 +168,22 @@ export class ModuleScanner {
         const fullPath = path.join(directory, file.name);
         const relativePath = path.relative(this.workspaceRoot, fullPath);
 
-        // 檢查是否應該被排除（對所有檔案和目錄都檢查）
+        // Check if it should be excluded (check for all files and directories)
         if (this.matchesPatterns(relativePath, options.excludePatterns)) {
-          logMessage(`Excluded by pattern: ${relativePath}`);
+          logDebug(`Excluded by pattern: ${relativePath}`);
+          excludedCount++;
           continue;
         }
 
         if (file.isDirectory() && options.recursive) {
           progress?.report({ message: `Scanning directory: ${relativePath}` });
-          await this.scanDirectory(fullPath, infFiles, options, currentDepth + 1, progress, token);
+          const subExcludedCount = await this.scanDirectory(fullPath, infFiles, options, currentDepth + 1, progress, token);
+          excludedCount += subExcludedCount;
         } else if (file.isFile()) {
           // Only files with the .inf extension (case-insensitive) are included
           if (path.extname(file.name).toLowerCase() === '.inf') {
             infFiles.push(fullPath);
+            logDebug(`Found INF file: ${relativePath}`);
             progress?.report?.({ message: `Module found: ${file.name}` });
           }
         }
@@ -175,22 +191,24 @@ export class ModuleScanner {
     } catch (error) {
       handleError(`Read directory error ${directory}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
+
+    return excludedCount;
   }
 
   private matchesPatterns(filePath: string, patterns: string[]): boolean {
     return patterns.some(pattern => {
-      // 正規化路徑分隔符為正斜線，以確保跨平台兼容
+      // Normalize path separators to forward slashes for cross-platform compatibility
       const normalizedPath = filePath.replace(/\\/g, '/');
       
-      // 將glob模式轉換為正則表達式
+      // Convert glob pattern to regular expression
       const regexPattern = pattern
-        .replace(/\./g, '\\.')             // 先轉義點號
-        .replace(/\*\*/g, '§DOUBLESTAR§')  // 替換雙星號
-        .replace(/\*/g, '[^/]*')           // 單星號不匹配路徑分隔符
-        .replace(/§DOUBLESTAR§/g, '.*')    // 雙星號匹配任何字符
-        .replace(/\?/g, '[^/]');           // 問號匹配單個非路徑分隔符字符
+        .replace(/\./g, '\\.')             // Escape dots first
+        .replace(/\*\*/g, '§DOUBLESTAR§')  // Replace double asterisks
+        .replace(/\*/g, '[^/]*')           // Single asterisk doesn't match path separators
+        .replace(/§DOUBLESTAR§/g, '.*')    // Double asterisk matches any character
+        .replace(/\?/g, '[^/]');           // Question mark matches single non-path separator character
       
-      const regex = new RegExp('^' + regexPattern + '$', 'i'); // 加入大小寫不敏感標誌
+      const regex = new RegExp('^' + regexPattern + '$', 'i'); // Add case-insensitive flag
       return regex.test(normalizedPath);
     });
   }

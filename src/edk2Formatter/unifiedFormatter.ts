@@ -4,21 +4,21 @@ import * as vscode from 'vscode';
 import { ONE_SPACE, HASH_STRING, HASH_LANGUAGE } from "../utils/constants";
 import { logMessage } from '../utils/logger';
 
-// 格式化器配置接口
+// Formatter configuration interface
 interface FormatterConfig {
     speceOnUni?: number;
     spaceOnSdlBefore?: number;
     spaceOnSdlAfter?: number;
 }
 
-// 行格式化器接口
+// Line formatter interface
 interface LineFormatter {
     formatLine(line: string, context: FormatterContext): string;
     getConfiguration(): FormatterConfig;
     needsMaxLength(): boolean;
 }
 
-// 格式化上下文
+// Formatting context
 interface FormatterContext {
     config: FormatterConfig;
     maxStringLength?: number;
@@ -27,7 +27,7 @@ interface FormatterContext {
     langLineMaxSpaceAhead?: string;
 }
 
-// UNI 格式化器
+// UNI formatter
 class UniLineFormatter implements LineFormatter {
     getConfiguration(): FormatterConfig {
         const config = vscode.workspace.getConfiguration('vebBuild.formatter');
@@ -72,7 +72,7 @@ class UniLineFormatter implements LineFormatter {
     }
 }
 
-// SDL 格式化器
+// SDL formatter
 class SdlLineFormatter implements LineFormatter {
     getConfiguration(): FormatterConfig {
         const config = vscode.workspace.getConfiguration('vebBuild.formatter');
@@ -114,7 +114,7 @@ class SdlLineFormatter implements LineFormatter {
     }
 }
 
-// 統一格式化器
+// Unified formatter
 class UnifiedFormatter {
     private formatters = {
         uni: new UniLineFormatter(),
@@ -125,7 +125,7 @@ class UnifiedFormatter {
         const formatter = this.formatters[type];
         const config = formatter.getConfiguration();
         
-        // 準備格式化上下文
+        // Prepare formatting context
         const context = this.createContext(config, maxStringLength);
         
         return new Promise((resolve, reject) => {
@@ -156,7 +156,7 @@ class UnifiedFormatter {
     }
 
     private createContext(config: FormatterConfig, maxStringLength?: number): FormatterContext {
-        // 生成空格字符串
+        // Generate space string
         const generateSpaces = (count: number): string => {
             return ONE_SPACE.repeat(count);
         };
@@ -169,14 +169,14 @@ class UnifiedFormatter {
         };
 
         if (config.speceOnUni !== undefined) {
-            // UNI 格式化上下文
+            // UNI formatting context
             context.spaceBefore = generateSpaces(config.speceOnUni);
             if (maxStringLength) {
                 const langLineMaxSpaceAheadNum = maxStringLength + HASH_STRING.length + config.speceOnUni;
                 context.langLineMaxSpaceAhead = generateSpaces(langLineMaxSpaceAheadNum);
             }
         } else if (config.spaceOnSdlBefore !== undefined) {
-            // SDL 格式化上下文
+            // SDL formatting context
             context.spaceBefore = generateSpaces(config.spaceOnSdlBefore);
         }
 
@@ -184,7 +184,7 @@ class UnifiedFormatter {
     }
 }
 
-// 導出函數保持向後兼容
+// Export functions for backward compatibility
 export async function formatUni(filepath: string, fileEncoding: BufferEncoding, maxStringLength: number): Promise<string> {
     const formatter = new UnifiedFormatter();
     return formatter.format(filepath, fileEncoding, 'uni', maxStringLength);

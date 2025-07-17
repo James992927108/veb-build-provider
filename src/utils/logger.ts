@@ -6,6 +6,26 @@ import * as path from 'path';
 let outputChannel: vscode.OutputChannel;
 let logStream: fs.WriteStream | undefined;
 
+// Simplified log levels
+export enum LogLevel {
+    DEBUG = 0,
+    INFO = 1,
+    WARN = 2,
+    ERROR = 3,
+    SUMMARY = 4
+}
+
+// Developers can modify log level directly here
+// Release version should be set to LogLevel.INFO
+// Development debugging can be set to LogLevel.DEBUG or other levels
+// 
+// LogLevel.DEBUG - Show all information, including "Excluded by pattern" and other detailed info
+// LogLevel.INFO - Show general information (release version default)
+// LogLevel.WARN - Show only warnings and errors
+// LogLevel.ERROR - Show only errors
+// LogLevel.SUMMARY - Show only important stage summary information
+const CURRENT_LOG_LEVEL: LogLevel = LogLevel.INFO;
+
 /**
  * Initialize logger, must be called once in activate(context)
  */
@@ -25,16 +45,23 @@ export function initLogger(context: vscode.ExtensionContext) {
     const logPath = path.join(logDir, fileName);
 
     logStream = fs.createWriteStream(logPath, { flags: 'a', encoding: 'utf8' });
-    logMessage(`Logger initialized, writing to ${logPath}`);
+    logMessage(`Logger initialized, writing to ${logPath}`, LogLevel.INFO);
 }
 
 /**
- * Output message to Output Channel and log file
+ * Output message to Output Channel and log file with level control
  */
-export function logMessage(message: string) {
+export function logMessage(message: string, level: LogLevel = LogLevel.INFO) {
+    // Check log level
+    if (level < CURRENT_LOG_LEVEL) {
+        return;
+    }
+
     const now = new Date();
     const timestamp = now.toISOString();
-    const fullMsg = `[${timestamp}] ${message}`;
+    const levelName = LogLevel[level];
+    const fullMsg = `[${timestamp}] [${levelName}] ${message}`;
+    
     if (outputChannel) {
         outputChannel.appendLine(fullMsg);
     }
@@ -43,13 +70,34 @@ export function logMessage(message: string) {
     }
 }
 
+// Convenience functions
+export function logDebug(message: string) {
+    logMessage(message, LogLevel.DEBUG);
+}
+
+export function logInfo(message: string) {
+    logMessage(message, LogLevel.INFO);
+}
+
+export function logWarn(message: string) {
+    logMessage(message, LogLevel.WARN);
+}
+
+export function logError(message: string) {
+    logMessage(message, LogLevel.ERROR);
+}
+
+export function logSummary(message: string) {
+    logMessage(message, LogLevel.SUMMARY);
+}
+
 export function logMessageWithLevel(message: string, level: 'info' | 'warn') {
     if (level === 'warn') {
         vscode.window.showWarningMessage(message);
-        logMessage(`Warning: ${message}`);
+        logMessage(`Warning: ${message}`, LogLevel.WARN);
     } else {
         vscode.window.showInformationMessage(message);
-        logMessage(message);
+        logMessage(message, LogLevel.INFO);
     }
 }
 
@@ -58,7 +106,7 @@ export function logMessageWithLevel(message: string, level: 'info' | 'warn') {
  */
 export function handleError(error: any) {
     const msg = error instanceof Error ? error.stack || error.message : String(error);
-    logMessage(`ERROR: ${msg}`);
+    logMessage(`ERROR: ${msg}`, LogLevel.ERROR);
 }
 
 /**

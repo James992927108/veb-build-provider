@@ -46,7 +46,7 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     context.subscriptions.push(closeTerminalButton);
     logMessage("Created status bar button: stopTerminal");
 
-    // 初始化時檢查當前專案狀態
+    // Check current project status during initialization
     updateProjectStatus();
     
     // Watch for file changes and automatically update status
@@ -77,13 +77,13 @@ export async function updateProjectStatus(): Promise<void> {
         const folderPath = workspaceFolder.uri.fsPath;
         const tasksJsonPath = path.join(folderPath, '.vscode', 'tasks.json');
         
-        // 嘗試從 tasks.json 讀取當前專案
+        // Try to read current project from tasks.json
         const tasksJson = await readFile(tasksJsonPath);
         const tasksObject = JSON.parse(tasksJson);
         
         const buildTask = tasksObject.tasks?.find((task: any) => task.label === "VebBuildTask");
         if (buildTask) {
-            // 已配置專案時顯示專案名稱
+            // Display project name when configured
             const command = buildTask.command;
             const vebMatch = command.match(/SET VEB=(\w+)/);
             const currentProject = vebMatch ? vebMatch[1] : 'Unknown';
@@ -94,12 +94,12 @@ export async function updateProjectStatus(): Promise<void> {
             
             logMessage(`Status bar updated: Current project is ${currentProject}`);
         } else {
-            // tasks.json 存在但沒有 VebBuildTask 時顯示 InitTask
+            // Display InitTask when tasks.json exists but no VebBuildTask
             resetToInitTask();
         }
         
     } catch (error) {
-        // 沒有 tasks.json 或讀取失敗時顯示 InitTask
+        // Display InitTask when no tasks.json or read failed
         resetToInitTask();
     }
 }
@@ -117,7 +117,7 @@ function resetToInitTask(): void {
 }
 
 /**
- * Refresh the project status display (可以被外部呼叫)
+ * Refresh the project status display (can be called externally)
  */
 export function refreshProjectStatus(): void {
     updateProjectStatus();

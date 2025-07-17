@@ -6,7 +6,7 @@ import { ModuleScanner } from '../scanner/moduleScanner';
 import { ProjectAnalyzer } from '../scanner/projectAnalyzer';
 import { Edk2InfMeta } from '../types';
 import { ModuleEnhancer } from '../enhancer/moduleEnhancer';
-import { logMessage, logMessageWithLevel, handleError } from '../../utils/logger';
+import { logMessage, logMessageWithLevel, logDebug, logSummary, logError, handleError } from '../../utils/logger';
 
 export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> {
     private _onDidChangeTreeData: vscode.EventEmitter<Edk2InfMeta | undefined | null | void> = new vscode.EventEmitter<Edk2InfMeta | undefined | null | void>();
@@ -192,7 +192,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                                     path: infPath,
                                     reason: 'INF file parsing returned null (missing BASE_NAME or MODULE_TYPE)'
                                 });
-                                logMessage(`INF Parse Failed: ${infPath} - Missing required fields`);
+                                logError(`INF Parse Failed: ${infPath} - Missing required fields`);
                             }
                         } catch (error) {
                             // Record files that threw during parsing
@@ -208,19 +208,19 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                     this.modules = metas;
 
                     // Detailed statistics log output
-                    logMessage(`=== EDK2 Debug Scanning Results ===`);
-                    logMessage(`Total INF files found by scanner: ${result.length}`);
-                    logMessage(`Successfully parsed INF files: ${successCount}`);
-                    logMessage(`Failed to parse INF files: ${failedFiles.length}`);
+                    logSummary(`=== EDK2 Debug Scanning Results ===`);
+                    logSummary(`Total INF files found by scanner: ${result.length}`);
+                    logSummary(`Successfully parsed INF files: ${successCount}`);
+                    logSummary(`Failed to parse INF files: ${failedFiles.length}`);
 
                     // Output failed file list
                     if (failedFiles.length > 0) {
-                        logMessage(`\n=== Failed INF Files List ===`);
+                        logDebug(`\n=== Failed INF Files List ===`);
                         failedFiles.forEach((failed, index) => {
-                            logMessage(`${index + 1}. File: ${failed.path}`);
-                            logMessage(`   Reason: ${failed.reason}`);
+                            logDebug(`${index + 1}. File: ${failed.path}`);
+                            logDebug(`   Reason: ${failed.reason}`);
                         });
-                        logMessage(`=== End of Failed Files List ===\n`);
+                        logDebug(`=== End of Failed Files List ===\n`);
 
                         // Show summary in VSCode notification
                         logMessageWithLevel(
@@ -252,7 +252,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                                 path: infPath,
                                 reason: 'INF file parsing returned null (missing BASE_NAME or MODULE_TYPE)'
                             });
-                            logMessage(`INF Parse Failed: ${infPath} - Missing required fields`);
+                            logError(`INF Parse Failed: ${infPath} - Missing required fields`);
                         }
                     } catch (error) {
                         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -267,16 +267,16 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                 this.modules = metas;
 
                 // Detailed statistics log (no progress version)
-                logMessage(`=== EDK2 Debug Scanning Results ===`);
-                logMessage(`Total INF files found by scanner: ${result.length}`);
-                logMessage(`Successfully parsed INF files: ${successCount}`);
-                logMessage(`Failed to parse INF files: ${failedFiles.length}`);
+                logSummary(`=== EDK2 Debug Scanning Results ===`);
+                logSummary(`Total INF files found by scanner: ${result.length}`);
+                logSummary(`Successfully parsed INF files: ${successCount}`);
+                logSummary(`Failed to parse INF files: ${failedFiles.length}`);
 
                 if (failedFiles.length > 0) {
-                    logMessage(`\n=== Failed INF Files List ===`);
+                    logDebug(`\n=== Failed INF Files List ===`);
                     failedFiles.forEach((failed, index) => {
-                        logMessage(`${index + 1}. File: ${failed.path}`);
-                        logMessage(`   Reason: ${failed.reason}`);
+                        logDebug(`${index + 1}. File: ${failed.path}`);
+                        logDebug(`   Reason: ${failed.reason}`);
                     });
                     logMessage(`=== End of Failed Files List ===\n`);
 
