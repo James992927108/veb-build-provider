@@ -6,7 +6,6 @@ import { logMessage, handleError } from '../utils/logger';
 import { registerCommandWithLog } from '../utils/commandRegistry';
 import { Edk2ModuleProvider } from '../edk2Debug/provider/edk2ModuleProvider';
 import { ModuleEnhancer } from '../edk2Debug/enhancer/moduleEnhancer';
-import { SnippetTools } from '../tools/SnippetTools';
 
 export function registerEdk2DebugCommands(context: vscode.ExtensionContext): void {
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
@@ -39,10 +38,6 @@ export function registerEdk2DebugCommands(context: vscode.ExtensionContext): voi
     registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByModuleType', () => handleFilterByModuleType(edk2ModuleProvider));
     registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByStatus', () => handleFilterByStatus(edk2ModuleProvider));
     
-    // Snippet tools commands
-    registerCommandWithLog(context, 'SnippetTools.DebugToAsusPrint', () => handleDebugToAsusPrint());
-    registerCommandWithLog(context, 'SnippetTools.AsusPrintToDebug', () => handleAsusPrintToDebug());
-
     // Auto-highlight active editor
     setupAutoHighlight(edk2TreeView, edk2ModuleProvider);
 
@@ -165,22 +160,6 @@ async function handleFilterByStatus(edk2ModuleProvider: Edk2ModuleProvider): Pro
         edk2ModuleProvider.setStatusFilter(status);
     } catch (error) {
         handleError(`Status filter failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-}
-
-function handleDebugToAsusPrint(): void {
-    try {
-        new SnippetTools(vscode).DebugToAsusPrint();
-    } catch (error) {
-        handleError(`DebugToAsusPrint failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-}
-
-function handleAsusPrintToDebug(): void {
-    try {
-        new SnippetTools(vscode).AsusPrintToDebug();
-    } catch (error) {
-        handleError(`AsusPrintToDebug failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 

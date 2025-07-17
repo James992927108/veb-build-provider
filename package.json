@@ -41,18 +41,6 @@
         "when": "resourceLangId == BiosLanguage_sdl || resourceLangId == edk2_uni"
       },
       {
-        "command": "SnippetTools.DebugToAsusPrint",
-        "key": "alt+F1",
-        "mac": "alt+F1",
-        "when": "resourceLangId == c"
-      },
-      {
-        "command": "SnippetTools.AsusPrintToDebug",
-        "key": "alt+shift+F1",
-        "mac": "alt+shift+F1",
-        "when": "resourceLangId == c"
-      },
-      {
         "command": "editor.action.insertSnippet",
         "key": "ctrl+f1",
         "when": "resourceLangId == c || resourceLangId == cpp",
@@ -261,14 +249,6 @@
         "title": "Format Document"
       },
       {
-        "command": "SnippetTools.DebugToAsusPrint",
-        "title": "Replace Debug to ASUSPRINT"
-      },
-      {
-        "command": "SnippetTools.AsusPrintToDebug",
-        "title": "Replace ASUSPRINT to Debug"
-      },
-      {
         "command": "extension.expandMakefileVars",
         "title": "Expand Makefile Variables"
       },
@@ -372,16 +352,6 @@
         {
           "when": "resourceLangId == BiosLanguage_sdl",
           "command": "vebBuild.formatter.formatEdk2",
-          "group": "navigation"
-        },
-        {
-          "when": "resourceLangId == c",
-          "command": "SnippetTools.DebugToAsusPrint",
-          "group": "navigation"
-        },
-        {
-          "when": "resourceLangId == c",
-          "command": "SnippetTools.AsusPrintToDebug",
           "group": "navigation"
         },
         {

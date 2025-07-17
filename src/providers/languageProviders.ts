@@ -29,9 +29,6 @@ export function registerLanguageProviders(context: vscode.ExtensionContext): voi
         
         // Register Symbol Providers
         registerSymbolProviders(context);
-        
-        // Register Completion Providers
-        registerCompletionProviders(context);
 
         logMessage("All language providers registered successfully");
     } catch (error) {
@@ -128,14 +125,6 @@ function registerSymbolProviders(context: vscode.ExtensionContext): void {
 }
 
 /**
- * Registers completion item providers for C/C++ languages with EDK2 support
- */
-function registerCompletionProviders(context: vscode.ExtensionContext): void {
-    // Completion providers removed - functionality not needed
-    logMessage("Completion providers registration skipped - feature not needed");
-}
-
-/**
  * Gets available language features for a specific language
  * @param languageId The language identifier
  * @returns Object containing available features for the language
@@ -143,14 +132,12 @@ function registerCompletionProviders(context: vscode.ExtensionContext): void {
 export function getLanguageFeatures(languageId: string): {
     hasDefinitionProvider: boolean;
     hasSymbolProvider: boolean;
-    hasCompletionProvider: boolean;
 } {
     const edk2Languages = ['edk2_fdf', 'edk2_dsc', 'edk2_dec', 'edk2_inf', 'edk2_vfr'];
 
     return {
         hasDefinitionProvider: edk2Languages.includes(languageId),
-        hasSymbolProvider: ['edk2_dsc', 'edk2_dec', 'edk2_fdf', 'edk2_inf'].includes(languageId),
-        hasCompletionProvider: false  // Completion provider feature removed
+        hasSymbolProvider: ['edk2_dsc', 'edk2_dec', 'edk2_fdf', 'edk2_inf'].includes(languageId)
     };
 }
 
