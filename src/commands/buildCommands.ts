@@ -67,17 +67,35 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
         {
           "label": "VebBuildTask",
           "type": "shell",
-          "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
+          "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\"",
+          "options": {
+            "shell": {
+              "executable": "cmd.exe",
+              "args": ["/c"]
+            }
+          }
         },
         {
           "label": "VebReBuildTask",
           "type": "shell",
-          "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
+          "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\"",
+          "options": {
+            "shell": {
+              "executable": "cmd.exe",
+              "args": ["/c"]
+            }
+          }
         },
         {
           "label": "VebCleanTask",
           "type": "shell",
-          "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\""
+          "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\"",
+          "options": {
+            "shell": {
+              "executable": "cmd.exe",
+              "args": ["/c"]
+            }
+          }
         }
       ]
     }`;
@@ -102,19 +120,37 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
           "label": "VebBuildTask",
           "type": "shell",
           "command": "source %s && make 2>&1 | tee %s",
-          "options": { "env": { "VEB": "%s" } }
+          "options": {
+            "env": { "VEB": "%s" },
+            "shell": {
+              "executable": "/bin/bash",
+              "args": ["-c"]
+            }
+          }
         },
         {
           "label": "VebReBuildTask",
           "type": "shell",
           "command": "source %s && make rebuild 2>&1 | tee %s",
-          "options": { "env": { "VEB": "%s" } }
+          "options": {
+            "env": { "VEB": "%s" },
+            "shell": {
+              "executable": "/bin/bash",
+              "args": ["-c"]
+            }
+          }
         },
         {
           "label": "VebCleanTask",
           "type": "shell",
           "command": "source %s && make clean 2>&1 | tee %s",
-          "options": { "env": { "VEB": "%s" } }
+          "options": {
+            "env": { "VEB": "%s" },
+            "shell": {
+              "executable": "/bin/bash",
+              "args": ["-c"]
+            }
+          }
         }
       ]
     }`;
