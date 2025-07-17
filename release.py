@@ -82,6 +82,48 @@ def update_build_commands(new_version):
         print(f"Error updating buildCommands.ts: {e}")
         return False
 
+def update_readme(new_version):
+    """Update README.md version"""
+    try:
+        from datetime import datetime
+        
+        with open('README.md', 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Replace version number in git tag examples
+        new_content = re.sub(r'git tag v[0-9]+\.[0-9]+\.[0-9]+', f'git tag v{new_version}', content)
+        new_content = re.sub(r'git push origin v[0-9]+\.[0-9]+\.[0-9]+', f'git push origin v{new_version}', new_content)
+        
+        # Update title with version if it doesn't exist, or update existing version
+        if re.search(r'# VEB Build Provider v[0-9]+\.[0-9]+\.[0-9]+', new_content):
+            # Update existing version in title
+            new_content = re.sub(r'# VEB Build Provider v[0-9]+\.[0-9]+\.[0-9]+', f'# VEB Build Provider v{new_version}', new_content)
+        elif re.search(r'# VEB Build Provider\s*$', new_content, re.MULTILINE):
+            # Add version to title if it doesn't have one
+            new_content = re.sub(r'# VEB Build Provider\s*$', f'# VEB Build Provider v{new_version}', new_content, flags=re.MULTILINE)
+        
+        # Add new version to version history table
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        new_version_row = f"| v{new_version} | {current_date} |"
+        
+        # Find the version history table and add the new version at the top
+        version_table_pattern = r'(\| 版本號 \| 發布日期 \|\n\|--------|----------\|)\n'
+        if re.search(version_table_pattern, new_content):
+            new_content = re.sub(
+                version_table_pattern,
+                f'\\1\n{new_version_row}\n',
+                new_content
+            )
+        
+        with open('README.md', 'w', encoding='utf-8') as f:
+            f.write(new_content)
+        
+        print(f"✓ Updated README.md to version {new_version}")
+        return True
+    except Exception as e:
+        print(f"Error updating README.md: {e}")
+        return False
+
 def clean_build():
     """Clean build files"""
     print("Cleaning previous build...")
@@ -186,18 +228,18 @@ def git_operations(version):
     push_confirm = input(f"Do you want to push the release v{version} to remote repository? (y/n): ")
     if push_confirm.lower() != 'y':
         print("Release completed locally. You can push manually later using:")
-        print(f"  git push origin master")
-        print(f"  git push origin v{version}")
+        print(f"  git push --force origin master")
+        print(f"  git push --force origin v{version}")
         return True
     
-    print("Pushing to remote...")
-    if not run_command('git push origin master'):
+    print("Pushing to remote with force...")
+    if not run_command('git push --force origin master'):
         return False
     
-    if not run_command(f'git push origin v{version}'):
+    if not run_command(f'git push --force origin v{version}'):
         return False
     
-    print("✓ Pushed to remote")
+    print("✓ Pushed to remote with force")
     return True
 
 def main():
@@ -241,6 +283,9 @@ def main():
         return False
     
     if not update_build_commands(new_version):
+        return False
+    
+    if not update_readme(new_version):
         return False
     
     # Clean build
