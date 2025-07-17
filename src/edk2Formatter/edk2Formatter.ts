@@ -3,39 +3,53 @@ import * as fs from "fs";
 import * as readline from "readline";
 import * as util from 'util';
 
-import formatUni from "./formatUni";
-import formatSdl from "./formatSdl";
+import UnifiedFormatter from "./unifiedFormatter";
 import { logMessage, handleError, outputChannel } from '../utils/logger';
 
-function detectFileEncoding(filepath: string): Promise<string> {
-    return new Promise((resolve, reject) => {
+// Type definitions
+interface EncodingConfig {
+    buffer: BufferEncoding;
+    needsMaxLength: boolean;
+}
+
+const ENCODING_MAP: Record<string, EncodingConfig> = {
+    'UTF-16LE': { buffer: 'utf16le', needsMaxLength: true },
+    'ISO-8859-1': { buffer: 'utf8', needsMaxLength: false },
+    'UTF-8': { buffer: 'utf8', needsMaxLength: false }
+};
+
+async function detectFileEncoding(filepath: string): Promise<string> {
+    try {
         const chardet = require('chardet');
-        try {
-            const encodingType = chardet.detectFileSync(filepath);
-            resolve(encodingType);
-        } catch (error) {
-            reject(error); // Handle any potential error in detection
+        const encodingType = chardet.detectFileSync(filepath);
+        
+        if (!encodingType) {
+            throw new Error('Cannot detect file encoding');
         }
-    });
+        
+        return encodingType;
+    } catch (error) {
+        throw new Error(`File encoding detection failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
 }
 
-function writeBacktoFile(filepath: string, fileEncoding: any, fileString: string) {
-    const writeFile = util.promisify(fs.writeFile);
-
-    writeFile(filepath, fileString, { encoding: fileEncoding })
-        .then(() => {
-            logMessage('File created!');
-        })
-        .catch(error => logMessage("error: " + error));
+async function writeBacktoFile(filepath: string, fileEncoding: BufferEncoding, fileString: string): Promise<void> {
+    try {
+        const writeFile = util.promisify(fs.writeFile);
+        await writeFile(filepath, fileString, { encoding: fileEncoding });
+        logMessage('File formatted successfully!');
+    } catch (error) {
+        const errorMessage = `Failed to write file: ${error instanceof Error ? error.message : String(error)}`;
+        logMessage(errorMessage);
+        throw new Error(errorMessage);
+    }
 }
 
-function findMaxLength(filepath: string, fileEncoding: any): Promise<any> {
-    return new Promise((resolve) => {
-        // Create local variable
+async function findMaxLength(filepath: string, fileEncoding: BufferEncoding): Promise<number> {
+    return new Promise((resolve, reject) => {
         let maxLength = 0;
         let currentLength = 0;
 
-        // Create read stream & readline interface
         const readStream = fs.createReadStream(filepath);
         readStream.setEncoding(fileEncoding);
         const rl = readline.createInterface({
@@ -43,71 +57,80 @@ function findMaxLength(filepath: string, fileEncoding: any): Promise<any> {
             crlfDelay: Infinity,
         });
 
-        // readline event: `line` handler
-        readStream.once("error", function (err) {
-            logMessage("readStream error");
-            resolve(null);
+        readStream.once("error", (err) => {
+            logMessage("readStream error: " + err.message);
+            reject(new Error(`Failed to read file: ${err.message}`));
         });
+
         rl.on("line", (line: string) => {
-            const patternString = new RegExp(/^#string/);
+            const patternString = /^#string/;
             if (line.match(patternString)) {
                 logMessage(line);
-                currentLength = line.split("#string")[1].trim().split(/\s+/)[0].length;
-                if (currentLength > maxLength) {
-                    maxLength = currentLength;
+                const parts = line.split("#string")[1]?.trim().split(/\s+/);
+                if (parts && parts.length > 0) {
+                    currentLength = parts[0].length;
+                    if (currentLength > maxLength) {
+                        maxLength = currentLength;
+                    }
                 }
             }
         });
 
-        // readline event: `close` handler
         rl.on("close", () => {
-            // Closing readline and readStream
             rl.close();
             readStream.destroy();
-
-            // maxLength will be resolved
             resolve(maxLength);
         });
     });
 }
 
+async function processFileByEncoding(filePath: string, fileEncoding: string): Promise<void> {
+    const config = ENCODING_MAP[fileEncoding];
+    if (!config) {
+        throw new Error(`Unsupported file encoding: ${fileEncoding}`);
+    }
+
+    logMessage(`Processing file with encoding: ${fileEncoding}, buffer: ${config.buffer}`);
+
+    const formatter = new UnifiedFormatter();
+    let fileString: string;
+
+    if (config.needsMaxLength) {
+        // For UNI files (UTF-16LE)
+        const maxStringLength = await findMaxLength(filePath, config.buffer);
+        fileString = await formatter.format(filePath, config.buffer, 'uni', maxStringLength);
+    } else {
+        // For SDL files (UTF-8, ISO-8859-1)
+        fileString = await formatter.format(filePath, config.buffer, 'sdl');
+    }
+
+    await writeBacktoFile(filePath, config.buffer, fileString);
+}
+
 /**
  * Format the currently active file in the editor based on its encoding.
- * @param filePath 
  */
-export function Edk2Formatter() {
+export async function Edk2Formatter(): Promise<void> {
     const activeEditor = vscode.window.activeTextEditor;
 
-    if (activeEditor) {
-        let filePath = activeEditor.document.uri.fsPath;
-        logMessage('filePath: ' + filePath);
+    if (!activeEditor) {
+        logMessage('No active editor found');
+        return;
+    }
 
-        detectFileEncoding(filePath).then(function (fileEncoding) {
-            switch (fileEncoding) {
-                case "UTF-16LE": {
-                    logMessage("fileEncoding is " + fileEncoding);
-                    findMaxLength(filePath, fileEncoding).then(function (maxStringLength) {
-                        formatUni(filePath, "utf16le", maxStringLength).then(function (fileString) {
-                            writeBacktoFile(filePath, "utf16le", fileString); // Use correct BufferEncoding
-                        });
-                    });
-                    break;
-                }
-                case "ISO-8859-1": 
-                case "UTF-8":{
-                    logMessage("fileEncoding is " + fileEncoding + ", set to utf8");
-                    formatSdl(filePath, "utf8").then(function (fileString) {
-                        writeBacktoFile(filePath, "utf8", fileString); // Use 'utf8' BufferEncoding
-                    });
-                    break;
-                }
-                default: {
-                    logMessage(`Unsupported fileEncoding: ${fileEncoding}`);
-                }
-            }
-        }).catch(error => {
-            console.error('Error detecting file encoding:', error);
-        });
+    try {
+        const filePath = activeEditor.document.uri.fsPath;
+        logMessage('Processing file: ' + filePath);
+
+        const fileEncoding = await detectFileEncoding(filePath);
+        await processFileByEncoding(filePath, fileEncoding);
+        
+        logMessage('File formatting completed successfully');
+    } catch (error) {
+        const errorMessage = `Edk2Formatter failed: ${error instanceof Error ? error.message : String(error)}`;
+        logMessage(errorMessage);
+        handleError(error);
+        throw error;
     }
 }
 
