@@ -60,70 +60,7 @@ export class Common {
         return [];
     }
 
-    static buildDsc(...args: any[]) {
-        let os = require('os');
-        let config = vscode.workspace.getConfiguration('vebBuild.language');
-        let parameter = ' -p ' +
-            args[0].path.substring((os.platform() === 'win32' ? 1 : 0)) +   // windows: \d:\xxxxx ; linux /home/xxxxx
-            ' -t ' +
-            (config.has('build.compiler') ? config.get('build.compiler') : 'VS2015x86') +
-            ' -a ' +
-            (config.has('build.arch') ? config.get('build.arch') : 'X64') +
-            ' -b ' +
-            (config.has('build.target') ? config.get('build.target') : 'DEBUG');
-        if (os.platform() === 'win32') {
-            vscode.window.terminals[0].sendText('cmd.exe /K \"edksetup.bat & build' + parameter + '\"');
-        } else {
-            vscode.window.terminals[0].sendText('. edksetup.sh && build' + parameter);
-        }
-    }
 
-    static goToBuild(...args: any[]) {
-        let openExplorer = require('open-file-explorer');
-        let os = require('os');
-        let config = vscode.workspace.getConfiguration('vebBuild.language');
-
-        if (vscode.workspace.workspaceFolders) {
-            let inf = args[0].path.substring((os.platform() === 'win32' ? 1 : 0) + vscode.workspace.workspaceFolders[0].uri.fsPath.length).replace(/.inf$/g, '');
-            let dict = vscode.workspace.workspaceFolders[0].uri.fsPath.replace(/\\/g, '/') +
-                '/' +
-                'Build' +
-                '/' +
-                (config.has('build.project') ? config.get('build.project') : 'EmulatorX64') +
-                '/' +
-                (config.has('build.target') ? config.get('build.target') : 'DEBUG') +
-                '_' +
-                (config.has('build.compiler') ? config.get('build.compiler') : 'VS2015x86') +
-                '/';
-            let archs = ['IA32', 'X64', 'EBC', 'ARM', 'AARCH64'];
-            for (let arch of archs) {
-                let full_path = dict + arch + inf;
-                if (fs.existsSync(full_path)) {
-                    // openExplorer only accept '\\' in windows.
-                    if (os.platform() === 'win32') {
-                        openExplorer(full_path.replace(/\//g, '\\'), () => { });
-                    } else {
-                        openExplorer(full_path, () => { });
-                    }
-                    return;
-                }
-            }
-            vscode.window.showInformationMessage('Not found in build - ' + inf);
-        }
-    }
-
-    static getDebugMessage(): string {
-        let config = vscode.workspace.getConfiguration('vebBuild.language');
-        let prefix = config.get('debug.prefix');
-        if (prefix !== '') {
-            prefix = prefix + ' ';
-        }
-        return 'DEBUG ((DEBUG_ERROR, \"' + prefix + '%a %d $0 \\n\", __FUNCTION__, __LINE__));';
-    }
-
-    static debugLogHotkey(textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) {
-        return textEditor.insertSnippet(new vscode.SnippetString(Common.getDebugMessage()));
-    }
 }
 
 /*
@@ -621,22 +558,3 @@ export class Edk2InfSymbolProvider implements vscode.DocumentSymbolProvider {
     }
 }
 
-export class Edk2CCompletionItemProvider implements vscode.CompletionItemProvider {
-    public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
-        let message = Common.getDebugMessage();
-
-        let snippet1 = new vscode.CompletionItem('DEBUG', vscode.CompletionItemKind.Snippet);
-        snippet1.insertText = new vscode.SnippetString(message);
-        snippet1.documentation = new vscode.MarkdownString('EDK2 debug snippet');
-
-        let snippet2 = new vscode.CompletionItem('debug', vscode.CompletionItemKind.Snippet);
-        snippet2.insertText = new vscode.SnippetString(message);
-        snippet2.documentation = new vscode.MarkdownString('EDK2 debug snippet');
-
-        let snippet3 = new vscode.CompletionItem('Debug', vscode.CompletionItemKind.Snippet);
-        snippet3.insertText = new vscode.SnippetString(message);
-        snippet3.documentation = new vscode.MarkdownString('EDK2 debug snippet');
-
-        return [snippet1, snippet2, snippet3];
-    }
-}
