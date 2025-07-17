@@ -92,7 +92,8 @@
       {
         "id": "BiosLanguage_veb",
         "extensions": [
-          ".veb"
+          ".veb",
+          ".vebpart"
         ],
         "configuration": "./config/languages/language-configuration_veb.json"
       },
@@ -164,6 +165,13 @@
           ".s"
         ],
         "configuration": "./config/languages/language-configuration_asm.json"
+      },
+      {
+        "id": "edk2_cif",
+        "extensions": [
+          ".cif"
+        ],
+        "configuration": "./config/languages/edk2_cif.conf.json"
       }
     ],
     "grammars": [
@@ -211,6 +219,11 @@
         "language": "asm",
         "scopeName": "source.asm.x86_64",
         "path": "./config/syntaxes/language-x86_64-assembly.tmLanguage"
+      },
+      {
+        "language": "edk2_cif",
+        "scopeName": "source.cif",
+        "path": "./config/syntaxes/edk2_cif.tmLanguage.json"
       }
     ],
     "snippets": [

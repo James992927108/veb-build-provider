@@ -1,0 +1,72 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "EDK2 CIF",
+    "patterns": [
+        {
+            "include": "#keywords_cif"
+        }
+    ],
+    "repository": {
+        "keywords_cif": {
+            "patterns": [
+                {
+                    "name": "entity.name.function.BiosLanguage",
+                    "match": "\\b^(<component>|<endComponent>)\\b"
+                },
+                {
+                    "begin": "\\b(name|category|LocalRoot|RefName|VERSION_STRING|ENTRY_POINT|FILE_GUID|MODULE_TYPE|LIBRARY_CLASS|CONSTRUCTOR|DESTRUCTOR|UNLOAD_IMAGE|PCD_IS_DRIVER|DPX_SOURCE|SHADOW)\\b",
+                    "end": "=",
+                    "name": "variable.function.constructor.BiosLanguage"
+                },
+                {
+                    "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*(=)",
+                    "captures": {
+                        "1": {
+                            "name": "variable.function.constructor.BiosLanguage"
+                        },
+                        "2": {
+                            "name": "variable.function.constructor.BiosLanguage"
+                        }
+                    }
+                },
+                {
+                    "begin": "\\[",
+                    "end": "\\]",
+                    "patterns": [
+                        {
+                            "name": "string.quoted.double.edk2_inf",
+                            "match": "[a-zA-Z0-9.]+"
+                        }
+                    ]
+                },
+                {
+                    "begin": " \"",
+                    "end": "\"",
+                    "name": "invalid.illegal.BiosLanguage",
+                    "patterns": [
+                        {
+                            "name": "entity.name.type.BiosLanguage",
+                            "match": "."
+                        }
+                    ]
+                },
+                {
+                    "begin": " '",
+                    "end": "'",
+                    "name": "invalid.illegal.BiosLanguage",
+                    "patterns": [
+                        {
+                            "name": "entity.name.type.BiosLanguage",
+                            "match": "."
+                        }
+                    ]
+                },
+                {
+                    "name": "entity.name.function.BiosLanguage",
+                    "match": "\\b(ModulePart|eModule|eCore|eChipset|eBoard|FLASH|IO|Flavor|CPU|dep|sources|binaries|packages|protocols|guids|ppis|pcd|defines|depex|userextensions)\\b"
+                }
+            ]
+        }
+    },
+    "scopeName": "source.cif"
+}

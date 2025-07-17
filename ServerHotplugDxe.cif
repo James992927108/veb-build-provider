@@ -1,0 +1,11 @@
+<component>
+    name = "ServerHotplugDxe"
+    category = ModulePart
+    LocalRoot = "I24A8Pkg\Universal\ServerHotplugDxe\"
+    RefName = "I24A8Pkg.Universal.ServerHotplugDxe"
+    
+[INF]
+"ServerHotplugDxe.inf"
+[files]
+"ServerHotplugDxe.sdl"
+<endComponent>

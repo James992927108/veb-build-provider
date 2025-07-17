@@ -3,23 +3,63 @@
   "name": "source.edk2_dec",
   "patterns": [
     {
-      "include": "#edk2_dec_color"
+      "include": "#keywords_dec"
     }
   ],
   "repository": {
-    "edk2_dec_color": {
+    "keywords_dec": {
       "patterns": [
         {
-          "name": "variable.language.edk2_dec",
-          "match": "((?<!\\w)(PACKAGE_NAME|PACKAGE_GUID|PACKAGE_VERSION|PACKAGE_UNI_FILE|DEC_SPECIFICATION))(?!\\w)"
+          "begin": "\\b(PACKAGE_NAME|PACKAGE_GUID|PACKAGE_VERSION|PACKAGE_UNI_FILE|DEC_SPECIFICATION|DEFINE)\\b",
+          "end": "=",
+          "name": "variable.function.constructor.BiosLanguage"
         },
         {
-          "name": "variable.parameter.edk2_dec",
-          "match": "[\\w/-]+\\.h"
+          "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*(=)",
+          "captures": {
+            "1": {
+              "name": "variable.function.constructor.BiosLanguage"
+            },
+            "2": {
+              "name": "variable.function.constructor.BiosLanguage"
+            }
+          }
         },
         {
-          "name": "keyword.control.edk2_dec",
-          "match": "((?<!\\w)DEFINE)(?!\\w)|(?<=!)(ifdef|ifndef|if|endif|include|else)"
+          "begin": "\\[",
+          "end": "\\]",
+          "patterns": [
+            {
+              "name": "string.quoted.double.edk2_inf",
+              "match": "[a-zA-Z0-9.]+"
+            }
+          ]
+        },
+        {
+          "begin": " \"",
+          "end": "\"",
+          "name": "invalid.illegal.BiosLanguage",
+          "patterns": [
+            {
+              "name": "entity.name.type.BiosLanguage",
+              "match": "."
+            }
+          ]
+        },
+        {
+          "begin": " '",
+          "end": "'",
+          "name": "invalid.illegal.BiosLanguage",
+          "patterns": [
+            {
+              "name": "entity.name.type.BiosLanguage",
+              "match": "."
+            }
+          ]
+        },
+        {
+          "name": "entity.name.function.BiosLanguage",
+          "match": "\\b(UINT64|UINT32|UINT16|UINT8|UINTN|BOOLEAN|VOID|TRUE|FALSE|NULL|ifdef|ifndef|if|endif|include|else|Includes|Guids|Ppis|Protocols|PcdsFeatureFlag|PcdsFixedAtBuild|PcdsPatchableInModule|PcdsDynamic|PcdsDynamicEx|LibraryClasses|UserExtensions)\\b"
         },
         {
           "name": "constant.numeric.edk2_dec",
@@ -30,35 +70,8 @@
           "match": "(?<!\\w)\\.?\\d(?:(?:[0-9a-zA-Z_\\.]|')|(?<=[eEpP])[+-])*"
         },
         {
-          "name": "entity.name.type.edk2_dec",
-          "match": "((?<!\\w)(UINT64|UINT32|UINT16|UINT8|UINTN|BOOLEAN|VOID))(?!\\w)"
-        },
-        {
-          "name": "constant.language.edk2_dec",
-          "match": "((?<!\\w)TRUE|FALSE|NULL)(?!\\w)"
-        },
-        {
-          "name": "string.quoted.double.edk2_dec",
-          "begin": "L\"|\"",
-          "end": "\""
-        },
-        {
-          "begin": "\\[",
-          "end": "\\]",
-          "patterns": [
-            {
-              "name": "string.quoted.double.edk2_dec",
-              "match": "[a-zA-Z0-9.]+"
-            }
-          ]
-        },
-        {
-          "name": "string.quoted.double.edk2_dec",
-          "match": "(?<=<)[a-zA-Z0-9.]+(?=>)"
-        },
-        {
-          "name": "support.function.edk2_dec",
-          "match": "(?<=\\$\\()[a-zA-Z0-9_]+(?=\\))"
+          "name": "keyword.control.edk2_dec",
+          "match": "(?<=!)(ifdef|ifndef|if|endif|include|else)"
         },
         {
           "name": "comment.line.number-sign.edk2_dec",
