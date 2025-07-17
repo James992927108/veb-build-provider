@@ -10,10 +10,10 @@ let projectStatusBar: vscode.StatusBarItem;
  * @param context VS Code extension context
  */
 export function registerStatusBarItems(context: vscode.ExtensionContext) {
-    // Dynamic Project/InitTask Button (動態顯示)
+    // Dynamic Project/InitTask Button (dynamic display)
     projectStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 103);
     projectStatusBar.command = 'vebBuild.buildTool.initTask';
-    projectStatusBar.text = '$(tools) InitTask';  // 預設顯示 InitTask
+    projectStatusBar.text = '$(tools) InitTask';  // Default display: InitTask
     projectStatusBar.tooltip = 'Initialize VEB Tasks (F8)';
     projectStatusBar.show();
     context.subscriptions.push(projectStatusBar);
@@ -49,7 +49,7 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     // 初始化時檢查當前專案狀態
     updateProjectStatus();
     
-    // 監聽檔案變化，自動更新狀態
+    // Watch for file changes and automatically update status
     const watcher = vscode.workspace.createFileSystemWatcher('**/.vscode/tasks.json');
     watcher.onDidChange(() => updateProjectStatus());
     watcher.onDidCreate(() => updateProjectStatus());
@@ -66,7 +66,7 @@ export async function updateProjectStatus(): Promise<void> {
     try {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
         if (!workspaceFolder) {
-            // 無工作區時顯示 InitTask
+            // Show InitTask when no workspace is opened
             projectStatusBar.text = '$(tools) InitTask';
             projectStatusBar.tooltip = 'No workspace opened';
             projectStatusBar.backgroundColor = undefined;

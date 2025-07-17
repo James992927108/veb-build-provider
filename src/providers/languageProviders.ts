@@ -15,7 +15,6 @@ import {
     Edk2FdfSymbolProvider, 
     Edk2InfSymbolProvider 
 } from '../edk2Language/edk2Language';
-import { Edk2CCompletionItemProvider as Edk2CCompletionProvider } from '../edk2Language/edk2Language';
 
 /**
  * Registers all language providers for EDK2 languages
@@ -132,30 +131,8 @@ function registerSymbolProviders(context: vscode.ExtensionContext): void {
  * Registers completion item providers for C/C++ languages with EDK2 support
  */
 function registerCompletionProviders(context: vscode.ExtensionContext): void {
-    const completionProviders = [
-        {
-            language: 'c',
-            description: 'EDK2 C Completion Provider'
-        },
-        {
-            language: 'cpp',
-            description: 'EDK2 C++ Completion Provider'
-        }
-    ];
-
-    completionProviders.forEach(({ language, description }) => {
-        try {
-            const provider = new Edk2CCompletionProvider();
-            const disposable = vscode.languages.registerCompletionItemProvider(
-                { scheme: 'file', language: language },
-                provider
-            );
-            context.subscriptions.push(disposable);
-            logMessage(`Registered ${description}`);
-        } catch (error) {
-            logMessage(`Failed to register ${description}: ${error}`);
-        }
-    });
+    // Completion providers removed - functionality not needed
+    logMessage("Completion providers registration skipped - feature not needed");
 }
 
 /**
@@ -169,12 +146,11 @@ export function getLanguageFeatures(languageId: string): {
     hasCompletionProvider: boolean;
 } {
     const edk2Languages = ['edk2_fdf', 'edk2_dsc', 'edk2_dec', 'edk2_inf', 'edk2_vfr'];
-    const cLanguages = ['c', 'cpp'];
 
     return {
         hasDefinitionProvider: edk2Languages.includes(languageId),
         hasSymbolProvider: ['edk2_dsc', 'edk2_dec', 'edk2_fdf', 'edk2_inf'].includes(languageId),
-        hasCompletionProvider: cLanguages.includes(languageId)
+        hasCompletionProvider: false  // Completion provider feature removed
     };
 }
 
