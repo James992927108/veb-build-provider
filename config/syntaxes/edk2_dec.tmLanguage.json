@@ -26,6 +26,17 @@
           }
         },
         {
+          "match": "^\\s*([A-Za-z][A-Za-z0-9_]*)\\s*(\\|)",
+          "captures": {
+            "1": {
+              "name": "variable.function.constructor.BiosLanguage"
+            },
+            "2": {
+              "name": "keyword.operator.edk2_dec"
+            }
+          }
+        },
+        {
           "begin": "\\[",
           "end": "\\]",
           "patterns": [

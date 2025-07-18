@@ -1,0 +1,19 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = TestModule
+  FILE_GUID                      = abcdef12-3456-7890-abcd-ef1234567890
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = TestModuleEntry
+
+!include TestInc.inc
+
+[Sources]
+  TestModule.c
+  TestModule.h
+  SubDir/AnotherFile.c
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiLib
+  BaseLib

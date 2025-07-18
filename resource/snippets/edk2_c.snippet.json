@@ -1,7 +1,7 @@
 {
   "debug_user_snippet": {
     "prefix": ["DEBUG", "debug", "Debug"],
-    "body": ["\tDEBUG ((DEBUG_INFO, \"[Anthony] %a %d $0\\n\", __FUNCTION__, __LINE__));"],
+    "body": ["\tDEBUG ((DEBUG_INFO, \"[Aivres-test] %a %d $0\\n\", __FUNCTION__, __LINE__));"],
     "description": "EDK2 debug snippet"
   },
   "debug_start_snippet": {

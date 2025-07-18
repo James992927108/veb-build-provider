@@ -66,7 +66,7 @@ def update_package_json(new_version):
 def update_build_commands(new_version):
     """Update buildCommands.ts version"""
     try:
-        build_commands_path = Path('src/commands/buildCommands.ts')
+        build_commands_path = Path('src/veb-build/commands/buildCommands.ts')
         with open(build_commands_path, 'r', encoding='utf-8') as f:
             content = f.read()
         

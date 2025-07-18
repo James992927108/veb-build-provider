@@ -7,6 +7,7 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 - [專案架構](#-專案架構)
 - [安裝方式](#-安裝方式)
 - [使用說明](#-使用說明)
+- [詳細使用指南](./USAGE_GUIDE.md) 📖
 - [常見問題](#-常見問題)
 - [版本歷史](#-版本歷史)
 - [貢獻方式](#-貢獻方式)
@@ -22,7 +23,7 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 - **🔧 快捷鍵觸發**：預設建置指令已綁定快捷鍵，使用更方便
 - **📝 EDK2 語言支援**：提供 EDK2/BIOS 相關檔案的語法高亮與格式化功能
 - **🐛 Debug 工具**：內建 Debug Snippet 插入功能，協助開發除錯
-- **� 日誌分析**：提供日誌分析與視覺化功能，快速定位問題
+- **📊 日誌分析**：提供日誌分析與視覺化功能，快速定位問題
 
 ---
 
@@ -37,25 +38,62 @@ veb-build-provider/
 │   └── 📁 syntaxes/               # 語法高亮定義
 │       ├── BiosLanguage.tmLanguage_*.json
 │       └── edk2_*.tmLanguage.json
-├── 📁 src/                        # 主要程式碼
-│   ├── 📁 commands/               # VSCode 指令實作
-│   │   ├── buildCommands.ts       # 建置相關指令
-│   │   ├── formatterCommands.ts   # 格式化指令
-│   │   ├── edk2DebugCommands.ts   # 除錯指令
-│   │   ├── logAnalysisCommands.ts # 日誌分析指令
-│   │   └── index.ts
-│   ├── 📁 providers/              # 語言服務提供者
-│   │   └── languageProviders.ts   # 定義/符號/自動完成
-│   ├── 📁 utils/                  # 共用工具函式
-│   │   ├── commandRegistry.ts     # 指令註冊器
-│   │   ├── logger.ts              # 日誌工具
-│   │   ├── constants.ts           # 全域常數
-│   │   └── file.ts                # 檔案工具
-│   ├── 📁 edk2Debug/              # EDK2 除錯核心邏輯
-│   ├── 📁 edk2Formatter/          # EDK2 程式碼格式化
-│   ├── 📁 edk2Language/           # EDK2 語言功能
-│   ├── 📁 tools/                  # 輔助工具
-│   ├── 📁 ui/                     # UI 元件
+├── 📁 src/                        # 主要程式碼 (模組化架構)
+│   ├── 📁 veb-build/              # VEB 建置模組
+│   │   ├── 📁 commands/           # 建置相關指令
+│   │   │   └── buildCommands.ts   # 建置指令實作
+│   │   ├── 📁 tools/              # 建置工具
+│   │   │   └── expandMakefileVars.ts # Makefile 變數展開工具
+│   │   └── index.ts               # VEB 建置模組入口
+│   ├── 📁 edk2-debug/             # EDK2 除錯模組
+│   │   ├── 📁 commands/           # 除錯相關指令
+│   │   │   └── edk2DebugCommands.ts # EDK2 除錯指令
+│   │   ├── 📁 analyzer/           # 分析器模組
+│   │   │   ├── jsonLogParser.ts   # JSON 日誌解析器
+│   │   │   └── logAnalyzer.ts     # 日誌分析器
+│   │   ├── 📁 enhancer/           # 增強器模組
+│   │   │   └── moduleEnhancer.ts  # 模組增強器
+│   │   ├── 📁 provider/           # 提供者模組
+│   │   │   ├── edk2ModuleProvider.ts # EDK2 模組提供者
+│   │   │   └── index.ts           # 提供者入口
+│   │   ├── 📁 scanner/            # 掃描器模組
+│   │   │   ├── index.ts           # 掃描器入口
+│   │   │   ├── infParser.ts       # INF 檔案解析器
+│   │   │   ├── moduleScanner.ts   # 模組掃描器
+│   │   │   ├── projectAnalyzer.ts # 專案分析器
+│   │   │   └── README.md          # 掃描器說明文件
+│   │   ├── 📁 visualization/      # 視覺化模組
+│   │   │   └── htmlReportGenerator.ts # HTML 報告產生器
+│   │   ├── constants.ts           # 除錯常數定義
+│   │   ├── index.ts               # EDK2 除錯模組入口
+│   │   └── types.ts               # 除錯型別定義
+│   ├── 📁 language-support/       # 語言支援模組
+│   │   ├── 📁 commands/           # 語言指令
+│   │   │   ├── formatterCommands.ts      # 格式化指令實作
+│   │   │   └── formatterCommandsEntry.ts # 格式化指令入口
+│   │   ├── 📁 core/               # 核心邏輯實現
+│   │   │   ├── edk2Parser.ts      # EDK2 解析器
+│   │   │   ├── edk2Formatter.ts   # EDK2 格式化器
+│   │   │   └── types.ts           # 型別定義
+│   │   ├── 📁 providers/          # VS Code 服務提供者
+│   │   │   ├── definitionProvider.ts    # 定義跳轉
+│   │   │   ├── symbolProvider.ts        # 符號導覽
+│   │   │   └── formattingProvider.ts    # 自動格式化
+│   │   ├── registry.ts            # 統一註冊管理
+│   │   └── index.ts               # 語言支援模組入口
+│   ├── 📁 log-analysis/           # 日誌分析模組
+│   │   ├── 📁 commands/           # 日誌分析指令
+│   │   │   └── logAnalysisCommands.ts # 日誌分析指令實作
+│   │   └── index.ts               # 日誌分析模組入口
+│   ├── 📁 shared/                 # 共用模組
+│   │   ├── 📁 ui/                 # UI 元件
+│   │   │   └── statusBar.ts       # 狀態列元件
+│   │   ├── 📁 utils/              # 共用工具函式
+│   │   │   ├── commandRegistry.ts # 指令註冊器
+│   │   │   ├── logger.ts          # 日誌工具
+│   │   │   ├── constants.ts       # 全域常數
+│   │   │   └── file.ts            # 檔案工具
+│   │   └── index.ts               # 共用模組入口
 │   └── extension.ts               # 擴充套件入口點
 ├── 📁 resource/                   # 資源檔案
 │   ├── 📁 icons/                  # 圖示檔案
@@ -117,6 +155,7 @@ vsce package
 
 - 按 `Ctrl+Shift+P` 開啟命令面板，輸入 `VEB` 查看所有相關指令
 - 可在 VS Code 的 `keybindings.json` 中自訂快捷鍵
+- 📖 **詳細功能說明請參考：[完整使用指南](./USAGE_GUIDE.md)**
 
 ---
 
