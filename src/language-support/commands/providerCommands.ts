@@ -1,7 +1,7 @@
-// src/language-support/registry.ts
+// src/language-support/commands/providerCommands.ts
 
 import * as vscode from 'vscode';
-import { logMessage } from '../shared/utils/logger';
+import { logMessage } from '../../shared/utils/logger';
 
 // Import all providers
 import {
@@ -10,19 +10,19 @@ import {
     Edk2DecDefinitionProvider,
     Edk2InfDefinitionProvider,
     Edk2VfrDefinitionProvider
-} from './providers/definitionProvider';
+} from '../providers/definitionProvider';
 
 import {
     Edk2DscSymbolProvider,
     Edk2DecSymbolProvider,
     Edk2FdfSymbolProvider,
     Edk2InfSymbolProvider
-} from './providers/symbolProvider';
+} from '../providers/symbolProvider';
 
 import {
     Edk2DocumentFormattingProvider,
     Edk2DocumentRangeFormattingProvider
-} from './providers/formattingProvider';
+} from '../providers/formattingProvider';
 
 /**
  * Registers all EDK2 language providers
@@ -166,84 +166,6 @@ function registerFormattingProviders(context: vscode.ExtensionContext): void {
     });
 }
 
-/**
- * Gets available language features for a specific language
- * @param languageId The language identifier
- * @returns Object containing available features for the language
- */
-export function getLanguageFeatures(languageId: string): {
-    hasDefinitionProvider: boolean;
-    hasSymbolProvider: boolean;
-    hasFormattingProvider: boolean;
-} {
-    const edk2Languages = ['edk2_fdf', 'edk2_dsc', 'edk2_dec', 'edk2_inf', 'edk2_vfr'];
 
-    return {
-        hasDefinitionProvider: edk2Languages.includes(languageId),
-        hasSymbolProvider: ['edk2_dsc', 'edk2_dec', 'edk2_fdf', 'edk2_inf'].includes(languageId),
-        hasFormattingProvider: edk2Languages.includes(languageId)
-    };
-}
 
-/**
- * Activates language providers based on workspace context
- * @param context The extension context
- */
-export function activateLanguageProviders(context: vscode.ExtensionContext): void {
-    // Check if workspace contains EDK2 files
-    const workspaceHasEdk2Files = checkWorkspaceForEdk2Files();
-    
-    if (workspaceHasEdk2Files) {
-        logMessage("EDK2 files detected in workspace, activating unified language providers");
-        registerLanguageProviders(context);
-        
-        // Set context for UI elements
-        vscode.commands.executeCommand('setContext', 'vebBuild.hasEdk2Files', true);
-    } else {
-        logMessage("No EDK2 files detected, unified language providers available but not pre-activated");
-        
-        // Still register providers but don't set workspace context
-        registerLanguageProviders(context);
-        vscode.commands.executeCommand('setContext', 'vebBuild.hasEdk2Files', false);
-    }
-}
 
-/**
- * Checks if the current workspace contains EDK2 files
- * @returns True if EDK2 files are found
- */
-function checkWorkspaceForEdk2Files(): boolean {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders) {
-        return false;
-    }
-
-    // Use workspace.findFiles to check for common EDK2 file types
-    const edk2FilePatterns = [
-        '**/*.dsc',
-        '**/*.dec',
-        '**/*.inf',
-        '**/*.fdf',
-        '**/*.vfr'
-    ];
-
-    // This is a simplified check - in practice you might want to use async file search
-    // For now, just check if any workspace folder seems to be an EDK2 project
-    return workspaceFolders.some(folder => {
-        const folderName = folder.name.toLowerCase();
-        return folderName.includes('edk2') || 
-               folderName.includes('uefi') || 
-               folderName.includes('bios') ||
-               folderName.includes('firmware');
-    });
-}
-
-/**
- * Deactivates all language providers
- * Called during extension deactivation
- */
-export function deactivateLanguageProviders(): void {
-    logMessage("Deactivating unified language providers");
-    // Providers are automatically disposed when extension context is disposed
-    // This function is mainly for logging and cleanup if needed
-}

@@ -59,12 +59,6 @@ export interface Edk2ProjectStats {
   architectures: Record<string, number>;
 }
 
-// Backward compatible type aliases
-export type InfMeta = Edk2InfMeta;
-export type ModuleType = Edk2ModuleType;
-export type Architecture = Edk2Architecture;
-export type ScanOptions = Edk2ScanOptions;
-
 // --- Log analysis and visualization related types ---
 
 /**

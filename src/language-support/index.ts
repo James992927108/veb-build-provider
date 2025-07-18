@@ -1,8 +1,8 @@
 // src/language-support/index.ts
 
 import * as vscode from 'vscode';
-import { registerLanguageProviders } from './registry';
-import { registerFormatterCommands } from './commands/formatterCommandsEntry';
+import { registerLanguageProviders } from './commands/providerCommands';
+import { registerFormatterCommands } from './commands/formatterCommands';
 
 export function registerLanguageSupportModule(context: vscode.ExtensionContext): void {
     registerLanguageProviders(context);
@@ -10,9 +10,5 @@ export function registerLanguageSupportModule(context: vscode.ExtensionContext):
 }
 
 // Export all language support functionality
-export * from './registry';
-export * from './commands/formatterCommandsEntry';
-export * from './providers/definitionProvider';
-export * from './providers/formattingProvider';
-export * from './providers/symbolProvider';
-export * from './core/edk2Formatter';
+export * from './commands/providerCommands';
+export * from './commands/formatterCommands';

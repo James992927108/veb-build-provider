@@ -1,14 +1,6 @@
 // src/edk2-debug/constants.ts
 // EDK2 Enhanced Debug Library - Core Constants Definition
 
-export const EDK2_DEBUG_COMMANDS = {
-  SCAN_PROJECT: 'edk2Debug.scanProject',
-  ENHANCE_MODULE: 'edk2Debug.enhanceModule',
-  BATCH_ENHANCE: 'edk2Debug.batchEnhance',
-  ANALYZE_LOG: 'edk2Debug.analyzeLog',
-  GENERATE_REPORT: 'edk2Debug.generateReport'
-} as const;
-
 
 /**
  * EDK2 file related constants
@@ -129,24 +121,6 @@ export const MODULE_TYPE_ICONS = {
   'UEFI_DRIVER': 'device-desktop',
   'UEFI_APPLICATION': 'play',
   'USER_DEFINED': 'question'
-} as const;
-
-/**
- * Module type color theme
- */
-export const MODULE_TYPE_COLORS = {
-  'BASE': 'charts.blue',
-  'SEC': 'charts.red',
-  'PEI_CORE': 'charts.orange',
-  'PEIM': 'charts.yellow',
-  'DXE_CORE': 'charts.green',
-  'DXE_DRIVER': 'charts.purple',
-  'DXE_RUNTIME_DRIVER': 'charts.pink',
-  'DXE_SAL_DRIVER': 'charts.gray',
-  'DXE_SMM_DRIVER': 'errorForeground',
-  'UEFI_DRIVER': 'charts.foreground',
-  'UEFI_APPLICATION': 'textLink.foreground',
-  'USER_DEFINED': 'descriptionForeground'
 } as const;
 
 /**

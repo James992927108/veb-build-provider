@@ -6,6 +6,7 @@ import * as readline from "readline";
 import * as util from 'util';
 import { formatUni, formatSdl } from '../core/edk2Formatter';
 import { logMessage, handleError, outputChannel } from '../../shared/utils/logger';
+import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
 
 // Type definitions
 interface EncodingConfig {
@@ -137,3 +138,18 @@ export async function Edk2Formatter(): Promise<void> {
 }
 
 export default Edk2Formatter;
+
+// Command registration
+export function registerFormatterCommands(context: vscode.ExtensionContext): void {
+    registerCommandWithLog(context, 'vebBuild.formatter.formatEdk2', handleEdk2Formatter);
+}
+
+async function handleEdk2Formatter(): Promise<void> {
+    try {
+        logMessage("Starting Edk2Formatter");
+        await Edk2Formatter();
+        logMessage("Edk2Formatter completed successfully");
+    } catch (error) {
+        handleError(`Edk2Formatter failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}

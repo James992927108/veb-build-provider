@@ -9,4 +9,3 @@ export function registerVebBuildModule(context: vscode.ExtensionContext): void {
 
 // Export all veb-build functionality
 export * from './commands/buildCommands';
-export * from './tools/expandMakefileVars';

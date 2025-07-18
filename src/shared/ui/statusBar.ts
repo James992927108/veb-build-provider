@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs/promises';
 import { logMessage } from '../utils/logger';
 import { readFile } from '../utils/file';
 
 let projectStatusBar: vscode.StatusBarItem;
+let updateTimeout: NodeJS.Timeout | undefined;
 
 /**
  * Initialize all VEB-related Status Bar buttons.
@@ -49,19 +51,35 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     // Check current project status during initialization
     updateProjectStatus();
     
-    // Watch for file changes and automatically update status
+    // Watch for file changes and automatically update status with debouncing
     const watcher = vscode.workspace.createFileSystemWatcher('**/.vscode/tasks.json');
-    watcher.onDidChange(() => updateProjectStatus());
-    watcher.onDidCreate(() => updateProjectStatus());
+    watcher.onDidChange(() => debouncedUpdateProjectStatus());
+    watcher.onDidCreate(() => debouncedUpdateProjectStatus());
     watcher.onDidDelete(() => resetToInitTask());
     context.subscriptions.push(watcher);
+}
+
+/**
+ * Debounced version of updateProjectStatus to prevent multiple rapid updates
+ */
+function debouncedUpdateProjectStatus(): void {
+    // Clear any existing timeout
+    if (updateTimeout) {
+        clearTimeout(updateTimeout);
+    }
+    
+    // Set a new timeout to update after 100ms of inactivity
+    updateTimeout = setTimeout(() => {
+        updateProjectStatus();
+        updateTimeout = undefined;
+    }, 100);
 }
 
 /**
  * Update the project status display in status bar
  */
 export async function updateProjectStatus(): Promise<void> {
-    if (!projectStatusBar) return;
+    if (!projectStatusBar) {return;}
 
     try {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
@@ -76,6 +94,15 @@ export async function updateProjectStatus(): Promise<void> {
 
         const folderPath = workspaceFolder.uri.fsPath;
         const tasksJsonPath = path.join(folderPath, '.vscode', 'tasks.json');
+        
+        // Check if tasks.json exists before trying to read it
+        try {
+            await fs.access(tasksJsonPath);
+        } catch {
+            // File doesn't exist, show InitTask
+            resetToInitTask();
+            return;
+        }
         
         // Try to read current project from tasks.json
         const tasksJson = await readFile(tasksJsonPath);
@@ -116,9 +143,4 @@ function resetToInitTask(): void {
     }
 }
 
-/**
- * Refresh the project status display (can be called externally)
- */
-export function refreshProjectStatus(): void {
-    updateProjectStatus();
-}
+

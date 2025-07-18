@@ -8,7 +8,6 @@ import { registerStatusBarItems } from './shared/ui/statusBar';
 import { registerVebBuildModule } from './veb-build';
 import { registerEdk2DebugModule } from './edk2-debug';
 import { registerLanguageSupportModule } from './language-support';
-import { registerLogAnalysisModule } from './log-analysis';
 
 export function activate(context: vscode.ExtensionContext): void {
     initLogger(context);
@@ -20,7 +19,6 @@ export function activate(context: vscode.ExtensionContext): void {
     registerVebBuildModule(context);
     registerEdk2DebugModule(context);
     registerLanguageSupportModule(context);
-    registerLogAnalysisModule(context);
 
     // Register Status Bar (InitTask(F8), VebBuild(F7), VebReBuild(F9), stopTerminal)
     registerStatusBarItems(context);
