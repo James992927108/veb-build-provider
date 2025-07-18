@@ -244,7 +244,7 @@ def git_operations(version):
 
 def main():
     print("==========================================")
-    print("    VEB Build Provider Release Script")
+    print("    VEB Build Provider Release Mode")
     print("==========================================")
     
     # Check vsce installation
