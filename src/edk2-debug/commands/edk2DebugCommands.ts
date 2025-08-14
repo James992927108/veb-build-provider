@@ -44,7 +44,7 @@ export function registerEdk2DebugCommands(context: vscode.ExtensionContext): voi
     // Register log analysis commands
     const logAnalyzer = new LogAnalyzer(workspaceRoot);
     const htmlReportGenerator = new HTMLReportGenerator();
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.analyzeLogFile', () => handleAnalyzeLogFile(logAnalyzer, htmlReportGenerator));
+    registerCommandWithLog(context, 'vebBuild.edk2Debug.analyzeLogFile', handleOpenLogFile);
     registerCommandWithLog(context, 'vebBuild.edk2Debug.parseLogLine', handleParseLogLine);
     registerCommandWithLog(context, 'vebBuild.edk2Debug.showPerformanceAnalysis', () => handleShowPerformanceAnalysis(logAnalyzer));
     registerCommandWithLog(context, 'vebBuild.edk2Debug.batchAnalyzeLogs', () => handleBatchAnalyzeLogs(logAnalyzer));
@@ -216,7 +216,8 @@ function setupAutoHighlight(edk2TreeView: vscode.TreeView<any>, edk2ModuleProvid
     });
 }
 
-// Log Analysis Command handlers
+// Log Analysis Command handlers (DEPRECATED - replaced with simple Open Log File)
+/*
 async function handleAnalyzeLogFile(logAnalyzer: LogAnalyzer, htmlReportGenerator: HTMLReportGenerator): Promise<void> {
     try {
         // const fileUri = await vscode.window.showOpenDialog({
@@ -277,6 +278,7 @@ async function handleAnalyzeLogFile(logAnalyzer: LogAnalyzer, htmlReportGenerato
         handleError(`Enhanced log file analysis failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
+*/
 
 async function handleParseLogLine(): Promise<void> {
     try {
@@ -474,4 +476,31 @@ async function generateBatchReport(batchReportPath: string, logFiles: string[], 
 </html>`;
 
     fs.writeFileSync(batchReportPath, batchReportHtml, 'utf-8');
+}
+
+// Simple log file opener (replaces complex analysis)
+async function handleOpenLogFile(): Promise<void> {
+    try {
+        const fileUri = await vscode.window.showOpenDialog({
+            canSelectFiles: true,
+            canSelectFolders: false,
+            canSelectMany: false,
+            openLabel: 'Select EDK2 Log File',
+            filters: {
+                'Log Files': ['log', 'txt'],
+                'All Files': ['*']
+            }
+        });
+
+        if (!fileUri || fileUri.length === 0) {
+            // User cancelled the dialog
+            return;
+        }
+
+        const selectedFileUri = fileUri[0];
+        await vscode.window.showTextDocument(selectedFileUri);
+        logMessage(`Opened log file: ${selectedFileUri.fsPath}`);
+    } catch (error) {
+        handleError(`Failed to open log file: ${error instanceof Error ? error.message : String(error)}`);
+    }
 }

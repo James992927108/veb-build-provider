@@ -313,9 +313,9 @@
       },
       {
         "command": "vebBuild.edk2Debug.analyzeLogFile",
-        "title": "Analyze Log File",
+        "title": "Open EDK2 Log File",
         "category": "VEB Build",
-        "icon": "$(file-text)"
+        "icon": "$(file-code)"
       },
       {
         "command": "vebBuild.edk2Debug.parseLogLine",
