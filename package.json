@@ -334,6 +334,54 @@
         "title": "Batch Analyze Logs",
         "category": "VEB Build",
         "icon": "$(folder-opened)"
+      },
+      {
+        "command": "vebBuild.enhancedDebug.switchToModules",
+        "title": "Module Manager",
+        "category": "Enhanced Debug",
+        "icon": "$(symbol-module)"
+      },
+      {
+        "command": "vebBuild.enhancedDebug.switchToLogs",
+        "title": "Log Analysis",
+        "category": "Enhanced Debug",
+        "icon": "$(debug-console)"
+      },
+      {
+        "command": "vebBuild.enhancedDebug.openLogFile",
+        "title": "Open Log File",
+        "category": "Enhanced Debug",
+        "icon": "$(file-text)"
+      },
+      {
+        "command": "vebBuild.enhancedDebug.filterLogs",
+        "title": "Filter Logs",
+        "category": "Enhanced Debug",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "vebBuild.enhancedDebug.jumpToSource",
+        "title": "Jump to Source",
+        "category": "Enhanced Debug",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "vebBuild.enhancedDebug.changeLogOpenLocation",
+        "title": "Change Log File Open Location",
+        "category": "Enhanced Debug",
+        "icon": "$(window)"
+      },
+      {
+        "command": "vebBuild.enhancedDebug.jumpToLogLine",
+        "title": "Jump to Log Line",
+        "category": "Enhanced Debug",
+        "icon": "$(arrow-right)"
+      },
+      {
+        "command": "vebBuild.enhancedDebug.locateInTreeView",
+        "title": "Locate in Enhanced Debug TreeView",
+        "category": "Enhanced Debug",
+        "icon": "$(search-view)"
       }
     ],
     "viewsContainers": {
@@ -348,10 +396,10 @@
     "views": {
       "veb-build-explorer": [
         {
-          "id": "vebBuildEdk2Modules",
-          "name": "EDK2 Modules",
+          "id": "vebBuildEnhancedDebug",
+          "name": "Enhanced Debug",
           "when": "vebBuild.hasEdk2Workspace",
-          "icon": "resource/icons/dep.svg"
+          "icon": "$(debug-alt)"
         }
       ]
     },
@@ -371,56 +419,91 @@
           "when": "editorLangId == makefile",
           "command": "extension.expandMakefileVars",
           "group": "navigation"
+        },
+        {
+          "when": "resourceExtname == .log || resourceExtname == .txt",
+          "command": "vebBuild.enhancedDebug.locateInTreeView",
+          "group": "enhanced-debug@1"
         }
       ],
       "view/title": [
         {
-          "command": "vebBuild.edk2Debug.scanProject",
-          "when": "view == vebBuildEdk2Modules",
+          "command": "vebBuild.enhancedDebug.switchToModules",
+          "when": "view == vebBuildEnhancedDebug",
           "group": "navigation@0"
         },
         {
-          "command": "vebBuild.edk2Debug.searchModules",
-          "when": "view == vebBuildEdk2Modules",
+          "command": "vebBuild.enhancedDebug.switchToLogs",
+          "when": "view == vebBuildEnhancedDebug",
           "group": "navigation@1"
         },
         {
+          "command": "vebBuild.edk2Debug.scanProject",
+          "when": "view == vebBuildEnhancedDebug && enhancedDebug.mode == modules",
+          "group": "modules@0"
+        },
+        {
+          "command": "vebBuild.edk2Debug.searchModules",
+          "when": "view == vebBuildEnhancedDebug && enhancedDebug.mode == modules",
+          "group": "modules@1"
+        },
+        {
           "command": "vebBuild.edk2Debug.clearSearch",
-          "when": "view == vebBuildEdk2Modules",
-          "group": "navigation@2"
+          "when": "view == vebBuildEnhancedDebug && enhancedDebug.mode == modules",
+          "group": "modules@2"
         },
         {
           "command": "vebBuild.edk2Debug.filterByModuleType",
-          "when": "view == vebBuildEdk2Modules",
-          "group": "navigation@3"
+          "when": "view == vebBuildEnhancedDebug && enhancedDebug.mode == modules",
+          "group": "modules@3"
         },
         {
           "command": "vebBuild.edk2Debug.filterByStatus",
-          "when": "view == vebBuildEdk2Modules",
-          "group": "navigation@4"
+          "when": "view == vebBuildEnhancedDebug && enhancedDebug.mode == modules",
+          "group": "modules@4"
         },
         {
-          "command": "vebBuild.edk2Debug.analyzeLogFile",
-          "when": "view == vebBuildEdk2Modules",
-          "group": "navigation@5"
+          "command": "vebBuild.enhancedDebug.openLogFile",
+          "when": "view == vebBuildEnhancedDebug && enhancedDebug.mode == logs",
+          "group": "logs@0"
+        },
+        {
+          "command": "vebBuild.enhancedDebug.filterLogs",
+          "when": "view == vebBuildEnhancedDebug && enhancedDebug.mode == logs",
+          "group": "logs@1"
+        },
+        {
+          "command": "vebBuild.enhancedDebug.changeLogOpenLocation",
+          "when": "view == vebBuildEnhancedDebug && enhancedDebug.mode == logs",
+          "group": "logs@2"
         }
       ],
       "view/item/context": [
         {
           "command": "vebBuild.edk2Debug.enhanceModule",
-          "when": "view == vebBuildEdk2Modules && viewItem == edk2Module",
+          "when": "view == vebBuildEnhancedDebug && viewItem == edk2Module",
           "group": "navigation"
         },
         {
           "command": "vebBuild.edk2Debug.restoreModuleEnhance",
-          "when": "view == vebBuildEdk2Modules && viewItem == edk2Module",
+          "when": "view == vebBuildEnhancedDebug && viewItem == edk2Module",
           "group": "navigation"
+        },
+        {
+          "command": "vebBuild.enhancedDebug.jumpToSource",
+          "when": "view == vebBuildEnhancedDebug && viewItem == logEntry",
+          "group": "navigation@1"
+        },
+        {
+          "command": "vebBuild.enhancedDebug.jumpToLogLine",
+          "when": "view == vebBuildEnhancedDebug && viewItem == logEntry",
+          "group": "navigation@0"
         }
       ],
       "view/item/inline": [
         {
           "command": "vebBuild.edk2Debug.enhanceModule",
-          "when": "view == vebBuildEdk2Modules && viewItem == edk2Module",
+          "when": "view == vebBuildEnhancedDebug && viewItem == edk2Module",
           "group": "inline"
         }
       ],
@@ -489,10 +572,30 @@
           "type": "number",
           "default": 100,
           "description": "Maximum log file size in MB for analysis"
+        },
+        "vebBuild.enhancedDebug.logFileOpenLocation": {
+          "type": "string",
+          "enum": ["beside", "active", "one", "two", "three"],
+          "enumDescriptions": [
+            "Open beside current editor (default)",
+            "Replace current active editor",
+            "Open in first editor column",
+            "Open in second editor column", 
+            "Open in third editor column"
+          ],
+          "default": "beside",
+          "description": "Where to open Enhanced Debug log files in the editor"
         }
       }
     }
   },
+  "keybindings": [
+    {
+      "command": "vebBuild.enhancedDebug.locateInTreeView",
+      "key": "ctrl+shift+l",
+      "when": "editorTextFocus && (resourceExtname == .log || resourceExtname == .txt)"
+    }
+  ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./ && npm run copy-scripts && npm run copy-templates",

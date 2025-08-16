@@ -37,6 +37,13 @@ export interface EnhancedLogEntry {
  */
 export class EnhancedLogParser {
   private static readonly DEBUG_PATTERN = /^\[([^:]+):([^:]+):(\d+):#(\d+)\]\s*(.*)$/;
+
+  /**
+   * Parse a single log line (instance method for compatibility with new provider)
+   */
+  parseLogLine(logLine: string, documentLine?: number): EnhancedLogEntry {
+    return EnhancedLogParser.parseLogLine(logLine, documentLine);
+  }
   
   /**
    * 解析單行 Enhanced Debug Log

@@ -5,6 +5,7 @@ import * as path from 'path';
 import { logMessage, handleError } from '../../shared/utils/logger';
 import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
 import { Edk2ModuleProvider } from '../core/edk2ModuleProvider';
+import { EnhancedDebugProvider } from '../providers/enhancedDebugProvider';
 import { ModuleEnhancer } from '../core/moduleEnhancer';
 import { LogAnalyzer } from '../analysis/logAnalyzer';
 import { HTMLReportGenerator } from '../analysis/htmlReportGenerator';
@@ -18,28 +19,51 @@ export function registerEdk2DebugCommands(context: vscode.ExtensionContext): voi
         return;
     }
 
-    // Initialize EDK2 module provider
-    const edk2ModuleProvider = new Edk2ModuleProvider(workspaceRoot);
+    // Initialize Enhanced Debug Provider (統一面板)
+    const enhancedDebugProvider = new EnhancedDebugProvider(workspaceRoot, context);
     
-    // Tree view for EDK2 modules
-    const edk2TreeView = vscode.window.createTreeView('vebBuildEdk2Modules', {
-        treeDataProvider: edk2ModuleProvider,
+    // Tree view for Enhanced Debug (取代原來的 EDK2 Modules)
+    const enhancedDebugTreeView = vscode.window.createTreeView('vebBuildEnhancedDebug', {
+        treeDataProvider: enhancedDebugProvider,
         showCollapseAll: true,
         canSelectMany: true
     });
 
-    // Let provider know TreeView reference for updating message
-    edk2ModuleProvider.setTreeView(edk2TreeView);
+    // Let provider know TreeView reference
+    enhancedDebugProvider.setTreeView(enhancedDebugTreeView);
 
-    // Register all EDK2 debug commands
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.scanProject', () => handleScanProject(edk2ModuleProvider));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.enhanceModule', (moduleNode) => handleEnhanceModule(edk2ModuleProvider, moduleNode));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.restoreModuleEnhance', (moduleNode) => handleRestoreModuleEnhance(edk2ModuleProvider, moduleNode));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.showStatistics', () => handleShowStatistics(edk2ModuleProvider));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.searchModules', () => handleSearchModules(edk2ModuleProvider));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.clearSearch', () => handleClearSearch(edk2ModuleProvider));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByModuleType', () => handleFilterByModuleType(edk2ModuleProvider));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByStatus', () => handleFilterByStatus(edk2ModuleProvider));
+    // 設定 context 變數以控制按鈕顯示
+    const updateContexts = () => {
+        const mode = enhancedDebugProvider.getCurrentMode();
+        vscode.commands.executeCommand('setContext', 'enhancedDebug.mode', mode);
+    };
+    updateContexts();
+
+    // Register Enhanced Debug panel commands
+    registerCommandWithLog(context, 'vebBuild.enhancedDebug.switchToModules', async () => {
+        await enhancedDebugProvider.switchMode('modules');
+        updateContexts();
+    });
+    registerCommandWithLog(context, 'vebBuild.enhancedDebug.switchToLogs', async () => {
+        await enhancedDebugProvider.switchMode('logs');
+        updateContexts();
+    });
+    registerCommandWithLog(context, 'vebBuild.enhancedDebug.openLogFile', () => enhancedDebugProvider.openLogFile());
+    registerCommandWithLog(context, 'vebBuild.enhancedDebug.filterLogs', () => handleFilterLogs());
+    registerCommandWithLog(context, 'vebBuild.enhancedDebug.jumpToSource', (jumpInfo) => handleJumpToSource(jumpInfo));
+    registerCommandWithLog(context, 'vebBuild.enhancedDebug.jumpToLogLine', (jumpInfo) => enhancedDebugProvider.jumpToLogLine(jumpInfo));
+    registerCommandWithLog(context, 'vebBuild.enhancedDebug.locateInTreeView', () => enhancedDebugProvider.locateInTreeView());
+    registerCommandWithLog(context, 'vebBuild.enhancedDebug.changeLogOpenLocation', () => enhancedDebugProvider.changeLogFileOpenLocation());
+
+    // Register module management commands (委託給 enhancedDebugProvider)
+    registerCommandWithLog(context, 'vebBuild.edk2Debug.scanProject', () => handleScanProject(enhancedDebugProvider));
+    registerCommandWithLog(context, 'vebBuild.edk2Debug.enhanceModule', (moduleNode) => handleEnhanceModule(enhancedDebugProvider, moduleNode));
+    registerCommandWithLog(context, 'vebBuild.edk2Debug.restoreModuleEnhance', (moduleNode) => handleRestoreModuleEnhance(enhancedDebugProvider, moduleNode));
+    registerCommandWithLog(context, 'vebBuild.edk2Debug.showStatistics', () => handleShowStatistics(enhancedDebugProvider));
+    registerCommandWithLog(context, 'vebBuild.edk2Debug.searchModules', () => handleSearchModules(enhancedDebugProvider));
+    registerCommandWithLog(context, 'vebBuild.edk2Debug.clearSearch', () => handleClearSearch(enhancedDebugProvider));
+    registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByModuleType', () => handleFilterByModuleType(enhancedDebugProvider));
+    registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByStatus', () => handleFilterByStatus(enhancedDebugProvider));
     
     // Register log analysis commands
     const logAnalyzer = new LogAnalyzer(workspaceRoot);
@@ -50,29 +74,34 @@ export function registerEdk2DebugCommands(context: vscode.ExtensionContext): voi
     registerCommandWithLog(context, 'vebBuild.edk2Debug.batchAnalyzeLogs', () => handleBatchAnalyzeLogs(logAnalyzer));
     
     // Auto-highlight active editor
-    setupAutoHighlight(edk2TreeView, edk2ModuleProvider);
+    setupAutoHighlight(enhancedDebugTreeView, enhancedDebugProvider);
 
     // Auto scan (if enabled in settings)
     const config = vscode.workspace.getConfiguration('vebBuild.edk2Debug');
     if (config.get('autoScan', true)) {
-        edk2ModuleProvider.refresh();
+        enhancedDebugProvider.refreshModules();
     }
 
-    context.subscriptions.push(edk2TreeView);
+    // Listen for editor changes to update status bar
+    const onDidChangeActiveEditor = vscode.window.onDidChangeActiveTextEditor(() => {
+        enhancedDebugProvider.updateStatusBarItem();
+    });
+
+    context.subscriptions.push(enhancedDebugTreeView, onDidChangeActiveEditor);
 }
 
 // Command handlers
-async function handleScanProject(edk2ModuleProvider: Edk2ModuleProvider): Promise<void> {
+async function handleScanProject(enhancedDebugProvider: EnhancedDebugProvider): Promise<void> {
     try {
         logMessage("Starting project scan");
-        await edk2ModuleProvider.refresh();
+        await enhancedDebugProvider.refreshModules();
         logMessage("Project scan completed");
     } catch (error) {
         handleError(`Project scan failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
-async function handleEnhanceModule(edk2ModuleProvider: Edk2ModuleProvider, moduleNode: any): Promise<void> {
+async function handleEnhanceModule(enhancedDebugProvider: EnhancedDebugProvider, moduleNode: any): Promise<void> {
     if (!moduleNode?.filePath) {
         vscode.window.showWarningMessage("No module selected for enhancement");
         return;
@@ -80,21 +109,21 @@ async function handleEnhanceModule(edk2ModuleProvider: Edk2ModuleProvider, modul
 
     try {
         logMessage(`Starting enhancement for module: ${moduleNode.baseName || moduleNode.filePath}`);
-        await edk2ModuleProvider.enhanceModule(moduleNode);
+        await enhancedDebugProvider.enhanceModule(moduleNode);
         vscode.window.showInformationMessage(`Enhanced module: ${moduleNode.baseName || moduleNode.filePath}`);
     } catch (error) {
         handleError(`Module enhancement failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
-async function handleRestoreModuleEnhance(edk2ModuleProvider: Edk2ModuleProvider, moduleNode: any): Promise<void> {
+async function handleRestoreModuleEnhance(enhancedDebugProvider: EnhancedDebugProvider, moduleNode: any): Promise<void> {
     if (!moduleNode?.filePath) {
         vscode.window.showWarningMessage("No module selected for restoration");
         return;
     }
 
     try {
-        const meta = await edk2ModuleProvider.getModuleByPath(moduleNode.filePath);
+        const meta = await enhancedDebugProvider.getModuleByPath(moduleNode.filePath);
         if (!meta) {
             vscode.window.showWarningMessage('Cannot restore: module not found.');
             return;
@@ -102,15 +131,90 @@ async function handleRestoreModuleEnhance(edk2ModuleProvider: Edk2ModuleProvider
 
         await ModuleEnhancer.restore(meta);
         vscode.window.showInformationMessage('Restore complete.');
-        await edk2ModuleProvider.refresh();
+        await enhancedDebugProvider.refreshModules();
     } catch (error) {
         handleError(`Module restoration failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
-async function handleShowStatistics(edk2ModuleProvider: Edk2ModuleProvider): Promise<void> {
+// New Enhanced Debug command handlers
+async function handleFilterLogs(): Promise<void> {
     try {
-        const stats = await edk2ModuleProvider.getProjectStatistics();
+        // TODO: Implement log filtering functionality
+        vscode.window.showInformationMessage('Log filtering functionality coming soon!');
+    } catch (error) {
+        handleError(`Log filtering failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
+
+async function handleJumpToSource(jumpInfo: any): Promise<void> {
+    try {
+        if (!jumpInfo || !jumpInfo.module || !jumpInfo.function || !jumpInfo.line) {
+            vscode.window.showWarningMessage('Invalid jump information provided');
+            return;
+        }
+
+        // Use existing jump-to-source functionality
+        const jumpToSourceCommand = vscode.commands.getCommands().then(commands => {
+            if (commands.includes('vebBuild.enhancedDebug.jumpToSourceFromLog')) {
+                return vscode.commands.executeCommand('vebBuild.enhancedDebug.jumpToSourceFromLog', jumpInfo);
+            } else {
+                // Fallback: try to find and open the source file manually
+                return findAndOpenSourceFile(jumpInfo);
+            }
+        });
+
+        logMessage(`Jumping to source: ${jumpInfo.module}:${jumpInfo.function}:${jumpInfo.line}`);
+    } catch (error) {
+        handleError(`Jump to source failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
+
+async function findAndOpenSourceFile(jumpInfo: any): Promise<void> {
+    // Simple fallback implementation - try to find C files with the module name
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (!workspaceRoot) return;
+
+    const searchPattern = `**/${jumpInfo.module}*.c`;
+    const files = await vscode.workspace.findFiles(searchPattern, null, 10);
+    
+    if (files.length === 0) {
+        vscode.window.showWarningMessage(`Source file for module "${jumpInfo.module}" not found`);
+        return;
+    }
+
+    let targetFile = files[0];
+    if (files.length > 1) {
+        const picks = files.map(file => ({
+            label: path.basename(file.fsPath),
+            description: file.fsPath,
+            uri: file
+        }));
+        
+        const selected = await vscode.window.showQuickPick(picks, {
+            placeHolder: `Multiple files found for module "${jumpInfo.module}". Select one:`
+        });
+        
+        if (selected) {
+            targetFile = selected.uri;
+        }
+    }
+
+    const document = await vscode.workspace.openTextDocument(targetFile);
+    const editor = await vscode.window.showTextDocument(document);
+    
+    // Try to go to the specific line
+    if (jumpInfo.line && jumpInfo.line > 0) {
+        const line = Math.min(jumpInfo.line - 1, document.lineCount - 1);
+        const position = new vscode.Position(line, 0);
+        editor.selection = new vscode.Selection(position, position);
+        editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+    }
+}
+
+async function handleShowStatistics(enhancedDebugProvider: EnhancedDebugProvider): Promise<void> {
+    try {
+        const stats = await enhancedDebugProvider.getProjectStatistics();
         const message = `EDK2 Module Statistics:\nTotal: ${stats.totalModules}\nEnhanced: ${stats.enhancedModules}`;
         vscode.window.showInformationMessage(message);
     } catch (error) {
@@ -118,7 +222,7 @@ async function handleShowStatistics(edk2ModuleProvider: Edk2ModuleProvider): Pro
     }
 }
 
-async function handleSearchModules(edk2ModuleProvider: Edk2ModuleProvider): Promise<void> {
+async function handleSearchModules(enhancedDebugProvider: EnhancedDebugProvider): Promise<void> {
     try {
         const searchTerm = await vscode.window.showInputBox({
             prompt: 'Search EDK2 modules (name, type, path)',
@@ -126,36 +230,36 @@ async function handleSearchModules(edk2ModuleProvider: Edk2ModuleProvider): Prom
         });
 
         if (searchTerm !== undefined) {
-            edk2ModuleProvider.searchModules(searchTerm);
+            enhancedDebugProvider.searchModules(searchTerm);
         }
     } catch (error) {
         handleError(`Module search failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
-function handleClearSearch(edk2ModuleProvider: Edk2ModuleProvider): void {
+function handleClearSearch(enhancedDebugProvider: EnhancedDebugProvider): void {
     try {
-        edk2ModuleProvider.clearSearch();
+        enhancedDebugProvider.clearModuleSearch();
         logMessage("Search cleared");
     } catch (error) {
         handleError(`Failed to clear search: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
-async function handleFilterByModuleType(edk2ModuleProvider: Edk2ModuleProvider): Promise<void> {
+async function handleFilterByModuleType(enhancedDebugProvider: EnhancedDebugProvider): Promise<void> {
     try {
-        const types = Array.from(new Set(edk2ModuleProvider.getAllModulesSync().map(m => m.moduleType)));
+        const types = Array.from(new Set(enhancedDebugProvider.getAllModulesSync().map(m => m.moduleType)));
         const picked = await vscode.window.showQuickPick(['All', ...types], { 
             placeHolder: 'Select ModuleType to filter' 
         });
         
-        edk2ModuleProvider.setModuleTypeFilter(picked === 'All' ? undefined : picked);
+        enhancedDebugProvider.setModuleTypeFilter(picked === 'All' ? undefined : picked);
     } catch (error) {
         handleError(`Module type filter failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
-async function handleFilterByStatus(edk2ModuleProvider: Edk2ModuleProvider): Promise<void> {
+async function handleFilterByStatus(enhancedDebugProvider: EnhancedDebugProvider): Promise<void> {
     try {
         const picked = await vscode.window.showQuickPick(['All', 'Enhanced', 'Not Enhanced'], { 
             placeHolder: 'Select status to filter' 
@@ -168,13 +272,13 @@ async function handleFilterByStatus(edk2ModuleProvider: Edk2ModuleProvider): Pro
             status = 'notEnhanced';
         }
         
-        edk2ModuleProvider.setStatusFilter(status);
+        enhancedDebugProvider.setModuleStatusFilter(status);
     } catch (error) {
         handleError(`Status filter failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
-function setupAutoHighlight(edk2TreeView: vscode.TreeView<any>, edk2ModuleProvider: Edk2ModuleProvider): void {
+function setupAutoHighlight(enhancedDebugTreeView: vscode.TreeView<any>, enhancedDebugProvider: EnhancedDebugProvider): void {
     let lastActiveInfPath: string | undefined = undefined;
 
     vscode.window.onDidChangeActiveTextEditor(async (editor) => {
@@ -189,12 +293,12 @@ function setupAutoHighlight(edk2TreeView: vscode.TreeView<any>, edk2ModuleProvid
 
         lastActiveInfPath = filePath;
 
-        // If the Veb Build TreeView is visible, immediately sync highlight
-        if (edk2TreeView.visible) {
-            const module = await edk2ModuleProvider.getModuleByPath(filePath);
+        // If the Enhanced Debug TreeView is visible, immediately sync highlight
+        if (enhancedDebugTreeView.visible) {
+            const module = await enhancedDebugProvider.getModuleByPath(filePath);
             if (module) {
                 try {
-                    await edk2TreeView.reveal(module, { select: true, focus: true, expand: false });
+                    await enhancedDebugTreeView.reveal(module, { select: true, focus: true, expand: false });
                 } catch (err) {
                     // ignore reveal errors
                 }
@@ -202,12 +306,12 @@ function setupAutoHighlight(edk2TreeView: vscode.TreeView<any>, edk2ModuleProvid
         }
     });
 
-    edk2TreeView.onDidChangeVisibility(async (e) => {
+    enhancedDebugTreeView.onDidChangeVisibility(async (e) => {
         if (e.visible && lastActiveInfPath) {
-            const module = await edk2ModuleProvider.getModuleByPath(lastActiveInfPath);
+            const module = await enhancedDebugProvider.getModuleByPath(lastActiveInfPath);
             if (module) {
                 try {
-                    await edk2TreeView.reveal(module, { select: true, focus: true, expand: false });
+                    await enhancedDebugTreeView.reveal(module, { select: true, focus: true, expand: false });
                 } catch (err) {
                     // ignore reveal errors
                 }
