@@ -233,11 +233,11 @@
     "snippets": [
       {
         "language": "c",
-        "path": "./resource/snippets/edk2_c.snippet.json"
+        "path": "./config/snippets/edk2_c.snippet.json"
       },
       {
         "language": "cpp",
-        "path": "./resource/snippets/edk2_c.snippet.json"
+        "path": "./config/snippets/edk2_c.snippet.json"
       }
     ],
     "commands": [
@@ -389,7 +389,7 @@
         {
           "id": "veb-build-explorer",
           "title": "Veb Build",
-          "icon": "resource/icons/dep.svg"
+          "icon": "$(tools)"
         }
       ]
     },
@@ -598,10 +598,9 @@
   ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./ && npm run copy-scripts && npm run copy-templates",
+    "compile": "tsc -p ./ && npm run copy-scripts",
     "watch": "tsc -watch -p ./",
-    "copy-scripts": "xcopy scripts out\\scripts /E /I /Y",
-    "copy-templates": "xcopy templates out\\templates /E /I /Y"
+    "copy-scripts": "xcopy tools\\scripts out\\scripts /E /I /Y"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",
