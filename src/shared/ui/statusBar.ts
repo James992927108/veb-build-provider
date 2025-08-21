@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { logMessage } from '../utils/logger';
+import { logInfo, logDebug } from '../utils/logger';
 import { readFile } from '../utils/file';
 
 let projectStatusBar: vscode.StatusBarItem;
@@ -19,7 +19,7 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     projectStatusBar.tooltip = 'Initialize VEB Tasks (F8)';
     projectStatusBar.show();
     context.subscriptions.push(projectStatusBar);
-    logMessage("Created status bar item: projectStatus");
+    logInfo("Created status bar item: projectStatus");
 
     // VebBuild Button
     const vebBuildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 102);
@@ -28,7 +28,7 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     vebBuildButton.tooltip = 'Run VEB Build (F7)';
     vebBuildButton.show();
     context.subscriptions.push(vebBuildButton);
-    logMessage("Created status bar button: vebBuild");
+    logInfo("Created status bar button: vebBuild");
 
     // VebReBuild Button
     const runRebuildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 101);
@@ -37,7 +37,7 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     runRebuildButton.tooltip = 'Run VEB ReBuild (F9)';
     runRebuildButton.show();
     context.subscriptions.push(runRebuildButton);
-    logMessage("Created status bar button: vebReBuild");
+    logInfo("Created status bar button: vebReBuild");
 
     // stopTerminal Button
     const closeTerminalButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
@@ -46,7 +46,7 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     closeTerminalButton.tooltip = "Stop the active terminal";
     closeTerminalButton.show();
     context.subscriptions.push(closeTerminalButton);
-    logMessage("Created status bar button: stopTerminal");
+    logInfo("Created status bar button: stopTerminal");
 
     // Check current project status during initialization
     updateProjectStatus();
@@ -88,7 +88,7 @@ export async function updateProjectStatus(): Promise<void> {
             projectStatusBar.text = '$(tools) InitTask';
             projectStatusBar.tooltip = 'No workspace opened';
             projectStatusBar.backgroundColor = undefined;
-            logMessage("Status bar: No workspace");
+            logDebug("Status bar: No workspace");
             return;
         }
 
@@ -119,7 +119,7 @@ export async function updateProjectStatus(): Promise<void> {
             projectStatusBar.tooltip = `Current VEB project: ${currentProject}\nClick to switch project (F8)`;
             projectStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
             
-            logMessage(`Status bar updated: Current project is ${currentProject}`);
+            logDebug(`Status bar updated: Current project is ${currentProject}`);
         } else {
             // Display InitTask when tasks.json exists but no VebBuildTask
             resetToInitTask();
@@ -139,7 +139,7 @@ function resetToInitTask(): void {
         projectStatusBar.text = '$(tools) InitTask';
         projectStatusBar.tooltip = 'Initialize VEB Tasks (F8)';
         projectStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
-        logMessage('Status bar reset to InitTask');
+        logDebug('Status bar reset to InitTask');
     }
 }
 

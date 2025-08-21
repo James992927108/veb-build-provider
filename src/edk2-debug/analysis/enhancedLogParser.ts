@@ -2,7 +2,7 @@
 // Enhanced Debug Log 解析器 - 支援日誌轉跳功能
 
 import * as vscode from 'vscode';
-import { logMessage } from '../../shared/utils/logger';
+import { logInfo, logDebug, logSummary, logError } from '../../shared/utils/logger';
 
 /**
  * Enhanced Debug Log 項目
@@ -52,7 +52,7 @@ export class EnhancedLogParser {
    * @returns 解析結果
    */
   static parseLogLine(logLine: string, documentLine?: number): EnhancedLogEntry {
-    logMessage(`[EnhancedLogParser] 解析日誌行: ${logLine.substring(0, 100)}...`);
+    logDebug(`[EnhancedLogParser] 解析日誌行: ${logLine.substring(0, 100)}...`);
     
     const match = logLine.trim().match(this.DEBUG_PATTERN);
     
@@ -77,7 +77,7 @@ export class EnhancedLogParser {
         functionEndCol: functionEndCol > functionStartCol ? functionEndCol : undefined
       };
       
-      logMessage(`[EnhancedLogParser] 解析成功: ${entry.module}:${entry.function}:${entry.line}#${entry.sequence}`);
+      logDebug(`[EnhancedLogParser] 解析成功: ${entry.module}:${entry.function}:${entry.line}#${entry.sequence}`);
       return entry;
     }
     
@@ -93,7 +93,7 @@ export class EnhancedLogParser {
       documentLine
     };
     
-    logMessage(`[EnhancedLogParser] 解析失敗，非 Enhanced Debug 格式`);
+    logDebug(`[EnhancedLogParser] 解析失敗，非 Enhanced Debug 格式`);
     return invalidEntry;
   }
 
@@ -103,7 +103,7 @@ export class EnhancedLogParser {
    * @returns 解析結果陣列
    */
   static parseLogContent(logContent: string): EnhancedLogEntry[] {
-    logMessage(`[EnhancedLogParser] 開始解析日誌內容，總長度: ${logContent.length} 字符`);
+    logInfo(`[EnhancedLogParser] 開始解析日誌內容，總長度: ${logContent.length} 字符`);
     
     const lines = logContent.split('\n');
     const results: EnhancedLogEntry[] = [];
@@ -120,7 +120,7 @@ export class EnhancedLogParser {
       }
     }
     
-    logMessage(`[EnhancedLogParser] 解析完成: ${validCount}/${results.length} Enhanced Debug 項目`);
+    logSummary(`[EnhancedLogParser] 解析完成: ${validCount}/${results.length} Enhanced Debug 項目`);
     return results;
   }
 
@@ -131,16 +131,16 @@ export class EnhancedLogParser {
    */
   static async parseLogFile(logFilePath: string): Promise<EnhancedLogEntry[]> {
     try {
-      logMessage(`[EnhancedLogParser] 載入日誌檔案: ${logFilePath}`);
+      logInfo(`[EnhancedLogParser] 載入日誌檔案: ${logFilePath}`);
       
       const document = await vscode.workspace.openTextDocument(logFilePath);
       const content = document.getText();
       
-      logMessage(`[EnhancedLogParser] 檔案載入成功，開始解析`);
+      logInfo(`[EnhancedLogParser] 檔案載入成功，開始解析`);
       return this.parseLogContent(content);
       
     } catch (error) {
-      logMessage(`[EnhancedLogParser] 載入檔案失敗 ${logFilePath}: ${error}`);
+      logError(`[EnhancedLogParser] 載入檔案失敗 ${logFilePath}: ${error}`);
       return [];
     }
   }
@@ -152,7 +152,7 @@ export class EnhancedLogParser {
    */
   static isEnhancedDebugLine(logLine: string): boolean {
     const result = this.DEBUG_PATTERN.test(logLine.trim());
-    logMessage(`[EnhancedLogParser] 格式檢查: ${result ? '符合' : '不符合'} Enhanced Debug 格式`);
+    logDebug(`[EnhancedLogParser] 格式檢查: ${result ? '符合' : '不符合'} Enhanced Debug 格式`);
     return result;
   }
 
@@ -162,7 +162,7 @@ export class EnhancedLogParser {
    * @returns 是否包含 Enhanced Debug 格式
    */
   static hasEnhancedDebugContent(document: vscode.TextDocument): boolean {
-    logMessage(`[EnhancedLogParser] 檢查檔案是否包含 Enhanced Debug 內容: ${document.fileName}`);
+    logInfo(`[EnhancedLogParser] 檢查檔案是否包含 Enhanced Debug 內容: ${document.fileName}`);
     
     const content = document.getText();
     const lines = content.split('\n');
@@ -175,13 +175,13 @@ export class EnhancedLogParser {
       if (this.isEnhancedDebugLine(lines[i])) {
         matchCount++;
         if (matchCount >= 5) {
-          logMessage(`[EnhancedLogParser] 確認為 Enhanced Debug 日誌檔案 (找到 ${matchCount}+ 匹配行)`);
+          logInfo(`[EnhancedLogParser] 確認為 Enhanced Debug 日誌檔案 (找到 ${matchCount}+ 匹配行)`);
           return true;
         }
       }
     }
     
-    logMessage(`[EnhancedLogParser] 不是 Enhanced Debug 日誌檔案 (僅找到 ${matchCount} 匹配行)`);
+    logDebug(`[EnhancedLogParser] 不是 Enhanced Debug 日誌檔案 (僅找到 ${matchCount} 匹配行)`);
     return false;
   }
 
@@ -196,7 +196,7 @@ export class EnhancedLogParser {
       .map(entry => entry.module);
     const uniqueModules = Array.from(new Set(modules)).sort();
     
-    logMessage(`[EnhancedLogParser] 提取到 ${uniqueModules.length} 個唯一模組: ${uniqueModules.join(', ')}`);
+    logSummary(`[EnhancedLogParser] 提取到 ${uniqueModules.length} 個唯一模組: ${uniqueModules.join(', ')}`);
     return uniqueModules;
   }
 
@@ -211,7 +211,7 @@ export class EnhancedLogParser {
       .map(entry => entry.function);
     const uniqueFunctions = Array.from(new Set(functions)).sort();
     
-    logMessage(`[EnhancedLogParser] 提取到 ${uniqueFunctions.length} 個唯一函數`);
+    logSummary(`[EnhancedLogParser] 提取到 ${uniqueFunctions.length} 個唯一函數`);
     return uniqueFunctions;
   }
 
@@ -223,7 +223,7 @@ export class EnhancedLogParser {
    */
   static filterByModule(entries: EnhancedLogEntry[], moduleName: string): EnhancedLogEntry[] {
     const filtered = entries.filter(entry => entry.isValid && entry.module === moduleName);
-    logMessage(`[EnhancedLogParser] 模組過濾 '${moduleName}': ${filtered.length}/${entries.length} 項目`);
+    logDebug(`[EnhancedLogParser] 模組過濾 '${moduleName}': ${filtered.length}/${entries.length} 項目`);
     return filtered;
   }
 
@@ -235,7 +235,7 @@ export class EnhancedLogParser {
    */
   static filterByFunction(entries: EnhancedLogEntry[], functionName: string): EnhancedLogEntry[] {
     const filtered = entries.filter(entry => entry.isValid && entry.function === functionName);
-    logMessage(`[EnhancedLogParser] 函數過濾 '${functionName}': ${filtered.length}/${entries.length} 項目`);
+    logDebug(`[EnhancedLogParser] 函數過濾 '${functionName}': ${filtered.length}/${entries.length} 項目`);
     return filtered;
   }
 
@@ -252,7 +252,7 @@ export class EnhancedLogParser {
       entry.sequence >= startSeq && 
       entry.sequence <= endSeq
     );
-    logMessage(`[EnhancedLogParser] 序號範圍過濾 #${startSeq}-#${endSeq}: ${filtered.length}/${entries.length} 項目`);
+    logDebug(`[EnhancedLogParser] 序號範圍過濾 #${startSeq}-#${endSeq}: ${filtered.length}/${entries.length} 項目`);
     return filtered;
   }
 
@@ -284,7 +284,7 @@ export class EnhancedLogParser {
       } : null
     };
     
-    logMessage(`[EnhancedLogParser] 生成統計摘要: ${JSON.stringify(summary)}`);
+    logSummary(`[EnhancedLogParser] 生成統計摘要: ${JSON.stringify(summary)}`);
     return summary;
   }
 
@@ -305,7 +305,7 @@ export class EnhancedLogParser {
     const mapped = mapping[debugLibName] || debugLibName;
     
     if (mapped !== debugLibName) {
-      logMessage(`[EnhancedLogParser] 模組名稱映射: ${debugLibName} → ${mapped}`);
+      logDebug(`[EnhancedLogParser] 模組名稱映射: ${debugLibName} → ${mapped}`);
     }
     
     return mapped;

@@ -3,7 +3,7 @@
 
 import * as vscode from 'vscode';
 import { CrossFolderNavigator } from '../core/crossFolderNavigator';
-import { logMessage, handleError } from '../../shared/utils/logger';
+import { logInfo, logDebug, handleError } from '../../shared/utils/logger';
 
 /**
  * 全域導航器實例 (單例)
@@ -32,7 +32,7 @@ export async function handleJumpToSourceCommand(
   lineNumber: number
 ): Promise<void> {
   
-  logMessage(`[JumpToSourceCommand] 處理跳轉請求: ${moduleName}:${functionName}:${lineNumber}`);
+  logDebug(`[JumpToSourceCommand] 處理跳轉請求: ${moduleName}:${functionName}:${lineNumber}`);
   
   try {
     const navigator = getNavigator();
@@ -50,7 +50,7 @@ export async function handleJumpToSourceCommand(
       const matchingFiles = await navigator.findSourceFiles(moduleName, functionName);
       
       if (token.isCancellationRequested) {
-        logMessage(`[JumpToSourceCommand] 搜尋被使用者取消`);
+        logDebug(`[JumpToSourceCommand] 搜尋被使用者取消`);
         return;
       }
       
@@ -60,7 +60,7 @@ export async function handleJumpToSourceCommand(
         vscode.window.showWarningMessage(
           `找不到函數 ${functionName} 的源碼檔案。請確認當前工作區包含 BIOS 專案源碼。`
         );
-        logMessage(`[JumpToSourceCommand] 沒有找到匹配的檔案`);
+        logDebug(`[JumpToSourceCommand] 沒有找到匹配的檔案`);
         return;
       }
       
@@ -70,11 +70,11 @@ export async function handleJumpToSourceCommand(
       if (matchingFiles.length === 1) {
         // 只有一個匹配，直接跳轉
         targetFile = matchingFiles[0];
-        logMessage(`[JumpToSourceCommand] 找到唯一匹配: ${targetFile}`);
+        logDebug(`[JumpToSourceCommand] 找到唯一匹配: ${targetFile}`);
         
       } else {
         // 多個匹配，顯示選擇視窗
-        logMessage(`[JumpToSourceCommand] 找到 ${matchingFiles.length} 個匹配，顯示選擇視窗`);
+        logDebug(`[JumpToSourceCommand] 找到 ${matchingFiles.length} 個匹配，顯示選擇視窗`);
         
         progress.report({ increment: 100, message: "Showing file selection..." });
         
@@ -84,7 +84,7 @@ export async function handleJumpToSourceCommand(
         );
         
         if (!selectedFile) {
-          logMessage(`[JumpToSourceCommand] 使用者取消選擇`);
+          logDebug(`[JumpToSourceCommand] 使用者取消選擇`);
           return;
         }
         
@@ -95,7 +95,7 @@ export async function handleJumpToSourceCommand(
       progress.report({ increment: 100, message: "Opening file..." });
       await openFileAtLine(targetFile, lineNumber);
       
-      logMessage(`[JumpToSourceCommand] 跳轉成功: ${targetFile}:${lineNumber}`);
+      logInfo(`[JumpToSourceCommand] 跳轉成功: ${targetFile}:${lineNumber}`);
     });
     
   } catch (error) {
@@ -114,7 +114,7 @@ async function showFileSelectionQuickPick(
   jumpInfo: { module: string; function: string; line: number }
 ): Promise<string | undefined> {
   
-  logMessage(`[JumpToSourceCommand] 顯示檔案選擇視窗，${files.length} 個選項`);
+  logDebug(`[JumpToSourceCommand] 顯示檔案選擇視窗，${files.length} 個選項`);
   
   // 建立選項清單
   const items: Array<vscode.QuickPickItem & { filePath: string }> = files.map(file => {
@@ -156,7 +156,7 @@ async function showFileSelectionQuickPick(
   });
   
   if (selected) {
-    logMessage(`[JumpToSourceCommand] 使用者選擇: ${selected.filePath}`);
+    logDebug(`[JumpToSourceCommand] 使用者選擇: ${selected.filePath}`);
     return selected.filePath;
   }
   
@@ -168,7 +168,7 @@ async function showFileSelectionQuickPick(
  */
 async function openFileAtLine(filePath: string, lineNumber: number): Promise<void> {
   try {
-    logMessage(`[JumpToSourceCommand] 開啟檔案: ${filePath}, 行號: ${lineNumber}`);
+    logDebug(`[JumpToSourceCommand] 開啟檔案: ${filePath}, 行號: ${lineNumber}`);
     
     const document = await vscode.workspace.openTextDocument(filePath);
     const editor = await vscode.window.showTextDocument(document);
@@ -199,10 +199,10 @@ async function openFileAtLine(filePath: string, lineNumber: number): Promise<voi
         vscode.TextEditorRevealType.InCenter
       );
       
-      logMessage(`[JumpToSourceCommand] 調整到實際函數位置: 第 ${actualFunctionLine + 1} 行`);
+      logDebug(`[JumpToSourceCommand] 調整到實際函數位置: 第 ${actualFunctionLine + 1} 行`);
     }
     
-    logMessage(`[JumpToSourceCommand] 檔案開啟成功`);
+    logDebug(`[JumpToSourceCommand] 檔案開啟成功`);
     
   } catch (error) {
     throw new Error(`無法開啟檔案 ${filePath}: ${error}`);
@@ -284,6 +284,6 @@ function getDirectoryPath(relativePath: string): string {
 export function clearNavigatorCache(): void {
   if (globalNavigator) {
     globalNavigator.clearCache();
-    logMessage(`[JumpToSourceCommand] 導航器快取已清除`);
+    logInfo(`[JumpToSourceCommand] 導航器快取已清除`);
   }
 }

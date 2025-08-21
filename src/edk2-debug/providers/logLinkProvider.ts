@@ -4,7 +4,7 @@
 import * as vscode from 'vscode';
 import { EnhancedLogParser, EnhancedLogEntry } from '../analysis/enhancedLogParser';
 import { CrossFolderNavigator } from '../core/crossFolderNavigator';
-import { logMessage, handleError } from '../../shared/utils/logger';
+import { logError, logInfo, logDebug, handleError } from '../../shared/utils/logger';
 
 /**
  * DocumentLinks 快取項目
@@ -27,7 +27,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
 
   constructor() {
     this.navigator = new CrossFolderNavigator();
-    logMessage(`[LogLinkProvider] 初始化完成`);
+    logInfo(`[LogLinkProvider] 初始化完成`);
   }
 
   /**
@@ -39,7 +39,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
   ): Promise<vscode.DocumentLink[]> {
     
     const startTime = Date.now();
-    logMessage(`[LogLinkProvider] 開始分析文件: ${document.fileName}`);
+    logDebug(`[LogLinkProvider] 開始分析文件: ${document.fileName}`);
     
     // 檢查快取
     const cacheKey = document.uri.toString();
@@ -51,13 +51,13 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
         cached.lineCount === document.lineCount &&
         (now - cached.timestamp) < this.CACHE_EXPIRY_MS) {
       
-      logMessage(`[LogLinkProvider] 使用快取結果 (${cached.links.length} 個連結, 耗時: ${Date.now() - startTime}ms)`);
+      logDebug(`[LogLinkProvider] 使用快取結果 (${cached.links.length} 個連結, 耗時: ${Date.now() - startTime}ms)`);
       return cached.links;
     }
     
     // 檢查是否為 Enhanced Debug 日誌檔案
     if (!EnhancedLogParser.hasEnhancedDebugContent(document)) {
-      logMessage(`[LogLinkProvider] 文件不包含 Enhanced Debug 內容，跳過`);
+      logDebug(`[LogLinkProvider] 文件不包含 Enhanced Debug 內容，跳過`);
       return [];
     }
 
@@ -65,11 +65,11 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     const content = document.getText();
     const lines = content.split('\n');
     
-    logMessage(`[LogLinkProvider] 開始處理 ${lines.length} 行日誌 (快取失效，重新解析)`);
+    logInfo(`[LogLinkProvider] 開始處理 ${lines.length} 行日誌 (快取失效，重新解析)`);
 
     for (let i = 0; i < lines.length; i++) {
       if (token.isCancellationRequested) {
-        logMessage(`[LogLinkProvider] 操作被取消`);
+        logDebug(`[LogLinkProvider] 操作被取消`);
         break;
       }
 
@@ -91,7 +91,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     this.cleanExpiredCache();
     
     const duration = Date.now() - startTime;
-    logMessage(`[LogLinkProvider] 完成分析，建立了 ${links.length} 個連結 (耗時: ${duration}ms, 已快取)`);
+    logInfo(`[LogLinkProvider] 完成分析，建立了 ${links.length} 個連結 (耗時: ${duration}ms, 已快取)`);
     return links;
   }
 
@@ -103,17 +103,17 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     token: vscode.CancellationToken
   ): Promise<vscode.DocumentLink> {
     
-    logMessage(`[LogLinkProvider] resolveDocumentLink 被呼叫`);
+    logDebug(`[LogLinkProvider] resolveDocumentLink 被呼叫`);
     
     // 檢查是否有跳轉資訊
     const jumpInfo = (link as any).jumpInfo;
     if (!jumpInfo) {
-      logMessage(`[LogLinkProvider] 連結沒有跳轉資訊`);
+      logDebug(`[LogLinkProvider] 連結沒有跳轉資訊`);
       return link;
     }
 
     try {
-      logMessage(`[LogLinkProvider] 解析跳轉請求: ${JSON.stringify(jumpInfo)}`);
+      logDebug(`[LogLinkProvider] 解析跳轉請求: ${JSON.stringify(jumpInfo)}`);
       
       // 執行實際跳轉
       await this.performJump(jumpInfo);
@@ -138,7 +138,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     sequence: number;
   }): Promise<void> {
     
-    logMessage(`[LogLinkProvider] 開始執行跳轉: ${jumpInfo.module}:${jumpInfo.function}:${jumpInfo.line}`);
+    logDebug(`[LogLinkProvider] 開始執行跳轉: ${jumpInfo.module}:${jumpInfo.function}:${jumpInfo.line}`);
     
     try {
       // 使用 CrossFolderNavigator 搜尋檔案
@@ -151,7 +151,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
         vscode.window.showWarningMessage(
           `找不到函數 ${jumpInfo.function} 的源碼檔案`
         );
-        logMessage(`[LogLinkProvider] 跳轉失敗: 找不到匹配的檔案`);
+        logDebug(`[LogLinkProvider] 跳轉失敗: 找不到匹配的檔案`);
         return;
       }
       
@@ -163,21 +163,21 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
         vscode.window.showWarningMessage(
           `找不到函數 ${jumpInfo.function} 的源碼檔案。請確認當前工作區包含 BIOS 專案源碼。`
         );
-        logMessage(`[LogLinkProvider] 沒有找到匹配檔案: ${jumpInfo.module}:${jumpInfo.function}`);
+        logDebug(`[LogLinkProvider] 沒有找到匹配檔案: ${jumpInfo.module}:${jumpInfo.function}`);
         return;
         
       } else if (matchingFiles.length === 1) {
         // 只有一個匹配，直接跳轉
         targetFile = matchingFiles[0];
-        logMessage(`[LogLinkProvider] 找到唯一匹配檔案: ${targetFile}`);
+        logDebug(`[LogLinkProvider] 找到唯一匹配檔案: ${targetFile}`);
         
       } else {
         // 多個匹配，顯示選擇視窗
-        logMessage(`[LogLinkProvider] 找到 ${matchingFiles.length} 個匹配檔案，顯示選擇視窗`);
+        logDebug(`[LogLinkProvider] 找到 ${matchingFiles.length} 個匹配檔案，顯示選擇視窗`);
         
         const selectedFile = await this.showFileSelectionQuickPick(matchingFiles, jumpInfo);
         if (!selectedFile) {
-          logMessage(`[LogLinkProvider] 使用者取消選擇`);
+          logDebug(`[LogLinkProvider] 使用者取消選擇`);
           return;
         }
         targetFile = selectedFile;
@@ -186,7 +186,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
       // 確保 targetFile 有效後再開啟檔案
       if (targetFile && targetFile.trim()) {
         await this.openFileAtLine(targetFile, jumpInfo.line);
-        logMessage(`[LogLinkProvider] 跳轉成功: ${targetFile}:${jumpInfo.line}`);
+        logInfo(`[LogLinkProvider] 跳轉成功: ${targetFile}:${jumpInfo.line}`);
       } else {
         throw new Error(`無效的檔案路徑: ${targetFile}`);
       }
@@ -205,7 +205,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     jumpInfo: { module: string; function: string; line: number; sequence: number }
   ): Promise<string | undefined> {
     
-    logMessage(`[LogLinkProvider] 顯示檔案選擇視窗，${files.length} 個選項`);
+    logDebug(`[LogLinkProvider] 顯示檔案選擇視窗，${files.length} 個選項`);
     
     const items: Array<vscode.QuickPickItem & { filePath: string }> = files.map(file => {
       const isOverride = file.includes('Override');
@@ -233,7 +233,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     });
     
     if (selected) {
-      logMessage(`[LogLinkProvider] 使用者選擇: ${selected.filePath}`);
+      logDebug(`[LogLinkProvider] 使用者選擇: ${selected.filePath}`);
       return selected.filePath;
     }
     
@@ -261,7 +261,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
         vscode.TextEditorRevealType.InCenter
       );
       
-      logMessage(`[LogLinkProvider] 檔案開啟成功，跳轉到第 ${lineNumber} 行`);
+      logDebug(`[LogLinkProvider] 檔案開啟成功，跳轉到第 ${lineNumber} 行`);
       
     } catch (error) {
       throw new Error(`無法開啟檔案 ${filePath}: ${error}`);
@@ -291,7 +291,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     }
     
     if (cleanedCount > 0) {
-      logMessage(`[LogLinkProvider] 清理了 ${cleanedCount} 個過期快取項目`);
+      logDebug(`[LogLinkProvider] 清理了 ${cleanedCount} 個過期快取項目`);
     }
   }
 
@@ -312,7 +312,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     const size = this.documentLinksCache.size;
     this.documentLinksCache.clear();
     this.navigator.clearCache();
-    logMessage(`[LogLinkProvider] 已清除所有快取 (${size} 個 DocumentLinks + CrossFolderNavigator 快取)`);
+    logInfo(`[LogLinkProvider] 已清除所有快取 (${size} 個 DocumentLinks + CrossFolderNavigator 快取)`);
   }
 
   /**
@@ -351,7 +351,7 @@ export function registerEnhancedDebugUriHandler(context: vscode.ExtensionContext
   const disposable = vscode.window.registerUriHandler({
     handleUri(uri: vscode.Uri): vscode.ProviderResult<void> {
       if (uri.scheme === 'enhanced-debug' && uri.authority === 'jump') {
-        logMessage(`[EnhancedDebugUriHandler] 處理跳轉 URI: ${uri.toString()}`);
+        logDebug(`[EnhancedDebugUriHandler] 處理跳轉 URI: ${uri.toString()}`);
         
         // 這裡可以添加額外的跳轉邏輯
         // 目前主要邏輯在 LogLinkProvider.resolveDocumentLink 中處理
@@ -360,5 +360,5 @@ export function registerEnhancedDebugUriHandler(context: vscode.ExtensionContext
   });
   
   context.subscriptions.push(disposable);
-  logMessage(`[EnhancedDebugUriHandler] URI 處理器註冊完成`);
+  logInfo(`[EnhancedDebugUriHandler] URI 處理器註冊完成`);
 }

@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as readline from "readline";
 import * as util from 'util';
 import { formatUni, formatSdl } from '../core/edk2Formatter';
-import { logMessage, handleError, outputChannel } from '../../shared/utils/logger';
+import { logInfo, logDebug, logError, logSummary, handleError, outputChannel } from '../../shared/utils/logger';
 import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
 
 // Type definitions
@@ -39,10 +39,10 @@ async function writeBacktoFile(filepath: string, fileEncoding: BufferEncoding, f
     try {
         const writeFile = util.promisify(fs.writeFile);
         await writeFile(filepath, fileString, { encoding: fileEncoding });
-        logMessage('File formatted successfully!');
+        logInfo('File formatted successfully!');
     } catch (error) {
         const errorMessage = `Failed to write file: ${error instanceof Error ? error.message : String(error)}`;
-        logMessage(errorMessage);
+        logError(errorMessage);
         throw new Error(errorMessage);
     }
 }
@@ -90,11 +90,11 @@ export async function Edk2Formatter(): Promise<void> {
         const document = editor.document;
         const filepath = document.fileName;
         
-        logMessage(`Starting Edk2Formatter for file: ${filepath}`);
+        logDebug(`Starting Edk2Formatter for file: ${filepath}`);
 
         // Detect file encoding
         const encodingType = await detectFileEncoding(filepath);
-        logMessage(`Detected encoding: ${encodingType}`);
+        logDebug(`Detected encoding: ${encodingType}`);
 
         const encodingConfig = ENCODING_MAP[encodingType];
         if (!encodingConfig) {
@@ -128,7 +128,7 @@ export async function Edk2Formatter(): Promise<void> {
         // Reload the document in VS Code
         await vscode.commands.executeCommand('workbench.action.files.revert');
         
-        logMessage("Edk2Formatter completed successfully");
+        logInfo("Edk2Formatter completed successfully");
         
     } catch (error) {
         const errorMessage = `Edk2Formatter failed: ${error instanceof Error ? error.message : String(error)}`;
@@ -146,9 +146,9 @@ export function registerFormatterCommands(context: vscode.ExtensionContext): voi
 
 async function handleEdk2Formatter(): Promise<void> {
     try {
-        logMessage("Starting Edk2Formatter");
+        logDebug("Starting Edk2Formatter");
         await Edk2Formatter();
-        logMessage("Edk2Formatter completed successfully");
+        logInfo("Edk2Formatter completed successfully");
     } catch (error) {
         handleError(`Edk2Formatter failed: ${error instanceof Error ? error.message : String(error)}`);
     }

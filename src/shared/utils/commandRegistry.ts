@@ -1,7 +1,7 @@
 // src/utils/commandRegistry.ts
 
 import * as vscode from 'vscode';
-import { logMessage, handleError } from './logger';
+import { logInfo, logDebug, handleError } from './logger';
 
 /**
  * Command registration options interface
@@ -65,7 +65,7 @@ export function registerCommandWithLog(
         context.subscriptions.push(disposable);
 
         if (opts.logSuccess) {
-            logMessage(`✓ Registered command: ${commandId}`);
+            logInfo(`✓ Registered command: ${commandId}`);
         }
 
         return disposable;
@@ -98,9 +98,9 @@ function createErrorHandledWrapper(
 ): (...args: any[]) => Promise<any> {
     return async (...args: any[]) => {
         try {
-            logMessage(`→ Executing command: ${commandId}`);
+            logDebug(`→ Executing command: ${commandId}`);
             const result = await Promise.resolve(handler(...args));
-            logMessage(`✓ Command completed: ${commandId}`);
+            logInfo(`✓ Command completed: ${commandId}`);
             return result;
         } catch (error) {
             const errorMessage = `Command execution failed [${commandId}]: ${error instanceof Error ? error.message : String(error)}`;

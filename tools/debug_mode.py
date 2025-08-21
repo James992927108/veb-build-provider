@@ -7,6 +7,14 @@ import glob
 from pathlib import Path
 import shutil
 
+# Define project paths
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+PACKAGE_JSON_PATH = os.path.join(PROJECT_ROOT, 'package.json')
+PACKAGE_JSON_BACKUP_PATH = os.path.join(PROJECT_ROOT, 'package.json.backup')
+OUT_DIR_PATH = os.path.join(PROJECT_ROOT, 'out')
+
+
 def run_command(cmd, cwd=None):
     """Execute command and return result"""
     try:
@@ -24,7 +32,7 @@ def run_command(cmd, cwd=None):
 def get_current_version():
     """Get current version from package.json"""
     try:
-        with open('package.json', 'r', encoding='utf-8') as f:
+        with open(PACKAGE_JSON_PATH, 'r', encoding='utf-8') as f:
             package_data = json.load(f)
             return package_data.get('version')
     except Exception as e:
@@ -45,17 +53,17 @@ def generate_debug_version(version):
 def create_debug_package_json(debug_version):
     """Create a temporary package.json with debug version"""
     try:
-        with open('package.json', 'r', encoding='utf-8') as f:
+        with open(PACKAGE_JSON_PATH, 'r', encoding='utf-8') as f:
             package_data = json.load(f)
         
         # Update version for debug
         package_data['version'] = debug_version
         
         # Create backup
-        shutil.copy2('package.json', 'package.json.backup')
+        shutil.copy2(PACKAGE_JSON_PATH, PACKAGE_JSON_BACKUP_PATH)
         
         # Write debug version
-        with open('package.json', 'w', encoding='utf-8') as f:
+        with open(PACKAGE_JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(package_data, f, indent=2, ensure_ascii=False)
         
         print(f"✓ Updated package.json to debug version: {debug_version}")
@@ -67,8 +75,8 @@ def create_debug_package_json(debug_version):
 def restore_package_json():
     """Restore original package.json"""
     try:
-        if os.path.exists('package.json.backup'):
-            shutil.move('package.json.backup', 'package.json')
+        if os.path.exists(PACKAGE_JSON_BACKUP_PATH):
+            shutil.move(PACKAGE_JSON_BACKUP_PATH, PACKAGE_JSON_PATH)
             print("✓ Restored original package.json")
         return True
     except Exception as e:
@@ -80,12 +88,12 @@ def clean_build():
     print("Cleaning previous builds...")
     
     # Remove out directory
-    if os.path.exists('out'):
-        shutil.rmtree('out')
+    if os.path.exists(OUT_DIR_PATH):
+        shutil.rmtree(OUT_DIR_PATH)
         print("✓ Removed out directory")
     
     # Remove existing debug .vsix files in root
-    vsix_files = glob.glob('veb-build-provider-*.vsix')
+    vsix_files = glob.glob(os.path.join(PROJECT_ROOT, 'veb-build-provider-*.vsix'))
     for file in vsix_files:
         os.remove(file)
         print(f"✓ Removed existing debug package: {file}")
@@ -94,7 +102,7 @@ def build_project():
     """Build the project"""
     print("Building project...")
     
-    if not run_command('npm run compile'):
+    if not run_command('npm run compile', cwd=PROJECT_ROOT):
         print("Build failed")
         return False
     
@@ -109,12 +117,13 @@ def package_extension(debug_version):
     package_name = f"veb-build-provider-{debug_version}.vsix"
     cmd = f'npx vsce package --out "{package_name}"'
     
-    if not run_command(cmd):
+    if not run_command(cmd, cwd=PROJECT_ROOT):
         print("Packaging failed")
         return False, None
     
-    if not os.path.exists(package_name):
-        print(f"Package file {package_name} was not created")
+    package_path = os.path.join(PROJECT_ROOT, package_name)
+    if not os.path.exists(package_path):
+        print(f"Package file {package_path} was not created")
         return False, None
     
     print(f"✓ Extension packaged successfully: {package_name}")
@@ -122,13 +131,13 @@ def package_extension(debug_version):
 
 def main():
     """Main function"""
-    print("==========================================")
+    print("===========================================")
     print("       VEB Build Provider Debug Mode")
-    print("==========================================")
+    print("===========================================")
     
     # Check vsce installation
     print("Checking if vsce is installed...")
-    result = subprocess.run('npx vsce --version', shell=True, capture_output=True, text=True)
+    result = subprocess.run('npx vsce --version', shell=True, capture_output=True, text=True, cwd=PROJECT_ROOT)
     if result.returncode != 0:
         print("Error: vsce is not installed.")
         print("Please install vsce first by running: npm install -g vsce")

@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as readline from "readline";
 import * as vscode from 'vscode';
 import { ONE_SPACE, HASH_STRING, HASH_LANGUAGE } from "../../shared/utils/constants";
-import { logMessage } from '../../shared/utils/logger';
 
 // Formatter configuration interface
 interface FormatterConfig {

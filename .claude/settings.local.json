@@ -7,7 +7,12 @@
       "Bash(rm:*)",
       "Bash(mv:*)",
       "Bash(mkdir:*)",
-      "Bash(rd:*)"
+      "Bash(rd:*)",
+      "Bash(git commit:*)",
+      "Bash(find:*)",
+      "Bash(copy:*)",
+      "Bash(cp:*)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": [],
     "ask": [],

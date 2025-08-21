@@ -278,7 +278,7 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
                         logDebug(`${index + 1}. File: ${failed.path}`);
                         logDebug(`   Reason: ${failed.reason}`);
                     });
-                    logMessage(`=== End of Failed Files List ===\n`);
+                    logDebug(`=== End of Failed Files List ===\n`);
 
                     logMessageWithLevel(
                         `EDK2 Scan completed: ${successCount} successful, ${failedFiles.length} failed. Check OUTPUT for details.`,

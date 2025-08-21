@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { logMessage, handleError } from '../../shared/utils/logger';
+import { logInfo, logDebug, logError, logSummary, handleError } from '../../shared/utils/logger';
 import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
 import { Edk2ModuleProvider } from '../core/edk2ModuleProvider';
 import { EnhancedDebugProvider } from '../providers/enhancedDebugProvider';
@@ -12,7 +12,7 @@ export function registerEdk2DebugCommands(context: vscode.ExtensionContext): voi
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     
     if (!workspaceRoot) {
-        logMessage("No workspace root found, skipping EDK2 debug commands registration");
+        logError("No workspace root found, skipping EDK2 debug commands registration");
         return;
     }
 
@@ -85,9 +85,9 @@ export function registerEdk2DebugCommands(context: vscode.ExtensionContext): voi
 // Command handlers
 async function handleScanProject(enhancedDebugProvider: EnhancedDebugProvider): Promise<void> {
     try {
-        logMessage("Starting project scan");
+        logInfo("Starting project scan");
         await enhancedDebugProvider.refreshModules();
-        logMessage("Project scan completed");
+        logInfo("Project scan completed");
     } catch (error) {
         handleError(`Project scan failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -100,7 +100,7 @@ async function handleEnhanceModule(enhancedDebugProvider: EnhancedDebugProvider,
     }
 
     try {
-        logMessage(`Starting enhancement for module: ${moduleNode.baseName || moduleNode.filePath}`);
+        logInfo(`Starting enhancement for module: ${moduleNode.baseName || moduleNode.filePath}`);
         await enhancedDebugProvider.enhanceModule(moduleNode);
         vscode.window.showInformationMessage(`Enhanced module: ${moduleNode.baseName || moduleNode.filePath}`);
     } catch (error) {
@@ -156,7 +156,7 @@ async function handleJumpToSource(jumpInfo: any): Promise<void> {
             }
         });
 
-        logMessage(`Jumping to source: ${jumpInfo.module}:${jumpInfo.function}:${jumpInfo.line}`);
+        logDebug(`Jumping to source: ${jumpInfo.module}:${jumpInfo.function}:${jumpInfo.line}`);
     } catch (error) {
         handleError(`Jump to source failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -232,7 +232,7 @@ async function handleSearchModules(enhancedDebugProvider: EnhancedDebugProvider)
 function handleClearSearch(enhancedDebugProvider: EnhancedDebugProvider): void {
     try {
         enhancedDebugProvider.clearModuleSearch();
-        logMessage("Search cleared");
+        logInfo("Search cleared");
     } catch (error) {
         handleError(`Failed to clear search: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -334,7 +334,7 @@ async function handleOpenLogFile(): Promise<void> {
 
         const selectedFileUri = fileUri[0];
         await vscode.window.showTextDocument(selectedFileUri);
-        logMessage(`Opened log file: ${selectedFileUri.fsPath}`);
+        logInfo(`Opened log file: ${selectedFileUri.fsPath}`);
     } catch (error) {
         handleError(`Failed to open log file: ${error instanceof Error ? error.message : String(error)}`);
     }

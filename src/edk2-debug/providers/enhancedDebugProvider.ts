@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { Edk2ModuleProvider } from '../core/edk2ModuleProvider';
 import { EnhancedLogParser } from '../analysis/enhancedLogParser';
-import { logMessage, logError, handleError } from '../../shared/utils/logger';
+import { logError, logInfo, logDebug, handleError } from '../../shared/utils/logger';
 
 export type DebugMode = 'modules' | 'logs';
 
@@ -56,7 +56,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
         await this.context.workspaceState.update('enhancedDebug.lastMode', mode);
         this.updateTreeViewTitle();
         this._onDidChangeTreeData.fire(undefined);
-        logMessage(`Switched to ${mode} mode`);
+        logInfo(`Switched to ${mode} mode`);
     }
 
     // 更新 TreeView 標題
@@ -254,7 +254,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
     // Open log file in editor window
     private async openLogFileInEditor(filePath: string): Promise<void> {
         try {
-            logMessage(`Opening log file in editor: ${filePath}`);
+            logDebug(`Opening log file in editor: ${filePath}`);
             
             const document = await vscode.workspace.openTextDocument(filePath);
             
@@ -288,7 +288,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
                 preview: false // Open as permanent tab, not preview
             });
 
-            logMessage(`Log file opened in editor successfully: ${path.basename(filePath)} (ViewColumn: ${openLocation})`);
+            logInfo(`Log file opened in editor successfully: ${path.basename(filePath)} (ViewColumn: ${openLocation})`);
             
             // Show success notification with file info
             const fileStats = await vscode.workspace.fs.stat(vscode.Uri.file(filePath));
@@ -337,7 +337,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
                     `Enhanced Debug log files will now open: ${selected.label}`
                 );
                 
-                logMessage(`Log file open location changed to: ${selected.value}`);
+            logInfo(`Log file open location changed to: ${selected.value}`);
             }
         } catch (error) {
             handleError(`Failed to change log file open location: ${error instanceof Error ? error.message : String(error)}`);
@@ -352,7 +352,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
                 return;
             }
 
-            logMessage(`Jumping to log line: ${jumpInfo.logFilePath}:${jumpInfo.logFileLineNumber + 1} (Sequence #${jumpInfo.sequence})`);
+            logDebug(`Jumping to log line: ${jumpInfo.logFilePath}:${jumpInfo.logFileLineNumber + 1} (Sequence #${jumpInfo.sequence})`);
             
             // Open the log file in editor
             const document = await vscode.workspace.openTextDocument(jumpInfo.logFilePath);
@@ -387,7 +387,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
                 { modal: false }
             );
 
-            logMessage(`Successfully jumped to line ${targetLine + 1} in log file`);
+            logDebug(`Successfully jumped to line ${targetLine + 1} in log file`);
 
         } catch (error) {
             handleError(`Failed to jump to log line: ${error instanceof Error ? error.message : String(error)}`);
@@ -415,7 +415,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
             const currentLineNumber = cursorPosition.line; // 0-based
             const currentLineText = activeEditor.document.lineAt(currentLineNumber).text;
 
-            logMessage(`Locating TreeView item from log line ${currentLineNumber + 1}: ${currentLineText.substring(0, 100)}...`);
+            logDebug(`Locating TreeView item from log line ${currentLineNumber + 1}: ${currentLineText.substring(0, 100)}...`);
 
             // Parse the current line to get Enhanced Debug info
             const parsed = this.logParser.parseLogLine(currentLineText.trim());
@@ -451,7 +451,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
                 { modal: false }
             );
 
-            logMessage(`Successfully located TreeView item for sequence #${parsed.sequence}`);
+            logInfo(`Successfully located TreeView item for sequence #${parsed.sequence}`);
 
         } catch (error) {
             handleError(`Failed to locate in TreeView: ${error instanceof Error ? error.message : String(error)}`);
@@ -468,7 +468,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
             // First, make sure TreeView is visible
             await vscode.commands.executeCommand('workbench.view.extension.veb-build-explorer');
 
-            logMessage(`Attempting to reveal TreeView item: ${targetItem.module} #${targetItem.sequence}`);
+            logDebug(`Attempting to reveal TreeView item: ${targetItem.module} #${targetItem.sequence}`);
 
             // Try to find and reveal the exact TreeView item
             // Since TreeView is grouped by modules, we need to work with the actual tree structure
@@ -480,7 +480,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
             );
 
             if (targetModuleGroup) {
-                logMessage(`Found target module group: ${targetModuleGroup.label}`);
+                logDebug(`Found target module group: ${targetModuleGroup.label}`);
                 
                 try {
                     // First reveal and expand the module group
@@ -505,7 +505,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
                             );
 
                             if (targetLogEntry) {
-                                logMessage(`Found target log entry: ${targetLogEntry.label}`);
+                                logDebug(`Found target log entry: ${targetLogEntry.label}`);
                                 
                                 // Reveal the specific log entry
                                 await this.treeView!.reveal(targetLogEntry, {
@@ -514,24 +514,24 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
                                     expand: false
                                 });
                                 
-                                logMessage(`TreeView item revealed successfully`);
+                                logDebug(`TreeView item revealed successfully`);
                             } else {
-                                logMessage(`Target log entry not found in module children`);
+                                logDebug(`Target log entry not found in module children`);
                             }
                         } catch (revealError) {
-                            logMessage(`Failed to reveal log entry: ${revealError}`);
+                            logDebug(`Failed to reveal log entry: ${revealError}`);
                         }
                     }, 300);
                     
                 } catch (groupRevealError) {
-                    logMessage(`Failed to reveal module group: ${groupRevealError}`);
+                    logDebug(`Failed to reveal module group: ${groupRevealError}`);
                 }
             } else {
-                logMessage(`Target module group not found: ${targetItem.module}`);
+                logDebug(`Target module group not found: ${targetItem.module}`);
             }
 
         } catch (error) {
-            logMessage(`Error in revealItemInTreeView: ${error}`);
+            logDebug(`Error in revealItemInTreeView: ${error}`);
         }
     }
 
@@ -564,7 +564,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
     // Load log file for analysis
     private async loadLogFile(filePath: string): Promise<void> {
         try {
-            logMessage(`Loading Enhanced Debug log: ${filePath}`);
+            logInfo(`Loading Enhanced Debug log: ${filePath}`);
             
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
@@ -614,7 +614,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
             this.updateStatusBarItem(); // Update status bar when log is loaded
             this._onDidChangeTreeData.fire(undefined);
             
-            logMessage(`Loaded ${this.logAnalysisData.length} Enhanced Debug entries from ${path.basename(filePath)}`);
+            logInfo(`Loaded ${this.logAnalysisData.length} Enhanced Debug entries from ${path.basename(filePath)}`);
             
             vscode.window.showInformationMessage(
                 `Enhanced Debug log loaded: ${this.logAnalysisData.length} entries parsed from ${path.basename(filePath)}`

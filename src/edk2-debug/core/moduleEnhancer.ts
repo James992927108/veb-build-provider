@@ -3,7 +3,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Edk2InfMeta, StructInfo } from '../types';
-import { logMessage } from '../../shared/utils/logger';
+import { logInfo, logDebug, logWarn } from '../../shared/utils/logger';
 import { ENHANCED_DEBUG_CONSTANTS } from '../constants';
 
 export class ModuleEnhancer {
@@ -53,34 +53,34 @@ export class ModuleEnhancer {
 
       if (issuesBeforeFix.length > 0) {
         // Precisely fix these lines
-        logMessage(`Adding braces to single-line if-return in ${path.basename(srcFile)}`);
+        logInfo(`Adding braces to single-line if-return in ${path.basename(srcFile)}`);
         code = this.addBracketsToSingleLineIf(code);
 
         // Generate temp file (only if fixes are made)
         const tempBak = srcFile.replace(/\.c$/, '.if-return.bak');
         fs.writeFileSync(tempBak, code, 'utf-8');
-        logMessage(`Generated if-return fixed file: ${path.basename(tempBak)}`);
+        logDebug(`Generated if-return fixed file: ${path.basename(tempBak)}`);
       } else {
         // No issues, do not generate temp file
-        logMessage(`No single-line if-return statements found in ${path.basename(srcFile)}`);
+        logDebug(`No single-line if-return statements found in ${path.basename(srcFile)}`);
       }
 
       // 3. Insert macros
-      logMessage(`entryPoint: ${infMeta.entryPoint}, maxDepth: ${maxDepth}`);
+      logDebug(`entryPoint: ${infMeta.entryPoint}, maxDepth: ${maxDepth}`);
       code = this.insertDebugMacros(code, infMeta.entryPoint, maxDepth);
 
       // 4. Verify if structure (validate code variable before writing)
       const issues = this.verifyIfBracketsEnhancedFromCode(code, srcFile);
       if (issues.length > 0) {
-        logMessage(`File ${srcFile} has ${issues.length} problematic if-return:`);
+        logWarn(`File ${srcFile} has ${issues.length} problematic if-return`);
         for (const { line, code: lineCode } of issues) {
-          logMessage(`  Line ${line}: ${lineCode.trim()}`);
+          logWarn(`  Line ${line}: ${lineCode.trim()}`);
         }
       }
 
       // 5. Write file
       fs.writeFileSync(srcFile, code, 'utf-8');
-      logMessage(`Enhanced ${path.basename(srcFile)}`);
+      logInfo(`Enhanced ${path.basename(srcFile)}`);
     }
 
     return true;
@@ -140,7 +140,7 @@ export class ModuleEnhancer {
         end: structRegex.lastIndex
       });
 
-      logMessage(`Found struct initialization: ${structName} with members: ${members.join(', ')}`);
+      logDebug(`Found struct initialization: ${structName} with members: ${members.join(', ')}`);
     }
 
     return structMap;
@@ -221,7 +221,7 @@ export class ModuleEnhancer {
       const validFunctions = structInfo.members.filter(member => funcMap.has(member));
       if (validFunctions.length > 0) {
         mapping.set(structName, validFunctions);
-        logMessage(`Struct ${structName} contains function pointers: ${validFunctions.join(', ')}`);
+        logDebug(`Struct ${structName} contains function pointers: ${validFunctions.join(', ')}`);
       }
     }
 
@@ -254,7 +254,7 @@ export class ModuleEnhancer {
       if (brace === 0) { map.set(name, { start: match.index, end: idx }); }
     }
     // Print found function names
-    logMessage(`Found functions: ${foundFunctions.join(', ')}`);
+    logDebug(`Found functions: ${foundFunctions.join(', ')}`);
     return map;
   }
 
@@ -295,7 +295,7 @@ export class ModuleEnhancer {
     const nextLevelFunctions = this.collectNextLevelFunctions(body, funcMap, structFunctionMap);
 
     if (nextLevelFunctions.length > 0) {
-      logMessage(`[Depth ${currentDepth}] ${fn} will call: ${nextLevelFunctions.join(', ')}`);
+      logDebug(`[Depth ${currentDepth}] ${fn} will call: ${nextLevelFunctions.join(', ')}`);
     }
 
     // 6. Recursively process next level
@@ -426,7 +426,7 @@ export class ModuleEnhancer {
       if (structUsageRegex.test(body)) {
         // Struct is used, add all member functions to tracking
         memberFunctions.forEach(func => functions.add(func));
-        logMessage(`Found struct usage: ${structName}, adding member functions: ${memberFunctions.join(', ')}`);
+        logDebug(`Found struct usage: ${structName}, adding member functions: ${memberFunctions.join(', ')}`);
       }
     }
 

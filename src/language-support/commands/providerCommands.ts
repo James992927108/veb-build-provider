@@ -1,7 +1,7 @@
 // src/language-support/commands/providerCommands.ts
 
 import * as vscode from 'vscode';
-import { logMessage } from '../../shared/utils/logger';
+import { logInfo, logError } from '../../shared/utils/logger';
 
 // Import all providers
 import {
@@ -29,7 +29,7 @@ import {
  * @param context The extension context for registering disposables
  */
 export function registerLanguageProviders(context: vscode.ExtensionContext): void {
-    logMessage("Starting unified language providers registration");
+    logInfo("Starting unified language providers registration");
 
     try {
         // Register Definition Providers
@@ -41,9 +41,9 @@ export function registerLanguageProviders(context: vscode.ExtensionContext): voi
         // Register Formatting Providers
         registerFormattingProviders(context);
 
-        logMessage("All unified language providers registered successfully");
+        logInfo("All unified language providers registered successfully");
     } catch (error) {
-        logMessage(`Error registering unified language providers: ${error}`);
+        logError(`Error registering unified language providers: ${error}`);
         throw error;
     }
 }
@@ -87,9 +87,9 @@ function registerDefinitionProviders(context: vscode.ExtensionContext): void {
                 provider
             );
             context.subscriptions.push(disposable);
-            logMessage(`Registered ${description}`);
+            logInfo(`Registered ${description}`);
         } catch (error) {
-            logMessage(`Failed to register ${description}: ${error}`);
+            logError(`Failed to register ${description}: ${error}`);
         }
     });
 }
@@ -128,9 +128,9 @@ function registerSymbolProviders(context: vscode.ExtensionContext): void {
                 provider
             );
             context.subscriptions.push(disposable);
-            logMessage(`Registered ${description}`);
+            logInfo(`Registered ${description}`);
         } catch (error) {
-            logMessage(`Failed to register ${description}: ${error}`);
+            logError(`Failed to register ${description}: ${error}`);
         }
     });
 }
@@ -159,9 +159,9 @@ function registerFormattingProviders(context: vscode.ExtensionContext): void {
             );
             context.subscriptions.push(rangeFormattingDisposable);
 
-            logMessage(`Registered formatting providers for ${language}`);
+            logInfo(`Registered formatting providers for ${language}`);
         } catch (error) {
-            logMessage(`Failed to register formatting providers for ${language}: ${error}`);
+            logError(`Failed to register formatting providers for ${language}: ${error}`);
         }
     });
 }

@@ -103,8 +103,7 @@ veb-build-provider/
 │   ├── 📁 scripts/                # 建置腳本
 │   │   ├── ExpandMakefileVars.py  # Makefile 變數展開
 │   │   ├── PrepareEnvScript.bat   # Windows 環境準備
-│   │   ├── PrepareEnvLinuxScript.sh # Linux 環境準備
-│   │   └── sol_log_analyzer.py    # SOL 日誌分析器
+│   │   └── PrepareEnvLinuxScript.sh # Linux 環境準備
 │   ├── debug_mode.py              # 除錯模式工具
 │   ├── release_mode.py            # 發布模式工具
 │   └── tee.exe                    # Windows tee 工具

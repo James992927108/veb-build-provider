@@ -1,5 +1,5 @@
 // src/edk2-debug/core/moduleScanner.ts
-import { logMessage, logDebug, logInfo, logSummary, logError, handleError, LogLevel } from '../../shared/utils/logger';
+import { logDebug, logInfo, logSummary, logError, handleError, LogLevel } from '../../shared/utils/logger';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';

@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode';
 import { Edk2FormatterCore } from '../core/edk2Formatter';
-import { logMessage } from '../../shared/utils/logger';
+import { logError } from '../../shared/utils/logger';
 
 export class Edk2DocumentFormattingProvider implements vscode.DocumentFormattingEditProvider {
     private formatter: Edk2FormatterCore;
@@ -31,7 +31,7 @@ export class Edk2DocumentFormattingProvider implements vscode.DocumentFormatting
 
             return [vscode.TextEdit.replace(fullRange, formattedText)];
         } catch (error) {
-            logMessage(`Formatting failed: ${error instanceof Error ? error.message : String(error)}`);
+            logError(`Formatting failed: ${error instanceof Error ? error.message : String(error)}`);
             return [];
         }
     }
@@ -60,7 +60,7 @@ export class Edk2DocumentRangeFormattingProvider implements vscode.DocumentRange
 
             return [vscode.TextEdit.replace(range, formattedText)];
         } catch (error) {
-            logMessage(`Range formatting failed: ${error instanceof Error ? error.message : String(error)}`);
+            logError(`Range formatting failed: ${error instanceof Error ? error.message : String(error)}`);
             return [];
         }
     }

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { logMessage, handleError, outputChannel } from '../../shared/utils/logger';
+import { logInfo, logDebug, logError, handleError, outputChannel } from '../../shared/utils/logger';
 import { spawn } from 'child_process';
 import { EXTENSION_ID } from '../../shared/utils/constants';
 
@@ -13,14 +13,14 @@ export async function expandMakefileVars(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage("No active editor found.");
-        logMessage("No active editor found.");
+        logError("No active editor found.");
         return;
     }
 
     const filePath = editor.document.uri.fsPath; // e.g. "build\token.mak"
     const fileDir = path.dirname(filePath); // Extract directory "build"
 
-    logMessage(`Starting expandMakefileVars for file: ${filePath}`);
+    logDebug(`Starting expandMakefileVars for file: ${filePath}`);
 
     const vebExtension = vscode.extensions.getExtension(EXTENSION_ID);
     if (!vebExtension) {
@@ -33,7 +33,7 @@ export async function expandMakefileVars(): Promise<void> {
         await fs.access(pythonScriptPath);
     } catch {
         vscode.window.showErrorMessage(`Python script not found at: ${pythonScriptPath}`);
-        logMessage(`Python script not found at: ${pythonScriptPath}`);
+        logError(`Python script not found at: ${pythonScriptPath}`);
         return;
     }
 
@@ -52,10 +52,10 @@ export async function expandMakefileVars(): Promise<void> {
 
     pythonProcess.on('close', (code) => {
         if (code === 0) {
-            logMessage(`Successfully processed ${filePath}: ${stdoutData}`);
+            logInfo(`Successfully processed ${filePath}: ${stdoutData}`);
             vscode.window.showInformationMessage(`Expanded Makefile variables for ${path.basename(filePath)}`);
         } else {
-            logMessage(`Error processing ${filePath}: ${stderrData}`);
+            logError(`Error processing ${filePath}: ${stderrData}`);
             vscode.window.showErrorMessage(`Failed to expand Makefile variables: ${stderrData}`);
         }
     });

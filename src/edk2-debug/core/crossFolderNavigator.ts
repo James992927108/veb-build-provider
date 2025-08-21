@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { EnhancedLogParser } from '../analysis/enhancedLogParser';
-import { logMessage } from '../../shared/utils/logger';
+import { logError, logInfo, logDebug, logSummary } from '../../shared/utils/logger';
 
 /**
  * 檔案匹配結果
@@ -40,7 +40,7 @@ export class CrossFolderNavigator {
   private readonly SEARCH_CACHE_EXPIRY_MS = 10 * 60 * 1000; // 10 分鐘過期
   
   constructor() {
-    logMessage(`[CrossFolderNavigator] 初始化完成`);
+    logInfo(`[CrossFolderNavigator] 初始化完成`);
   }
 
   /**
@@ -51,7 +51,7 @@ export class CrossFolderNavigator {
    */
   async findSourceFiles(moduleName: string, functionName: string): Promise<string[]> {
     const startTime = Date.now();
-    logMessage(`[CrossFolderNavigator] 搜尋源碼: ${moduleName}:${functionName}`);
+    logDebug(`[CrossFolderNavigator] 搜尋源碼: ${moduleName}:${functionName}`);
     
     const cacheKey = `${moduleName}:${functionName}`;
     const now = Date.now();
@@ -60,7 +60,7 @@ export class CrossFolderNavigator {
     const cached = this.searchCache.get(cacheKey);
     if (cached && (now - cached.timestamp) < this.SEARCH_CACHE_EXPIRY_MS) {
       const filePaths = cached.matches.map(match => match.filePath);
-      logMessage(`[CrossFolderNavigator] 使用快取結果 (${filePaths.length} 個檔案, 耗時: ${Date.now() - startTime}ms)`);
+      logDebug(`[CrossFolderNavigator] 使用快取結果 (${filePaths.length} 個檔案, 耗時: ${Date.now() - startTime}ms)`);
       return filePaths;
     }
     
@@ -83,17 +83,17 @@ export class CrossFolderNavigator {
       const filePaths = sortedMatches.map(match => match.filePath);
       
       const duration = Date.now() - startTime;
-      logMessage(`[CrossFolderNavigator] 搜尋完成，找到 ${filePaths.length} 個匹配檔案 (耗時: ${duration}ms, 已快取)`);
+      logSummary(`[CrossFolderNavigator] 搜尋完成，找到 ${filePaths.length} 個匹配檔案 (耗時: ${duration}ms, 已快取)`);
       
       // 記錄搜尋結果詳情
       sortedMatches.forEach((match, index) => {
-        logMessage(`[CrossFolderNavigator]   ${index + 1}. ${match.filePath} (${match.reason}, 權重: ${match.weight})`);
+        logDebug(`[CrossFolderNavigator]   ${index + 1}. ${match.filePath} (${match.reason}, 權重: ${match.weight})`);
       });
       
       return filePaths;
       
     } catch (error) {
-      logMessage(`[CrossFolderNavigator] 搜尋失敗: ${error}`);
+      logError(`[CrossFolderNavigator] 搜尋失敗: ${error}`);
       return [];
     }
   }
@@ -109,22 +109,22 @@ export class CrossFolderNavigator {
     const matches: FileMatch[] = [];
     
     // 策略1: Override 目錄優先搜尋
-    logMessage(`[CrossFolderNavigator] 執行策略1: Override 目錄搜尋`);
+    logDebug(`[CrossFolderNavigator] 執行策略1: Override 目錄搜尋`);
     const overrideMatches = await this.searchInOverrideDirectories(moduleName, functionName);
     matches.push(...overrideMatches);
     
     // 策略2: 模組目錄搜尋
-    logMessage(`[CrossFolderNavigator] 執行策略2: 模組目錄搜尋`);
+    logDebug(`[CrossFolderNavigator] 執行策略2: 模組目錄搜尋`);
     const moduleMatches = await this.searchInModuleDirectories(moduleName, functionName);
     matches.push(...moduleMatches);
     
     // 策略3: 函數名全域搜尋
-    logMessage(`[CrossFolderNavigator] 執行策略3: 函數名全域搜尋`);
+    logDebug(`[CrossFolderNavigator] 執行策略3: 函數名全域搜尋`);
     const functionMatches = await this.searchByFunctionName(functionName);
     matches.push(...functionMatches);
     
     // 策略4: 檔案名模糊搜尋
-    logMessage(`[CrossFolderNavigator] 執行策略4: 檔案名模糊搜尋`);
+    logDebug(`[CrossFolderNavigator] 執行策略4: 檔案名模糊搜尋`);
     const fileNameMatches = await this.searchByFileName(moduleName);
     matches.push(...fileNameMatches);
     
@@ -145,7 +145,7 @@ export class CrossFolderNavigator {
     const overridePattern = '**/Override/**/*.{c,h}';
     const overrideFiles = await vscode.workspace.findFiles(overridePattern, '**/node_modules/**');
     
-    logMessage(`[CrossFolderNavigator] 在 Override 目錄找到 ${overrideFiles.length} 個檔案`);
+    logDebug(`[CrossFolderNavigator] 在 Override 目錄找到 ${overrideFiles.length} 個檔案`);
     
     for (const file of overrideFiles) {
       try {
@@ -163,7 +163,7 @@ export class CrossFolderNavigator {
             functionLine
           });
           
-          logMessage(`[CrossFolderNavigator] Override 匹配: ${file.fsPath}`);
+          logDebug(`[CrossFolderNavigator] Override 匹配: ${file.fsPath}`);
         }
         
       } catch (error) {
@@ -198,7 +198,7 @@ export class CrossFolderNavigator {
     for (const pattern of modulePatterns) {
       try {
         const moduleFiles = await vscode.workspace.findFiles(pattern, '**/node_modules/**');
-        logMessage(`[CrossFolderNavigator] 模組搜尋 '${pattern}' 找到 ${moduleFiles.length} 個檔案`);
+        logDebug(`[CrossFolderNavigator] 模組搜尋 '${pattern}' 找到 ${moduleFiles.length} 個檔案`);
         
         for (const file of moduleFiles) {
           try {
@@ -216,7 +216,7 @@ export class CrossFolderNavigator {
                 functionLine
               });
               
-              logMessage(`[CrossFolderNavigator] 模組匹配: ${file.fsPath}`);
+              logDebug(`[CrossFolderNavigator] 模組匹配: ${file.fsPath}`);
             }
             
           } catch (error) {
@@ -225,7 +225,7 @@ export class CrossFolderNavigator {
         }
         
       } catch (error) {
-        logMessage(`[CrossFolderNavigator] 模組搜尋模式 '${pattern}' 失敗: ${error}`);
+        logError(`[CrossFolderNavigator] 模組搜尋模式 '${pattern}' 失敗: ${error}`);
       }
     }
     
@@ -241,14 +241,14 @@ export class CrossFolderNavigator {
     try {
       // 搜尋所有 .c 和 .h 檔案
       const allFiles = await vscode.workspace.findFiles('**/*.{c,h}', '**/node_modules/**');
-      logMessage(`[CrossFolderNavigator] 函數名搜尋：檢查 ${allFiles.length} 個檔案`);
+      logDebug(`[CrossFolderNavigator] 函數名搜尋：檢查 ${allFiles.length} 個檔案`);
       
       // 限制搜尋數量以避免效能問題 (優化: 500 -> 100)
       const maxFiles = 100;
       const filesToSearch = allFiles.slice(0, maxFiles);
       
       if (allFiles.length > maxFiles) {
-        logMessage(`[CrossFolderNavigator] 檔案數量過多 (${allFiles.length})，限制搜尋前 ${maxFiles} 個檔案`);
+        logDebug(`[CrossFolderNavigator] 檔案數量過多 (${allFiles.length})，限制搜尋前 ${maxFiles} 個檔案`);
       }
       
       for (const file of filesToSearch) {
@@ -267,7 +267,7 @@ export class CrossFolderNavigator {
               functionLine
             });
             
-            logMessage(`[CrossFolderNavigator] 函數名匹配: ${file.fsPath}`);
+            logDebug(`[CrossFolderNavigator] 函數名匹配: ${file.fsPath}`);
           }
           
         } catch (error) {
@@ -276,7 +276,7 @@ export class CrossFolderNavigator {
       }
       
     } catch (error) {
-      logMessage(`[CrossFolderNavigator] 函數名搜尋失敗: ${error}`);
+      logError(`[CrossFolderNavigator] 函數名搜尋失敗: ${error}`);
     }
     
     return matches;
@@ -298,7 +298,7 @@ export class CrossFolderNavigator {
       
       for (const pattern of fileNamePatterns) {
         const files = await vscode.workspace.findFiles(pattern, '**/node_modules/**');
-        logMessage(`[CrossFolderNavigator] 檔案名搜尋 '${pattern}' 找到 ${files.length} 個檔案`);
+        logDebug(`[CrossFolderNavigator] 檔案名搜尋 '${pattern}' 找到 ${files.length} 個檔案`);
         
         for (const file of files) {
           const isOverride = file.fsPath.includes('Override');
@@ -313,7 +313,7 @@ export class CrossFolderNavigator {
       }
       
     } catch (error) {
-      logMessage(`[CrossFolderNavigator] 檔案名搜尋失敗: ${error}`);
+      logError(`[CrossFolderNavigator] 檔案名搜尋失敗: ${error}`);
     }
     
     return matches;
@@ -431,7 +431,7 @@ export class CrossFolderNavigator {
     }
     
     if (cleanedCount > 0) {
-      logMessage(`[CrossFolderNavigator] 清理了 ${cleanedCount} 個過期搜尋快取`);
+      logDebug(`[CrossFolderNavigator] 清理了 ${cleanedCount} 個過期搜尋快取`);
     }
   }
 
@@ -441,7 +441,7 @@ export class CrossFolderNavigator {
   clearCache(): void {
     const size = this.searchCache.size;
     this.searchCache.clear();
-    logMessage(`[CrossFolderNavigator] 搜尋快取已清除 (${size} 個項目)`);
+    logInfo(`[CrossFolderNavigator] 搜尋快取已清除 (${size} 個項目)`);
   }
 
   /**

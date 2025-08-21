@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { logMessage, handleError, outputChannel } from '../../shared/utils/logger';
+import { logDebug, handleError, outputChannel } from '../../shared/utils/logger';
 
 export class Edk2Parser {
     static removeHashTagComment(line: string): string {
@@ -180,7 +180,7 @@ export class Edk2DecDefinitionProvider implements vscode.DefinitionProvider {
         // TO-DO: Should parse DEC only once when opening *.dec.
         //
         let parent_path = document.uri.fsPath.replace(/[\w\.]*$/g, '');
-        logMessage(parent_path);
+        logDebug(parent_path);
 
         let directory = [parent_path + dest];
         for (let i = 0; i < document.lineCount; i++) {
@@ -226,12 +226,12 @@ export class Edk2InfDefinitionProvider implements vscode.DefinitionProvider {
             }
         }
 
-        logMessage(`${dest} ${dest.match(/^[a-zA-Z0-9_\/]+\.[a-zA-Z0-9]+$/g)}`);
+        logDebug(`${dest} ${dest.match(/^[a-zA-Z0-9_\/]+\.[a-zA-Z0-9]+$/g)}`);
         if (dest.match(/^[\w\-\/]+\.[\w\-]+$/g)) {
             // format: ****.***
 
             let file_extension = dest.replace(/^[\w\-\/]+/g, '');
-            logMessage('extension ' + file_extension);
+            logDebug('extension ' + file_extension);
             if (file_extension.match('.dec')) {
                 //
                 // dec
@@ -246,7 +246,7 @@ export class Edk2InfDefinitionProvider implements vscode.DefinitionProvider {
             } else {
 
                 let parent_path = document.uri.fsPath.replace(/[\w\-\.]*$/g, '');
-                logMessage(parent_path+dest);
+                logDebug(parent_path+dest);
                 if (fs.existsSync(parent_path + dest)) {
                     //
                     // source code
@@ -305,7 +305,7 @@ export class Edk2InfDefinitionProvider implements vscode.DefinitionProvider {
 
                 // table[0] = keywords, table[1] = function name;
                 let parent_path = document.uri.fsPath.replace(/[\w\.]*$/g, '');
-                logMessage(parent_path);
+                logDebug(parent_path);
                 return Common.searchPatternInFiles(associate_c_files, parent_path, table[1]);
             }
         }

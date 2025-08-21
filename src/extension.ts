@@ -1,7 +1,7 @@
 // src/extension.ts
 
 import * as vscode from 'vscode';
-import { initLogger, disposeLogger, logMessage, outputChannel } from './shared/utils/logger';
+import { initLogger, disposeLogger, logInfo, outputChannel } from './shared/utils/logger';
 import { registerStatusBarItems } from './shared/ui/statusBar';
 
 // Import all modules
@@ -11,7 +11,7 @@ import { registerLanguageSupportModule } from './language-support';
 
 export function activate(context: vscode.ExtensionContext): void {
     initLogger(context);
-    logMessage(`Extension activated at: ${new Date().toISOString()}`);
+    logInfo(`Extension activated at: ${new Date().toISOString()}`);
 
     outputChannel.show();
 
@@ -26,10 +26,10 @@ export function activate(context: vscode.ExtensionContext): void {
     // Set workspace context (if needed for UI)
     vscode.commands.executeCommand('setContext', 'vebBuild.hasEdk2Workspace', !!vscode.workspace.workspaceFolders?.length);
 
-    logMessage('Extension activation completed successfully');
+    logInfo('Extension activation completed successfully');
 }
 
 export function deactivate(): void {
-    logMessage(`Extension deactivated at: ${new Date().toISOString()}`);
+    logInfo(`Extension deactivated at: ${new Date().toISOString()}`);
     disposeLogger();
 }
