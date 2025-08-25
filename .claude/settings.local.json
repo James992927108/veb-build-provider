@@ -12,7 +12,10 @@
       "Bash(find:*)",
       "Bash(copy:*)",
       "Bash(cp:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(where python)",
+      "Bash(pip install:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": [],

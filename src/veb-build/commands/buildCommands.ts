@@ -92,10 +92,6 @@ function setupTaskListener(context: vscode.ExtensionContext): void {
       logInfo(`Build Time: ${formattedDuration}`);
       logInfo(`Task [${taskName}] end at ${endTimeStr}`);
       
-      if (outputChannel) {
-        outputChannel.show(true);
-      }
-      
       // Display build info in terminal if available
       setTimeout(() => {
         const terminals = vscode.window.terminals;
