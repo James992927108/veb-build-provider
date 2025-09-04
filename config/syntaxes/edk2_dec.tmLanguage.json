@@ -26,6 +26,17 @@
           }
         },
         {
+          "match": "^\\s*([A-Za-z][A-Za-z0-9_]*\\.[A-Za-z][A-Za-z0-9_]*)\\s*(\\|)",
+          "captures": {
+            "1": {
+              "name": "variable.name.edk2_dec"
+            },
+            "2": {
+              "name": "keyword.operator.edk2_dec"
+            }
+          }
+        },
+        {
           "match": "^\\s*([A-Za-z][A-Za-z0-9_]*)\\s*(\\|)",
           "captures": {
             "1": {
@@ -47,13 +58,13 @@
           ]
         },
         {
-          "begin": " \"",
+          "begin": "\"",
           "end": "\"",
-          "name": "invalid.illegal.BiosLanguage",
+          "name": "string.quoted.double.edk2_dec",
           "patterns": [
             {
-              "name": "entity.name.type.BiosLanguage",
-              "match": "."
+              "name": "constant.character.escape.edk2_dec",
+              "match": "\\\\."
             }
           ]
         },
@@ -69,16 +80,24 @@
           ]
         },
         {
+          "name": "support.type.edk2_dec",
+          "match": "\\b(UINT64|UINT32|UINT16|UINT8|UINTN|BOOLEAN|VOID\\*?|TRUE|FALSE|NULL)\\b"
+        },
+        {
           "name": "entity.name.function.BiosLanguage",
-          "match": "\\b(UINT64|UINT32|UINT16|UINT8|UINTN|BOOLEAN|VOID|TRUE|FALSE|NULL|ifdef|ifndef|if|endif|include|else|Includes|Guids|Ppis|Protocols|PcdsFeatureFlag|PcdsFixedAtBuild|PcdsPatchableInModule|PcdsDynamic|PcdsDynamicEx|LibraryClasses|UserExtensions)\\b"
+          "match": "\\b(ifdef|ifndef|if|endif|include|else|Includes|Guids|Ppis|Protocols|PcdsFeatureFlag|PcdsFixedAtBuild|PcdsPatchableInModule|PcdsDynamic|PcdsDynamicEx|LibraryClasses|UserExtensions)\\b"
         },
         {
           "name": "constant.numeric.edk2_dec",
           "match": "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
         },
         {
-          "name": "constant.numeric.edk2_dec",
-          "match": "(?<!\\w)\\.?\\d(?:(?:[0-9a-zA-Z_\\.]|')|(?<=[eEpP])[+-])*"
+          "name": "constant.numeric.hex.edk2_dec",
+          "match": "\\b0[xX][0-9a-fA-F]+\\b"
+        },
+        {
+          "name": "constant.numeric.decimal.edk2_dec",
+          "match": "\\b\\d+\\b"
         },
         {
           "name": "keyword.control.edk2_dec",

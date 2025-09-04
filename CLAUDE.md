@@ -79,11 +79,24 @@ The extension follows a modular architecture with three main modules:
 - `src/extension.ts` - Extension entry point and module registration
 - `src/shared/utils/logger.ts` - Centralized logging system
 - `src/veb-build/commands/buildCommands.ts` - Build time tracking and task management
+- `src/veb-build/tools/expandMakefileVars.ts` - Makefile variable expansion utility
 - `src/edk2-debug/providers/enhancedDebugProvider.ts` - Enhanced Debug TreeView provider
 
 ### Build Output
 - `out/` - Compiled JavaScript output
+- `out/scripts/` - Python utilities (ExpandMakefileVars.py, PrepareEnvScript.bat/sh)
 - Generated .vsix files for distribution
+
+### Tools and Scripts
+- `tools/scripts/ExpandMakefileVars.py` - Python script for Makefile variable expansion and analysis
+  - Recursively expands `$(variable)` references in Makefile
+  - Generates `*_expanded.mak` with expanded variables and aligned comments
+  - Creates `*_miss.mak` report for unresolved variables
+  - Supports multi-line variable definitions with `\` continuation
+  - Injects common EDK2 build variables as header
+- `tools/scripts/PrepareEnvScript.bat` - Windows environment preparation script
+- `tools/scripts/PrepareEnvLinuxScript.sh` - Linux environment preparation script
+- `tools/tee.exe` - Windows tee utility for build output logging
 
 ## Development Patterns
 
@@ -144,10 +157,29 @@ Always run `npm run compile` after changes to ensure TypeScript compilation succ
 3. Implement command handler in appropriate module
 4. Register command in module's registration function
 
+### Makefile Variable Expansion
+The `extension.expandMakefileVars` command provides Makefile analysis capabilities:
+- **Usage**: Right-click on Makefile → "Expand Makefile Variables"
+- **Functionality**: Expands `$(variable)` references and generates analysis reports
+- **Output**: Creates `*_expanded.mak` and `*_miss.mak` files for debugging
+- **Requirements**: Python interpreter available in system PATH
+
 ### Extending Language Support
 1. Add language definition to `package.json` `contributes.languages`
 2. Create grammar file in `config/syntaxes/`
 3. Add grammar reference to `package.json` `contributes.grammars`
+
+### EDK2 Language Support Updates
+**Recent Enhancement**: Improved .dec file syntax highlighting
+- **PCD Entries**: `TokenSpaceGuid.PcdName|DefaultValue|DataType|Token` format properly highlighted
+- **Color Scheme**: 
+  - PCD names (e.g., `gSiPkgTokenSpaceGuid.PcdAcpiDefaultOemId`) → White (default text)
+  - String values (e.g., `"INTEL "`) → Light yellow (`string.quoted.double.edk2_dec`)
+  - Data types (e.g., `VOID*`, `BOOLEAN`, `UINT64`) → Light green (`support.type.edk2_dec`)
+  - Numeric values (e.g., `0x30001034`) → White (default text)
+  - Comments (`##`, `#`) → Comment color
+- **Pattern Matching**: Enhanced regex patterns for PCD entries, hex values, and string literals
+- **File Location**: `config/syntaxes/edk2_dec.tmLanguage.json`
 
 ### Logger Refactoring Status
 **Active Task**: Converting `logMessage()` calls to specific log levels

@@ -27,7 +27,7 @@ export async function expandMakefileVars(): Promise<void> {
         vscode.window.showErrorMessage("Unable to get VEB build provider extension");
         return;
     }
-    const pythonScriptPath = path.join(vebExtension.extensionPath, "scripts", "ExpandMakefileVars.py");
+    const pythonScriptPath = path.join(vebExtension.extensionPath, "out", "scripts", "ExpandMakefileVars.py");
 
     try {
         await fs.access(pythonScriptPath);

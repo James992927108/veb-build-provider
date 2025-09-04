@@ -8,6 +8,7 @@ import { logInfo, logDebug, logError, logSummary, handleError, outputChannel } f
 import { readFile, writeFile, copyFile, escapePath } from '../../shared/utils/file';
 import { EXTENSION_ID } from '../../shared/utils/constants';
 import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
+import { expandMakefileVars } from '../tools/expandMakefileVars';
 
 // Constants & Enums
 
@@ -405,6 +406,7 @@ export function registerVebBuildCommands(context: vscode.ExtensionContext): void
   registerCommandWithLog(context, 'vebBuild.buildTool.vebBuild', handleVebBuild);
   registerCommandWithLog(context, 'vebBuild.buildTool.vebReBuild', handleVebReBuild);
   registerCommandWithLog(context, 'vebBuild.buildTool.stopTerminal', handleterminateTerminal);
+  registerCommandWithLog(context, 'extension.expandMakefileVars', expandMakefileVars);
   
   // Setup task listeners
   setupTaskListener(context);
