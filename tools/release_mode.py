@@ -173,8 +173,9 @@ def build_project():
 
 def create_release_directory(version):
     """Create release directory"""
-    DIST_DIR_PATH.mkdir(parents=True, exist_ok=True)
-    return DIST_DIR_PATH
+    dist_path = Path(DIST_DIR_PATH)
+    dist_path.mkdir(parents=True, exist_ok=True)
+    return dist_path
 
 def copy_release_files(release_dir, version):
     """Copy release files"""
