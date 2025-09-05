@@ -177,4 +177,98 @@ VEB Build Provider 提供多種 EDK2 檔案類型的語言支援：
 
 - `vebBuild.edk2Debug.autoScan` - 自動掃描 EDK2 模組
 - `vebBuild.edk2Debug.showProgress` - 顯示掃描進度
+
+---
+
+## ⚙️ 模塊化配置 ✨ **新功能**
+
+VEB Build Provider v3.3.0 新增模塊化功能，允許您按需啟用/停用特定功能模塊，實現更靈活的擴展配置。
+
+### 🎛️ 可用的模塊開關
+
+在 VS Code 設定中，您可以控制以下四個獨立模塊：
+
+```json
+{
+  "vebBuild.modules.enableBuildTools": true,      // VEB 構建工具
+  "vebBuild.modules.enableDebugTools": false,     // EDK2 調試分析
+  "vebBuild.modules.enableLanguageSupport": true, // 語言支持功能  
+  "vebBuild.modules.enableMakefileTools": false   // Makefile 工具
+}
+```
+
+### 📦 模塊功能詳解
+
+| 模塊 | 功能範圍 | 包含內容 |
+|------|----------|----------|
+| **enableBuildTools** | VEB 構建功能 | • F7/F8/F9 快捷鍵<br>• 任務管理與追蹤<br>• 構建時間顯示<br>• 狀態列按鈕 |
+| **enableDebugTools** | EDK2 調試分析 | • Enhanced Debug 日誌解析<br>• 模塊掃描與管理<br>• TreeView 雙向導航<br>• 大檔案支援 |
+| **enableLanguageSupport** | 進階語言支持 | • 大綱視圖 (Outline)<br>• 跳轉定義 (F12)<br>• 符號搜索 (Ctrl+Shift+O)<br>• 代碼格式化<br>• 麵包屑導航 |
+| **enableMakefileTools** | Makefile 工具 | • 變量展開功能<br>• 右鍵選單整合 |
+
+> **注意**：基礎語法高亮功能始終可用，不受 `enableLanguageSupport` 影響。
+
+### 🎯 使用場景範例
+
+#### **純語法高亮版本** (最輕量)
+```json
+{
+  "vebBuild.modules.enableBuildTools": false,
+  "vebBuild.modules.enableDebugTools": false,
+  "vebBuild.modules.enableLanguageSupport": false,
+  "vebBuild.modules.enableMakefileTools": false
+}
+```
+*適用於：僅需要 EDK2 文件語法高亮的輕量環境*
+
+#### **開發專用版本**
+```json
+{
+  "vebBuild.modules.enableBuildTools": true,
+  "vebBuild.modules.enableDebugTools": false,
+  "vebBuild.modules.enableLanguageSupport": true,
+  "vebBuild.modules.enableMakefileTools": true
+}
+```
+*適用於：日常開發，需要構建和語言支持，但不需要調試分析*
+
+#### **調試專用版本**
+```json
+{
+  "vebBuild.modules.enableBuildTools": false,
+  "vebBuild.modules.enableDebugTools": true,
+  "vebBuild.modules.enableLanguageSupport": true,
+  "vebBuild.modules.enableMakefileTools": false
+}
+```
+*適用於：專注於日誌分析和調試的場景*
+
+#### **完整版本** (預設)
+```json
+{
+  "vebBuild.modules.enableBuildTools": true,
+  "vebBuild.modules.enableDebugTools": false,
+  "vebBuild.modules.enableLanguageSupport": true,
+  "vebBuild.modules.enableMakefileTools": false
+}
+```
+*適用於：完整功能體驗*
+
+### 💡 語言支持功能說明
+
+當 `enableLanguageSupport = true` 時，您將獲得：
+
+- **大綱視圖**：左側 Explorer 面板的 "OUTLINE" 顯示文件結構
+- **跳轉定義**：`F12` 或 `Ctrl+Click` 跳轉到定義
+- **符號搜索**：`Ctrl+Shift+O` 快速搜索配置項
+- **代碼格式化**：格式化 .uni 和 .sdl 文件
+- **麵包屑導航**：文件頂部的層次結構顯示
+
+### 🔄 配置變更生效
+
+修改模塊配置後，需要重新載入 VSCode 窗口：
+- 按 `Ctrl+Shift+P` 開啟命令面板
+- 執行 `Developer: Reload Window`
+
+---
 - `vebBuild.formatter.speceOnUni` - UNI 檔案格式化間距

@@ -550,7 +550,7 @@
         },
         "vebBuild.edk2Debug.autoScan": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Automatically scan EDK2 modules"
         },
         "vebBuild.edk2Debug.showProgress": {
@@ -585,6 +585,26 @@
           ],
           "default": "beside",
           "description": "Where to open Enhanced Debug log files in the editor"
+        },
+        "vebBuild.modules.enableBuildTools": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable VEB build tools (F7/F8/F9 shortcuts, task management)"
+        },
+        "vebBuild.modules.enableDebugTools": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable EDK2 debug analysis tools (log parsing, module scanning)"
+        },
+        "vebBuild.modules.enableLanguageSupport": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable EDK2 language support (syntax highlighting, formatting)"
+        },
+        "vebBuild.modules.enableMakefileTools": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Makefile variable expansion tools"
         }
       }
     }

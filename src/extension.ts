@@ -15,13 +15,26 @@ export function activate(context: vscode.ExtensionContext): void {
 
     outputChannel.show();
 
-    // Register all modules
-    registerVebBuildModule(context);
-    registerEdk2DebugModule(context);
-    registerLanguageSupportModule(context);
-
-    // Register Status Bar (InitTask(F8), VebBuild(F7), VebReBuild(F9), stopTerminal)
-    registerStatusBarItems(context);
+    // Get module configuration
+    const moduleConfig = vscode.workspace.getConfiguration('vebBuild.modules');
+    
+    // Conditionally register modules based on configuration
+    if (moduleConfig.get('enableBuildTools', true)) {
+        logInfo('Loading VEB Build Tools module');
+        registerVebBuildModule(context);
+        // Register Status Bar only if build tools are enabled
+        registerStatusBarItems(context);
+    }
+    
+    if (moduleConfig.get('enableDebugTools', true)) {
+        logInfo('Loading EDK2 Debug Tools module');
+        registerEdk2DebugModule(context);
+    }
+    
+    if (moduleConfig.get('enableLanguageSupport', true)) {
+        logInfo('Loading Language Support module');
+        registerLanguageSupportModule(context);
+    }
 
     // Set workspace context (if needed for UI)
     vscode.commands.executeCommand('setContext', 'vebBuild.hasEdk2Workspace', !!vscode.workspace.workspaceFolders?.length);

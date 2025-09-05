@@ -406,7 +406,12 @@ export function registerVebBuildCommands(context: vscode.ExtensionContext): void
   registerCommandWithLog(context, 'vebBuild.buildTool.vebBuild', handleVebBuild);
   registerCommandWithLog(context, 'vebBuild.buildTool.vebReBuild', handleVebReBuild);
   registerCommandWithLog(context, 'vebBuild.buildTool.stopTerminal', handleterminateTerminal);
-  registerCommandWithLog(context, 'extension.expandMakefileVars', expandMakefileVars);
+  
+  // Conditionally register Makefile tools if enabled
+  const moduleConfig = vscode.workspace.getConfiguration('vebBuild.modules');
+  if (moduleConfig.get('enableMakefileTools', true)) {
+    registerCommandWithLog(context, 'extension.expandMakefileVars', expandMakefileVars);
+  }
   
   // Setup task listeners
   setupTaskListener(context);
