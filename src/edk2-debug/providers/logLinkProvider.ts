@@ -1,5 +1,5 @@
 // src/edk2-debug/providers/logLinkProvider.ts
-// DocumentLinkProvider - 支援 Enhanced Debug Log 的 Ctrl+Click 跳轉
+// DocumentLinkProvider - Supports Ctrl+Click navigation for Enhanced Debug Log
 
 import * as vscode from 'vscode';
 import { EnhancedLogParser, EnhancedLogEntry } from '../analysis/enhancedLogParser';
@@ -7,7 +7,7 @@ import { CrossFolderNavigator } from '../core/crossFolderNavigator';
 import { logError, logInfo, logDebug, handleError } from '../../shared/utils/logger';
 
 /**
- * DocumentLinks 快取項目
+ * DocumentLinks cache item
  */
 interface DocumentLinksCache {
   links: vscode.DocumentLink[];
@@ -17,21 +17,21 @@ interface DocumentLinksCache {
 }
 
 /**
- * Log 檔案的 DocumentLinkProvider
- * 為 Enhanced Debug 格式提供 Ctrl+Click 跳轉功能
+ * DocumentLinkProvider for log files
+ * Provides Ctrl+Click navigation functionality for Enhanced Debug format
  */
 export class LogLinkProvider implements vscode.DocumentLinkProvider {
   private navigator: CrossFolderNavigator;
   private documentLinksCache = new Map<string, DocumentLinksCache>();
-  private readonly CACHE_EXPIRY_MS = 5 * 60 * 1000; // 5 分鐘過期
+  private readonly CACHE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes expiry
 
   constructor() {
     this.navigator = new CrossFolderNavigator();
-    logInfo(`[LogLinkProvider] 初始化完成`);
+    logInfo(`[LogLinkProvider] Initialization completed`);
   }
 
   /**
-   * 提供文件連結 (為 Enhanced Debug 行建立可點擊連結)
+   * Provide document links (create clickable links for Enhanced Debug lines)
    */
   async provideDocumentLinks(
     document: vscode.TextDocument,
@@ -39,9 +39,9 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
   ): Promise<vscode.DocumentLink[]> {
     
     const startTime = Date.now();
-    logDebug(`[LogLinkProvider] 開始分析文件: ${document.fileName}`);
+    logDebug(`[LogLinkProvider] Starting document analysis: ${document.fileName}`);
     
-    // 檢查快取
+    // Check cache
     const cacheKey = document.uri.toString();
     const cached = this.documentLinksCache.get(cacheKey);
     const now = Date.now();
@@ -51,13 +51,13 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
         cached.lineCount === document.lineCount &&
         (now - cached.timestamp) < this.CACHE_EXPIRY_MS) {
       
-      logDebug(`[LogLinkProvider] 使用快取結果 (${cached.links.length} 個連結, 耗時: ${Date.now() - startTime}ms)`);
+      logDebug(`[LogLinkProvider] Using cached result (${cached.links.length} links, time: ${Date.now() - startTime}ms)`);
       return cached.links;
     }
     
-    // 檢查是否為 Enhanced Debug 日誌檔案
+    // Check if it's an Enhanced Debug log file
     if (!EnhancedLogParser.hasEnhancedDebugContent(document)) {
-      logDebug(`[LogLinkProvider] 文件不包含 Enhanced Debug 內容，跳過`);
+      logDebug(`[LogLinkProvider] Document does not contain Enhanced Debug content, skipping`);
       return [];
     }
 
@@ -65,11 +65,11 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     const content = document.getText();
     const lines = content.split('\n');
     
-    logInfo(`[LogLinkProvider] 開始處理 ${lines.length} 行日誌 (快取失效，重新解析)`);
+    logInfo(`[LogLinkProvider] Starting to process ${lines.length} log lines (cache invalid, re-parsing)`);
 
     for (let i = 0; i < lines.length; i++) {
       if (token.isCancellationRequested) {
-        logDebug(`[LogLinkProvider] 操作被取消`);
+        logDebug(`[LogLinkProvider] Operation cancelled`);
         break;
       }
 
@@ -79,7 +79,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
       }
     }
     
-    // 儲存到快取
+    // Save to cache
     this.documentLinksCache.set(cacheKey, {
       links: links,
       version: document.version,
@@ -87,49 +87,49 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
       lineCount: document.lineCount
     });
     
-    // 清理過期快取
+    // Clean expired cache
     this.cleanExpiredCache();
     
     const duration = Date.now() - startTime;
-    logInfo(`[LogLinkProvider] 完成分析，建立了 ${links.length} 個連結 (耗時: ${duration}ms, 已快取)`);
+    logInfo(`[LogLinkProvider] Analysis completed, created ${links.length} links (time: ${duration}ms, cached)`);
     return links;
   }
 
   /**
-   * 解析文件連結 (當使用者點擊連結時觸發)
+   * Resolve document link (triggered when user clicks the link)
    */
   async resolveDocumentLink(
     link: vscode.DocumentLink,
     token: vscode.CancellationToken
   ): Promise<vscode.DocumentLink> {
     
-    logDebug(`[LogLinkProvider] resolveDocumentLink 被呼叫`);
+    logDebug(`[LogLinkProvider] resolveDocumentLink called`);
     
-    // 檢查是否有跳轉資訊
+    // Check if jump information exists
     const jumpInfo = (link as any).jumpInfo;
     if (!jumpInfo) {
-      logDebug(`[LogLinkProvider] 連結沒有跳轉資訊`);
+      logDebug(`[LogLinkProvider] Link has no jump information`);
       return link;
     }
 
     try {
-      logDebug(`[LogLinkProvider] 解析跳轉請求: ${JSON.stringify(jumpInfo)}`);
+      logDebug(`[LogLinkProvider] Parsing jump request: ${JSON.stringify(jumpInfo)}`);
       
-      // 執行實際跳轉
+      // Execute actual jump
       await this.performJump(jumpInfo);
       
-      // 不設定 target，讓 VSCode 知道這是一個已處理的連結
-      // 這樣就不會嘗試開啟無效的 URI
+      // Don't set target, let VSCode know this is a handled link
+      // This way it won't try to open invalid URI
       
     } catch (error) {
-      handleError(`[LogLinkProvider] 跳轉失敗: ${error}`);
+      handleError(`[LogLinkProvider] Jump failed: ${error}`);
     }
     
     return link;
   }
 
   /**
-   * 執行實際的檔案跳轉
+   * Execute actual file jump
    */
   private async performJump(jumpInfo: {
     module: string;
@@ -138,10 +138,10 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     sequence: number;
   }): Promise<void> {
     
-    logDebug(`[LogLinkProvider] 開始執行跳轉: ${jumpInfo.module}:${jumpInfo.function}:${jumpInfo.line}`);
+    logDebug(`[LogLinkProvider] Starting jump execution: ${jumpInfo.module}:${jumpInfo.function}:${jumpInfo.line}`);
     
     try {
-      // 使用 CrossFolderNavigator 搜尋檔案
+      // Use CrossFolderNavigator to search files
       const matchingFiles = await this.navigator.findSourceFiles(
         jumpInfo.module, 
         jumpInfo.function
@@ -149,63 +149,63 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
       
       if (matchingFiles.length === 0) {
         vscode.window.showWarningMessage(
-          `找不到函數 ${jumpInfo.function} 的源碼檔案`
+          `Cannot find source file for function ${jumpInfo.function}`
         );
-        logDebug(`[LogLinkProvider] 跳轉失敗: 找不到匹配的檔案`);
+        logDebug(`[LogLinkProvider] Jump failed: no matching files found`);
         return;
       }
       
-      // 根據匹配數量決定處理方式
+      // Decide handling based on number of matches
       let targetFile: string | undefined;
       
       if (matchingFiles.length === 0) {
-        // 沒有找到匹配檔案
+        // No matching files found
         vscode.window.showWarningMessage(
-          `找不到函數 ${jumpInfo.function} 的源碼檔案。請確認當前工作區包含 BIOS 專案源碼。`
+          `Cannot find source file for function ${jumpInfo.function}. Please ensure the current workspace contains BIOS project source code.`
         );
-        logDebug(`[LogLinkProvider] 沒有找到匹配檔案: ${jumpInfo.module}:${jumpInfo.function}`);
+        logDebug(`[LogLinkProvider] No matching files found: ${jumpInfo.module}:${jumpInfo.function}`);
         return;
         
       } else if (matchingFiles.length === 1) {
-        // 只有一個匹配，直接跳轉
+        // Only one match, jump directly
         targetFile = matchingFiles[0];
-        logDebug(`[LogLinkProvider] 找到唯一匹配檔案: ${targetFile}`);
+        logDebug(`[LogLinkProvider] Found unique matching file: ${targetFile}`);
         
       } else {
-        // 多個匹配，顯示選擇視窗
-        logDebug(`[LogLinkProvider] 找到 ${matchingFiles.length} 個匹配檔案，顯示選擇視窗`);
+        // Multiple matches, show selection window
+        logDebug(`[LogLinkProvider] Found ${matchingFiles.length} matching files, showing selection window`);
         
         const selectedFile = await this.showFileSelectionQuickPick(matchingFiles, jumpInfo);
         if (!selectedFile) {
-          logDebug(`[LogLinkProvider] 使用者取消選擇`);
+          logDebug(`[LogLinkProvider] User cancelled selection`);
           return;
         }
         targetFile = selectedFile;
       }
       
-      // 確保 targetFile 有效後再開啟檔案
+      // Ensure targetFile is valid before opening file
       if (targetFile && targetFile.trim()) {
         await this.openFileAtLine(targetFile, jumpInfo.line);
-        logInfo(`[LogLinkProvider] 跳轉成功: ${targetFile}:${jumpInfo.line}`);
+        logInfo(`[LogLinkProvider] Jump successful: ${targetFile}:${jumpInfo.line}`);
       } else {
-        throw new Error(`無效的檔案路徑: ${targetFile}`);
+        throw new Error(`Invalid file path: ${targetFile}`);
       }
       
     } catch (error) {
-      handleError(`[LogLinkProvider] 跳轉執行失敗: ${error}`);
-      vscode.window.showErrorMessage(`跳轉失敗: ${error instanceof Error ? error.message : String(error)}`);
+      handleError(`[LogLinkProvider] Jump execution failed: ${error}`);
+      vscode.window.showErrorMessage(`Jump failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   /**
-   * 顯示檔案選擇快速選擇視窗
+   * Show file selection quick pick window
    */
   private async showFileSelectionQuickPick(
     files: string[], 
     jumpInfo: { module: string; function: string; line: number; sequence: number }
   ): Promise<string | undefined> {
     
-    logDebug(`[LogLinkProvider] 顯示檔案選擇視窗，${files.length} 個選項`);
+    logDebug(`[LogLinkProvider] Showing file selection window, ${files.length} options`);
     
     const items: Array<vscode.QuickPickItem & { filePath: string }> = files.map(file => {
       const isOverride = file.includes('Override');
@@ -219,7 +219,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
       };
     });
     
-    // 排序: Override 檔案優先
+    // Sort: Override files first
     items.sort((a, b) => {
       const aIsOverride = a.filePath.includes('Override') ? 0 : 1;
       const bIsOverride = b.filePath.includes('Override') ? 0 : 1;
@@ -233,7 +233,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     });
     
     if (selected) {
-      logDebug(`[LogLinkProvider] 使用者選擇: ${selected.filePath}`);
+      logDebug(`[LogLinkProvider] User selected: ${selected.filePath}`);
       return selected.filePath;
     }
     
@@ -241,35 +241,35 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
   }
 
   /**
-   * 開啟檔案並跳轉到指定行
+   * Open file and jump to specified line
    */
   private async openFileAtLine(filePath: string, lineNumber: number): Promise<void> {
     try {
       const document = await vscode.workspace.openTextDocument(filePath);
       const editor = await vscode.window.showTextDocument(document);
       
-      // 跳轉到指定行 (VSCode 行號從0開始，log中的行號從1開始)
+      // Jump to specified line (VSCode line numbers start from 0, log line numbers start from 1)
       const targetLine = Math.max(0, lineNumber - 1);
       const position = new vscode.Position(targetLine, 0);
       
-      // 設定游標位置和選擇
+      // Set cursor position and selection
       editor.selection = new vscode.Selection(position, position);
       
-      // 將該行顯示在編輯器中央
+      // Display the line in the center of the editor
       editor.revealRange(
         new vscode.Range(position, position), 
         vscode.TextEditorRevealType.InCenter
       );
       
-      logDebug(`[LogLinkProvider] 檔案開啟成功，跳轉到第 ${lineNumber} 行`);
+      logDebug(`[LogLinkProvider] File opened successfully, jumped to line ${lineNumber}`);
       
     } catch (error) {
-      throw new Error(`無法開啟檔案 ${filePath}: ${error}`);
+      throw new Error(`Cannot open file ${filePath}: ${error}`);
     }
   }
 
   /**
-   * 從完整路徑中提取檔案名稱
+   * Extract file name from full path
    */
   private getFileName(filePath: string): string {
     const parts = filePath.split(/[\\\/]/);
@@ -277,7 +277,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
   }
 
   /**
-   * 清理過期的快取項目
+   * Clean expired cache items
    */
   private cleanExpiredCache(): void {
     const now = Date.now();
@@ -291,12 +291,12 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     }
     
     if (cleanedCount > 0) {
-      logDebug(`[LogLinkProvider] 清理了 ${cleanedCount} 個過期快取項目`);
+      logDebug(`[LogLinkProvider] Cleaned ${cleanedCount} expired cache items`);
     }
   }
 
   /**
-   * 取得快取統計資訊
+   * Get cache statistics
    */
   getCacheStats(): { size: number; keys: string[] } {
     return {
@@ -306,17 +306,17 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
   }
 
   /**
-   * 清除所有快取
+   * Clear all cache
    */
   clearAllCache(): void {
     const size = this.documentLinksCache.size;
     this.documentLinksCache.clear();
     this.navigator.clearCache();
-    logInfo(`[LogLinkProvider] 已清除所有快取 (${size} 個 DocumentLinks + CrossFolderNavigator 快取)`);
+    logInfo(`[LogLinkProvider] Cleared all cache (${size} DocumentLinks + CrossFolderNavigator cache)`);
   }
 
   /**
-   * 為單行創建 DocumentLink
+   * Create DocumentLink for a single line
    */
   private createDocumentLink(line: string, lineIndex: number): vscode.DocumentLink | null {
     const entry = EnhancedLogParser.parseLogLine(line, lineIndex);
@@ -329,7 +329,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
       const link = new vscode.DocumentLink(range);
       link.tooltip = `Ctrl+Click to jump to ${entry.function} at line ${entry.line}`;
       
-      // 將跳轉資訊儲存在 link 物件中
+      // Store jump information in the link object
       (link as any).jumpInfo = {
         module: entry.module,
         function: entry.function,
@@ -345,20 +345,20 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
 }
 
 /**
- * 註冊 Enhanced Debug 跳轉 URI 處理器
+ * Register Enhanced Debug jump URI handler
  */
 export function registerEnhancedDebugUriHandler(context: vscode.ExtensionContext): void {
   const disposable = vscode.window.registerUriHandler({
     handleUri(uri: vscode.Uri): vscode.ProviderResult<void> {
       if (uri.scheme === 'enhanced-debug' && uri.authority === 'jump') {
-        logDebug(`[EnhancedDebugUriHandler] 處理跳轉 URI: ${uri.toString()}`);
+        logDebug(`[EnhancedDebugUriHandler] Handling jump URI: ${uri.toString()}`);
         
-        // 這裡可以添加額外的跳轉邏輯
-        // 目前主要邏輯在 LogLinkProvider.resolveDocumentLink 中處理
+        // Additional jump logic can be added here
+        // Currently main logic is handled in LogLinkProvider.resolveDocumentLink
       }
     }
   });
   
   context.subscriptions.push(disposable);
-  logInfo(`[EnhancedDebugUriHandler] URI 處理器註冊完成`);
+  logInfo(`[EnhancedDebugUriHandler] URI handler registration completed`);
 }

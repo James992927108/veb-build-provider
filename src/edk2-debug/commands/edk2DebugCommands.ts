@@ -16,10 +16,10 @@ export function registerEdk2DebugCommands(context: vscode.ExtensionContext): voi
         return;
     }
 
-    // Initialize Enhanced Debug Provider (統一面板)
+    // Initialize Enhanced Debug Provider (unified panel)
     const enhancedDebugProvider = new EnhancedDebugProvider(workspaceRoot, context);
     
-    // Tree view for Enhanced Debug (取代原來的 EDK2 Modules)
+    // Tree view for Enhanced Debug (replaces original EDK2 Modules)
     const enhancedDebugTreeView = vscode.window.createTreeView('vebBuildEnhancedDebug', {
         treeDataProvider: enhancedDebugProvider,
         showCollapseAll: true,
@@ -29,7 +29,7 @@ export function registerEdk2DebugCommands(context: vscode.ExtensionContext): voi
     // Let provider know TreeView reference
     enhancedDebugProvider.setTreeView(enhancedDebugTreeView);
 
-    // 設定 context 變數以控制按鈕顯示
+    // Set context variables to control button display
     const updateContexts = () => {
         const mode = enhancedDebugProvider.getCurrentMode();
         vscode.commands.executeCommand('setContext', 'enhancedDebug.mode', mode);
@@ -52,7 +52,7 @@ export function registerEdk2DebugCommands(context: vscode.ExtensionContext): voi
     registerCommandWithLog(context, 'vebBuild.enhancedDebug.locateInTreeView', () => enhancedDebugProvider.locateInTreeView());
     registerCommandWithLog(context, 'vebBuild.enhancedDebug.changeLogOpenLocation', () => enhancedDebugProvider.changeLogFileOpenLocation());
 
-    // Register module management commands (委託給 enhancedDebugProvider)
+    // Register module management commands (delegated to enhancedDebugProvider)
     registerCommandWithLog(context, 'vebBuild.edk2Debug.scanProject', () => handleScanProject(enhancedDebugProvider));
     registerCommandWithLog(context, 'vebBuild.edk2Debug.enhanceModule', (moduleNode) => handleEnhanceModule(enhancedDebugProvider, moduleNode));
     registerCommandWithLog(context, 'vebBuild.edk2Debug.restoreModuleEnhance', (moduleNode) => handleRestoreModuleEnhance(enhancedDebugProvider, moduleNode));

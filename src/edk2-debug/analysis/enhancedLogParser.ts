@@ -1,39 +1,39 @@
 // src/edk2-debug/analysis/enhancedLogParser.ts
-// Enhanced Debug Log 解析器 - 支援日誌轉跳功能
+// Enhanced Debug Log Parser - Supports log navigation functionality
 
 import * as vscode from 'vscode';
 import { logInfo, logDebug, logSummary, logError } from '../../shared/utils/logger';
 
 /**
- * Enhanced Debug Log 項目
- * 格式: [Module:Function:Line:#Sequence] Message
- * 範例: [PeiCore:TestEnhancedDebugMacro:492:#1] [PEICORE][Test] message
+ * Enhanced Debug Log Entry
+ * Format: [Module:Function:Line:#Sequence] Message
+ * Example: [PeiCore:TestEnhancedDebugMacro:492:#1] [PEICORE][Test] message
  */
 export interface EnhancedLogEntry {
-  /** 原始日誌行 */
+  /** Original log line */
   rawLine: string;
-  /** 模組名稱 (如: PeiCore, BaseDebugLibSerialPort) */
+  /** Module name (e.g: PeiCore, BaseDebugLibSerialPort) */
   module: string;
-  /** 函數名稱 (如: TestEnhancedDebugMacro) */
+  /** Function name (e.g: TestEnhancedDebugMacro) */
   function: string;
-  /** 行號 (如: 492) */
+  /** Line number (e.g: 492) */
   line: number;
-  /** 序號 (如: 1) */
+  /** Sequence number (e.g: 1) */
   sequence: number;
-  /** 訊息內容 */
+  /** Message content */
   message: string;
-  /** 是否解析成功 */
+  /** Parse success status */
   isValid: boolean;
-  /** 在文件中的行號 (用於 DocumentLink) */
+  /** Document line number (used for DocumentLink) */
   documentLine?: number;
-  /** 函數名在行中的位置 (用於 DocumentLink) */
+  /** Function name position in line (used for DocumentLink) */
   functionStartCol?: number;
-  /** 函數名結束位置 */
+  /** Function name end position */
   functionEndCol?: number;
 }
 
 /**
- * Enhanced Debug Log 解析器
+ * Enhanced Debug Log Parser
  */
 export class EnhancedLogParser {
   private static readonly DEBUG_PATTERN = /^\[([^:]+):([^:]+):(\d+):#(\d+)\]\s*(.*)$/;
@@ -46,20 +46,20 @@ export class EnhancedLogParser {
   }
   
   /**
-   * 解析單行 Enhanced Debug Log
-   * @param logLine 日誌行
-   * @param documentLine 在文件中的行號 (可選)
-   * @returns 解析結果
+   * Parse single Enhanced Debug Log line
+   * @param logLine Log line
+   * @param documentLine Document line number (optional)
+   * @returns Parse result
    */
   static parseLogLine(logLine: string, documentLine?: number): EnhancedLogEntry {
-    logDebug(`[EnhancedLogParser] 解析日誌行: ${logLine.substring(0, 100)}...`);
+    logDebug(`[EnhancedLogParser] Parsing log line: ${logLine.substring(0, 100)}...`);
     
     const match = logLine.trim().match(this.DEBUG_PATTERN);
     
     if (match) {
       const [, module, functionName, lineStr, sequenceStr, message] = match;
       
-      // 計算函數名在原始行中的位置 (用於 DocumentLink)
+      // Calculate function name position in original line (for DocumentLink)
       const functionInOriginal = `${functionName}:${lineStr}`;
       const functionStartCol = logLine.indexOf(functionInOriginal);
       const functionEndCol = functionStartCol + functionInOriginal.length;
@@ -77,11 +77,11 @@ export class EnhancedLogParser {
         functionEndCol: functionEndCol > functionStartCol ? functionEndCol : undefined
       };
       
-      logDebug(`[EnhancedLogParser] 解析成功: ${entry.module}:${entry.function}:${entry.line}#${entry.sequence}`);
+      logDebug(`[EnhancedLogParser] Parse successful: ${entry.module}:${entry.function}:${entry.line}#${entry.sequence}`);
       return entry;
     }
     
-    // 解析失敗，返回無效項目
+    // Parse failed, return invalid entry
     const invalidEntry: EnhancedLogEntry = {
       rawLine: logLine,
       module: '',
@@ -93,17 +93,17 @@ export class EnhancedLogParser {
       documentLine
     };
     
-    logDebug(`[EnhancedLogParser] 解析失敗，非 Enhanced Debug 格式`);
+    logDebug(`[EnhancedLogParser] Parse failed, not Enhanced Debug format`);
     return invalidEntry;
   }
 
   /**
-   * 解析整個日誌檔案
-   * @param logContent 日誌內容
-   * @returns 解析結果陣列
+   * Parse entire log file
+   * @param logContent Log content
+   * @returns Parse result array
    */
   static parseLogContent(logContent: string): EnhancedLogEntry[] {
-    logInfo(`[EnhancedLogParser] 開始解析日誌內容，總長度: ${logContent.length} 字符`);
+    logInfo(`[EnhancedLogParser] Start parsing log content, total length: ${logContent.length} characters`);
     
     const lines = logContent.split('\n');
     const results: EnhancedLogEntry[] = [];
@@ -120,54 +120,54 @@ export class EnhancedLogParser {
       }
     }
     
-    logSummary(`[EnhancedLogParser] 解析完成: ${validCount}/${results.length} Enhanced Debug 項目`);
+    logSummary(`[EnhancedLogParser] Parse complete: ${validCount}/${results.length} Enhanced Debug entries`);
     return results;
   }
 
   /**
-   * 從日誌檔案載入並解析
-   * @param logFilePath 日誌檔案路徑
-   * @returns 解析結果陣列
+   * Load and parse from log file
+   * @param logFilePath Log file path
+   * @returns Parse result array
    */
   static async parseLogFile(logFilePath: string): Promise<EnhancedLogEntry[]> {
     try {
-      logInfo(`[EnhancedLogParser] 載入日誌檔案: ${logFilePath}`);
+      logInfo(`[EnhancedLogParser] Loading log file: ${logFilePath}`);
       
       const document = await vscode.workspace.openTextDocument(logFilePath);
       const content = document.getText();
       
-      logInfo(`[EnhancedLogParser] 檔案載入成功，開始解析`);
+      logInfo(`[EnhancedLogParser] File loaded successfully, starting parse`);
       return this.parseLogContent(content);
       
     } catch (error) {
-      logError(`[EnhancedLogParser] 載入檔案失敗 ${logFilePath}: ${error}`);
+      logError(`[EnhancedLogParser] Failed to load file ${logFilePath}: ${error}`);
       return [];
     }
   }
 
   /**
-   * 檢查是否為 Enhanced Debug 格式的日誌行
-   * @param logLine 日誌行
-   * @returns 是否為 Enhanced Debug 格式
+   * Check if log line is Enhanced Debug format
+   * @param logLine Log line
+   * @returns Whether it is Enhanced Debug format
    */
   static isEnhancedDebugLine(logLine: string): boolean {
     const result = this.DEBUG_PATTERN.test(logLine.trim());
-    logDebug(`[EnhancedLogParser] 格式檢查: ${result ? '符合' : '不符合'} Enhanced Debug 格式`);
+    logDebug(`[EnhancedLogParser] Format check: ${result ? 'matches' : 'does not match'} Enhanced Debug format`);
     return result;
   }
 
   /**
-   * 檢查檔案是否包含 Enhanced Debug 內容
-   * @param document VSCode 文件
-   * @returns 是否包含 Enhanced Debug 格式
+   * Check if file contains Enhanced Debug content
+   * @param document VSCode document
+   * @returns Whether it contains Enhanced Debug format
    */
   static hasEnhancedDebugContent(document: vscode.TextDocument): boolean {
-    logInfo(`[EnhancedLogParser] 檢查檔案是否包含 Enhanced Debug 內容: ${document.fileName}`);
+    logInfo(`[EnhancedLogParser] Checking if file contains Enhanced Debug content: ${document.fileName}`);
     
     const content = document.getText();
     const lines = content.split('\n');
     
-    // 檢查前100行，如果有超過5行符合格式，則認為是 Enhanced Debug 日誌
+    // Check first 100 lines, if more than 5 lines match format, consider it Enhanced Debug log
     let matchCount = 0;
     const checkLines = Math.min(100, lines.length);
     
@@ -175,20 +175,20 @@ export class EnhancedLogParser {
       if (this.isEnhancedDebugLine(lines[i])) {
         matchCount++;
         if (matchCount >= 5) {
-          logInfo(`[EnhancedLogParser] 確認為 Enhanced Debug 日誌檔案 (找到 ${matchCount}+ 匹配行)`);
+          logInfo(`[EnhancedLogParser] Confirmed as Enhanced Debug log file (found ${matchCount}+ matching lines)`);
           return true;
         }
       }
     }
     
-    logDebug(`[EnhancedLogParser] 不是 Enhanced Debug 日誌檔案 (僅找到 ${matchCount} 匹配行)`);
+    logDebug(`[EnhancedLogParser] Not an Enhanced Debug log file (only found ${matchCount} matching lines)`);
     return false;
   }
 
   /**
-   * 從解析結果中提取唯一的模組列表
-   * @param entries 解析結果陣列
-   * @returns 唯一模組列表
+   * Extract unique module list from parse results
+   * @param entries Parse result array
+   * @returns Unique module list
    */
   static extractUniqueModules(entries: EnhancedLogEntry[]): string[] {
     const modules = entries
@@ -196,14 +196,14 @@ export class EnhancedLogParser {
       .map(entry => entry.module);
     const uniqueModules = Array.from(new Set(modules)).sort();
     
-    logSummary(`[EnhancedLogParser] 提取到 ${uniqueModules.length} 個唯一模組: ${uniqueModules.join(', ')}`);
+    logSummary(`[EnhancedLogParser] Extracted ${uniqueModules.length} unique modules: ${uniqueModules.join(', ')}`);
     return uniqueModules;
   }
 
   /**
-   * 從解析結果中提取唯一的函數列表
-   * @param entries 解析結果陣列
-   * @returns 唯一函數列表
+   * Extract unique function list from parse results
+   * @param entries Parse result array
+   * @returns Unique function list
    */
   static extractUniqueFunctions(entries: EnhancedLogEntry[]): string[] {
     const functions = entries
@@ -211,40 +211,40 @@ export class EnhancedLogParser {
       .map(entry => entry.function);
     const uniqueFunctions = Array.from(new Set(functions)).sort();
     
-    logSummary(`[EnhancedLogParser] 提取到 ${uniqueFunctions.length} 個唯一函數`);
+    logSummary(`[EnhancedLogParser] Extracted ${uniqueFunctions.length} unique functions`);
     return uniqueFunctions;
   }
 
   /**
-   * 根據模組名過濾日誌項目
-   * @param entries 解析結果陣列
-   * @param moduleName 模組名
-   * @returns 過濾後的結果
+   * Filter log entries by module name
+   * @param entries Parse result array
+   * @param moduleName Module name
+   * @returns Filtered results
    */
   static filterByModule(entries: EnhancedLogEntry[], moduleName: string): EnhancedLogEntry[] {
     const filtered = entries.filter(entry => entry.isValid && entry.module === moduleName);
-    logDebug(`[EnhancedLogParser] 模組過濾 '${moduleName}': ${filtered.length}/${entries.length} 項目`);
+    logDebug(`[EnhancedLogParser] Module filter '${moduleName}': ${filtered.length}/${entries.length} entries`);
     return filtered;
   }
 
   /**
-   * 根據函數名過濾日誌項目
-   * @param entries 解析結果陣列
-   * @param functionName 函數名
-   * @returns 過濾後的結果
+   * Filter log entries by function name
+   * @param entries Parse result array
+   * @param functionName Function name
+   * @returns Filtered results
    */
   static filterByFunction(entries: EnhancedLogEntry[], functionName: string): EnhancedLogEntry[] {
     const filtered = entries.filter(entry => entry.isValid && entry.function === functionName);
-    logDebug(`[EnhancedLogParser] 函數過濾 '${functionName}': ${filtered.length}/${entries.length} 項目`);
+    logDebug(`[EnhancedLogParser] Function filter '${functionName}': ${filtered.length}/${entries.length} entries`);
     return filtered;
   }
 
   /**
-   * 根據序號範圍過濾日誌項目
-   * @param entries 解析結果陣列
-   * @param startSeq 起始序號
-   * @param endSeq 結束序號
-   * @returns 過濾後的結果
+   * Filter log entries by sequence number range
+   * @param entries Parse result array
+   * @param startSeq Start sequence number
+   * @param endSeq End sequence number
+   * @returns Filtered results
    */
   static filterBySequenceRange(entries: EnhancedLogEntry[], startSeq: number, endSeq: number): EnhancedLogEntry[] {
     const filtered = entries.filter(entry => 
@@ -252,14 +252,14 @@ export class EnhancedLogParser {
       entry.sequence >= startSeq && 
       entry.sequence <= endSeq
     );
-    logDebug(`[EnhancedLogParser] 序號範圍過濾 #${startSeq}-#${endSeq}: ${filtered.length}/${entries.length} 項目`);
+    logDebug(`[EnhancedLogParser] Sequence range filter #${startSeq}-#${endSeq}: ${filtered.length}/${entries.length} entries`);
     return filtered;
   }
 
   /**
-   * 生成日誌摘要統計
-   * @param entries 解析結果陣列
-   * @returns 統計資訊
+   * Generate log summary statistics
+   * @param entries Parse result array
+   * @returns Statistics information
    */
   static generateSummary(entries: EnhancedLogEntry[]): {
     totalLines: number;
@@ -284,13 +284,13 @@ export class EnhancedLogParser {
       } : null
     };
     
-    logSummary(`[EnhancedLogParser] 生成統計摘要: ${JSON.stringify(summary)}`);
+    logSummary(`[EnhancedLogParser] Generated statistics summary: ${JSON.stringify(summary)}`);
     return summary;
   }
 
   /**
-   * 映射 DebugLib 變體名稱到實際模組名稱
-   * 用於改善搜尋準確性
+   * Map DebugLib variant names to actual module names
+   * Used to improve search accuracy
    */
   static mapDebugLibToModule(debugLibName: string): string {
     const mapping: { [key: string]: string } = {
@@ -305,7 +305,7 @@ export class EnhancedLogParser {
     const mapped = mapping[debugLibName] || debugLibName;
     
     if (mapped !== debugLibName) {
-      logDebug(`[EnhancedLogParser] 模組名稱映射: ${debugLibName} → ${mapped}`);
+      logDebug(`[EnhancedLogParser] Module name mapping: ${debugLibName} → ${mapped}`);
     }
     
     return mapped;

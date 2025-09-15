@@ -36,6 +36,29 @@ const buildStartTimes = new Map<string, BuildInfo>();
 
 // Utility Functions
 
+async function detectPlatform(): Promise<{ platform: string; isWSL: boolean }> {
+  const platform = process.platform;
+  let isWSL = false;
+
+  if (platform === 'linux') {
+    // Check environment variables first (fastest)
+    isWSL = !!(process.env.WSL_DISTRO_NAME || process.env.WSLENV);
+
+    if (!isWSL) {
+      // Check /proc/version as fallback
+      try {
+        const version = await fs.readFile('/proc/version', 'utf8');
+        isWSL = version.toLowerCase().includes('microsoft') || version.toLowerCase().includes('wsl');
+      } catch {
+        // If we can't read /proc/version, assume not WSL
+        logDebug("Unable to read /proc/version, assuming not WSL");
+      }
+    }
+  }
+
+  return { platform, isWSL };
+}
+
 function getFormattedTimestamp(): string {
   const now = new Date();
   const year = now.getFullYear();
@@ -124,14 +147,15 @@ function setupTaskListener(context: vscode.ExtensionContext): void {
 async function BuildDefaultTask(folderpath: string, selection: string, TaskfileUpdate: string): Promise<string> {
   logDebug("BuildDefaultTask Start");
   const vebExtension = vscode.extensions.getExtension(EXTENSION_ID);
-  if (!vebExtension) { 
+  if (!vebExtension) {
     throw new Error("Unable to get VEB build provider extension");
   }
 
-  const isLinux = process.platform === 'linux';
-  const isWindows = process.platform === 'win32';
+  const { platform, isWSL } = await detectPlatform();
+  const isLinux = platform === 'linux' && !isWSL;
+  const isWindows = platform === 'win32';
   let result: string;
-  logDebug(`Detected platform: ${process.platform}`);
+  logInfo(`Detected platform: ${platform}, WSL: ${isWSL}`);
 
   if (isWindows) {
     const teePath = escapePath(path.join(vebExtension.extensionPath, "tools", "tee.exe"));
@@ -203,7 +227,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
     logDebug(`Copied Linux prepare script to ${targetLinuxScriptPath}`);
     const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
     const logFilePath = escapePath(path.join(folderpath, logFile));
-    
+
     const taskfileLinux = `{
       "version": "3.4.0",
       "tasks": [
@@ -245,8 +269,65 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
         }
       ]
     }`;
-    
+
     result = util.format(taskfileLinux,
+      targetLinuxScriptPath, logFilePath, Veb,
+      targetLinuxScriptPath, logFilePath, Veb,
+      targetLinuxScriptPath, logFilePath, Veb
+    );
+  } else if (isWSL) {
+    // WSL-specific handling
+    const Veb = selection.split('.')[0];
+    const sourceLinuxScript = path.join(vebExtension.extensionPath, "tools", "scripts", PREPARE_ENV_LINUX_SCRIPT);
+    const targetLinuxScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_LINUX_SCRIPT));
+    await copyFile(sourceLinuxScript, targetLinuxScriptPath);
+    logDebug(`Copied Linux prepare script for WSL to ${targetLinuxScriptPath}`);
+    const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
+    const logFilePath = escapePath(path.join(folderpath, logFile));
+
+    const taskfileWSL = `{
+      "version": "3.4.0",
+      "tasks": [
+        {
+          "label": "VebBuildTask",
+          "type": "shell",
+          "command": "source %s && make 2>&1 | tee %s",
+          "options": {
+            "env": { "VEB": "%s" },
+            "shell": {
+              "executable": "/bin/bash",
+              "args": ["-c"]
+            }
+          }
+        },
+        {
+          "label": "VebReBuildTask",
+          "type": "shell",
+          "command": "source %s && make rebuild 2>&1 | tee %s",
+          "options": {
+            "env": { "VEB": "%s" },
+            "shell": {
+              "executable": "/bin/bash",
+              "args": ["-c"]
+            }
+          }
+        },
+        {
+          "label": "VebCleanTask",
+          "type": "shell",
+          "command": "source %s && make clean 2>&1 | tee %s",
+          "options": {
+            "env": { "VEB": "%s" },
+            "shell": {
+              "executable": "/bin/bash",
+              "args": ["-c"]
+            }
+          }
+        }
+      ]
+    }`;
+
+    result = util.format(taskfileWSL,
       targetLinuxScriptPath, logFilePath, Veb,
       targetLinuxScriptPath, logFilePath, Veb,
       targetLinuxScriptPath, logFilePath, Veb
@@ -263,7 +344,7 @@ async function createVscodeFolder(folderpath: string): Promise<void> {
   const vscodePath = path.join(folderpath, VSCODE_FOLDER);
   try {
     await fs.mkdir(vscodePath, { recursive: true });
-    logInfo(".vscode folder created successfully");
+    logDebug(".vscode folder created successfully");
   } catch (error) {
     handleError(`Failed to create .vscode folder: ${error instanceof Error ? error.stack || error.message : String(error)}`);
   }
@@ -272,7 +353,7 @@ async function createVscodeFolder(folderpath: string): Promise<void> {
 async function writeTasksJson(folderpath: string, TaskfileUpdate: string): Promise<void> {
   try {
     await writeFile(path.join(folderpath, VSCODE_FOLDER, TASKS_JSON), TaskfileUpdate);
-    logInfo("Successfully created tasks.json");
+    logDebug("Successfully created tasks.json");
     vscode.window.showInformationMessage("Create tasks.json Success.");
   } catch (error) {
     handleError(`Failed to write tasks.json: ${error instanceof Error ? error.stack || error.message : String(error)}`);

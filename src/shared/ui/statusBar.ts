@@ -19,7 +19,7 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     projectStatusBar.tooltip = 'Initialize VEB Tasks (F8)';
     projectStatusBar.show();
     context.subscriptions.push(projectStatusBar);
-    logInfo("Created status bar item: projectStatus");
+    logDebug("Created status bar item: projectStatus");
 
     // VebBuild Button
     const vebBuildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 102);
@@ -28,7 +28,7 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     vebBuildButton.tooltip = 'Run VEB Build (F7)';
     vebBuildButton.show();
     context.subscriptions.push(vebBuildButton);
-    logInfo("Created status bar button: vebBuild");
+    logDebug("Created status bar button: vebBuild");
 
     // VebReBuild Button
     const runRebuildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 101);
@@ -37,7 +37,7 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     runRebuildButton.tooltip = 'Run VEB ReBuild (F9)';
     runRebuildButton.show();
     context.subscriptions.push(runRebuildButton);
-    logInfo("Created status bar button: vebReBuild");
+    logDebug("Created status bar button: vebReBuild");
 
     // stopTerminal Button
     const closeTerminalButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
@@ -46,7 +46,7 @@ export function registerStatusBarItems(context: vscode.ExtensionContext) {
     closeTerminalButton.tooltip = "Stop the active terminal";
     closeTerminalButton.show();
     context.subscriptions.push(closeTerminalButton);
-    logInfo("Created status bar button: stopTerminal");
+    logDebug("Created status bar button: stopTerminal");
 
     // Check current project status during initialization
     updateProjectStatus();

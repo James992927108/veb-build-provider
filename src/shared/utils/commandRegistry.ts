@@ -65,7 +65,7 @@ export function registerCommandWithLog(
         context.subscriptions.push(disposable);
 
         if (opts.logSuccess) {
-            logInfo(`✓ Registered command: ${commandId}`);
+            logDebug(`✓ Registered command: ${commandId}`);
         }
 
         return disposable;
@@ -100,7 +100,7 @@ function createErrorHandledWrapper(
         try {
             logDebug(`→ Executing command: ${commandId}`);
             const result = await Promise.resolve(handler(...args));
-            logInfo(`✓ Command completed: ${commandId}`);
+            logDebug(`✓ Command completed: ${commandId}`);
             return result;
         } catch (error) {
             const errorMessage = `Command execution failed [${commandId}]: ${error instanceof Error ? error.message : String(error)}`;

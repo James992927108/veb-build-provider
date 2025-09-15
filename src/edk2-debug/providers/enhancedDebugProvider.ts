@@ -50,7 +50,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
         this.updateTreeViewTitle();
     }
 
-    // 切換模式
+    // Switch mode
     async switchMode(mode: DebugMode): Promise<void> {
         this.currentMode = mode;
         await this.context.workspaceState.update('enhancedDebug.lastMode', mode);
@@ -59,7 +59,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
         logInfo(`Switched to ${mode} mode`);
     }
 
-    // 更新 TreeView 標題
+    // Update TreeView title
     private updateTreeViewTitle(): void {
         if (!this.treeView) return;
 
@@ -70,17 +70,17 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
 
         this.treeView.title = `Enhanced Debug - ${modeNames[this.currentMode]}`;
         
-        // 更新訊息
+        // Update message
         this.updateTreeViewMessage();
     }
 
-    // 更新 TreeView 訊息
+    // Update TreeView message
     private updateTreeViewMessage(): void {
         if (!this.treeView) return;
 
         switch (this.currentMode) {
             case 'modules':
-                // 委託給 moduleProvider 處理
+                // Delegate to moduleProvider for handling
                 break;
             case 'logs':
                 if (this.currentLogFile) {
@@ -98,7 +98,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
         return this.currentMode;
     }
 
-    // TreeDataProvider 實作
+    // TreeDataProvider implementation
     getParent(element: any): any | undefined {
         if (this.currentMode === 'modules') {
             return this.moduleProvider.getParent(element);
@@ -128,17 +128,17 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
         }
     }
 
-    // Log Analysis 模式的子項目
+    // Log Analysis mode child items
     private async getLogChildren(element?: LogAnalysisItem): Promise<LogAnalysisItem[]> {
         if (!element) {
-            // 根節點 - 顯示模組分組或日誌條目
+            // Root node - display module groups or log entries
             if (this.logAnalysisData.length === 0) {
                 return [{
                     label: '📁 Click "Open Log File" to load Enhanced Debug logs',
                 }];
             }
 
-            // 按模組分組
+            // Group by module
             const groupedByModule = new Map<string, LogAnalysisItem[]>();
             
             for (const item of this.logAnalysisData) {
@@ -150,7 +150,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
                 }
             }
 
-            // 創建模組群組項目
+            // Create module group items
             const groupItems: LogAnalysisItem[] = [];
             for (const [moduleName, entries] of groupedByModule) {
                 groupItems.push({
@@ -162,7 +162,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
 
             return groupItems.sort((a, b) => a.label.localeCompare(b.label));
         } else {
-            // 展開模組 - 顯示該模組的日誌條目
+            // Expand module - display log entries for this module
             if (element.module) {
                 return this.logAnalysisData
                     .filter(item => item.module === element.module && item.sequence !== undefined)
@@ -173,10 +173,10 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
         return [];
     }
 
-    // Log Analysis 模式的 TreeItem
+    // Log Analysis mode TreeItem
     private getLogTreeItem(element: LogAnalysisItem): vscode.TreeItem {
         if (element.sequence !== undefined) {
-            // 日誌條目
+            // Log entry
             const item = new vscode.TreeItem(`#${element.sequence} ${element.function}:${element.line}`, vscode.TreeItemCollapsibleState.None);
             item.description = element.message;
             item.tooltip = new vscode.MarkdownString(`
@@ -212,7 +212,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
             
             return item;
         } else {
-            // 模組群組
+            // Module group
             const item = new vscode.TreeItem(element.label, vscode.TreeItemCollapsibleState.Collapsed);
             item.description = element.message;
             item.contextValue = 'logGroup';
@@ -624,16 +624,16 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
         }
     }
 
-    // 根據序號判斷 UEFI 階段
+    // Determine UEFI phase based on sequence number
     private determinePhase(sequence: number): string {
-        // 簡單的階段判斷邏輯 - 可以根據實際需求調整
+        // Simple phase determination logic - can be adjusted based on actual requirements
         if (sequence < 200) return 'PEI';
         if (sequence < 1000) return 'DXE';
         if (sequence < 5000) return 'BDS';
         return 'Runtime';
     }
 
-    // 委託模組相關功能給 moduleProvider
+    // Delegate module-related functionality to moduleProvider
     async refreshModules(): Promise<void> {
         await this.moduleProvider.refresh();
         if (this.currentMode === 'modules') {

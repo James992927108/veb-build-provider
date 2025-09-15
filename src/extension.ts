@@ -1,7 +1,8 @@
 // src/extension.ts
 
 import * as vscode from 'vscode';
-import { initLogger, disposeLogger, logInfo, outputChannel } from './shared/utils/logger';
+import { initLogger, disposeLogger, logInfo, logDebug, outputChannel } from './shared/utils/logger';
+import { detectPlatform, formatPlatformInfo } from './shared/utils/platform';
 import { registerStatusBarItems } from './shared/ui/statusBar';
 
 // Import all modules
@@ -9,30 +10,39 @@ import { registerVebBuildModule } from './veb-build';
 import { registerEdk2DebugModule } from './edk2-debug';
 import { registerLanguageSupportModule } from './language-support';
 
-export function activate(context: vscode.ExtensionContext): void {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
     initLogger(context);
     logInfo(`Extension activated at: ${new Date().toISOString()}`);
+
+    // Detect and log platform information
+    try {
+        const platformInfo = await detectPlatform();
+        logInfo(`Operating System: ${formatPlatformInfo(platformInfo)}`);
+        logInfo(`Platform details: ${platformInfo.platform}, WSL: ${platformInfo.isWSL}`);
+    } catch (error) {
+        logInfo(`Platform detection failed: ${error}, using fallback: ${process.platform}`);
+    }
 
     outputChannel.show();
 
     // Get module configuration
     const moduleConfig = vscode.workspace.getConfiguration('vebBuild.modules');
-    
+
     // Conditionally register modules based on configuration
     if (moduleConfig.get('enableBuildTools', true)) {
-        logInfo('Loading VEB Build Tools module');
+        logDebug('Loading VEB Build Tools module');
         registerVebBuildModule(context);
         // Register Status Bar only if build tools are enabled
         registerStatusBarItems(context);
     }
-    
+
     if (moduleConfig.get('enableDebugTools', true)) {
-        logInfo('Loading EDK2 Debug Tools module');
+        logDebug('Loading EDK2 Debug Tools module');
         registerEdk2DebugModule(context);
     }
-    
+
     if (moduleConfig.get('enableLanguageSupport', true)) {
-        logInfo('Loading Language Support module');
+        logDebug('Loading Language Support module');
         registerLanguageSupportModule(context);
     }
 

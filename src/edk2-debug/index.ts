@@ -5,18 +5,18 @@ import * as vscode from 'vscode';
 import { registerEdk2DebugCommands } from './commands/edk2DebugCommands';
 import { LogLinkProvider, registerEnhancedDebugUriHandler } from './providers/logLinkProvider';
 import { EnhancedLogParser } from './analysis/enhancedLogParser';
-import { logInfo, logDebug } from '../shared/utils/logger';
+import { logDebug } from '../shared/utils/logger';
 
 export function registerEdk2DebugModule(context: vscode.ExtensionContext): void {
-    logInfo('[EDK2DebugModule] 註冊 EDK2 Debug 模組');
+    logDebug('[EDK2DebugModule] Registering EDK2 Debug module');
 
-    // 註冊命令
+    // Register commands
     registerEdk2DebugCommands(context);
 
-    // 註冊 DocumentLinkProvider 支援多種檔案類型
+    // Register DocumentLinkProvider for multiple file types
     const logLinkProvider = new LogLinkProvider();
     
-    // 支援 .log 和 .txt 檔案
+    // Support .log and .txt files
     context.subscriptions.push(
         vscode.languages.registerDocumentLinkProvider(
             [
@@ -27,23 +27,23 @@ export function registerEdk2DebugModule(context: vscode.ExtensionContext): void 
         )
     );
 
-    // 註冊 URI 處理器
+    // Register URI handler
     registerEnhancedDebugUriHandler(context);
 
-    // 監聽活動編輯器變更，自動檢測 Enhanced Debug 檔案
+    // Listen for active editor changes, auto-detect Enhanced Debug files
     context.subscriptions.push(
         vscode.window.onDidChangeActiveTextEditor((editor) => {
             if (editor && editor.document) {
                 const fileName = editor.document.fileName;
                 
-                // 檢查是否為可能的日誌檔案
+                // Check if this could be a log file
                 if (fileName.match(/\.(log|txt)$/i)) {
-                    // 異步檢查是否包含 Enhanced Debug 內容
+                    // Asynchronously check if it contains Enhanced Debug content
                     setTimeout(() => {
                         if (EnhancedLogParser.hasEnhancedDebugContent(editor.document)) {
-                            logDebug(`[EDK2DebugModule] 檢測到 Enhanced Debug 日誌檔案: ${fileName}`);
+                            logDebug(`[EDK2DebugModule] Detected Enhanced Debug log file: ${fileName}`);
                             
-                            // 狀態列提示使用者
+                            // Show status bar notification to user
                             vscode.window.setStatusBarMessage(
                                 '$(debug) Enhanced Debug log detected - Ctrl+Click functions to jump to source',
                                 5000
@@ -55,5 +55,5 @@ export function registerEdk2DebugModule(context: vscode.ExtensionContext): void 
         })
     );
 
-    logInfo('[EDK2DebugModule] EDK2 Debug 模組註冊完成');
+    logDebug('[EDK2DebugModule] EDK2 Debug module registration completed');
 }

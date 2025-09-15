@@ -1,6 +1,6 @@
 // src/utils/file.ts
 
-import { logInfo, handleError, outputChannel } from './logger';
+import { logInfo, logDebug, handleError, outputChannel } from './logger';
 
 import * as fs from 'fs/promises';
 
@@ -21,7 +21,7 @@ export function escapePath(filePath: string): string {
 export async function readFile(filePath: string): Promise<string> {
     try {
         const content = await fs.readFile(filePath, 'utf8');
-        logInfo(`Successfully read file: ${filePath}`);
+        logDebug(`Successfully read file: ${filePath}`);
         return content;
     } catch (error) {
         handleError(`Failed to read file: ${filePath}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
@@ -37,7 +37,7 @@ export async function readFile(filePath: string): Promise<string> {
 export async function writeFile(filePath: string, content: string): Promise<void> {
     try {
         await fs.writeFile(filePath, content, 'utf8');
-        logInfo(`Successfully wrote to file: ${filePath}`);
+        logDebug(`Successfully wrote to file: ${filePath}`);
     } catch (error) {
         handleError(`Failed to write to file: ${filePath}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
@@ -51,11 +51,11 @@ export async function writeFile(filePath: string, content: string): Promise<void
 export async function copyFile(source: string, target: string): Promise<void> {
     try {
         await fs.access(target);
-        logInfo(`${target} already exists`);
+        logDebug(`${target} already exists`);
     } catch {
         try {
             await fs.copyFile(source, target);
-            logInfo(`Copied ${source} to ${target} successfully`);
+            logDebug(`Copied ${source} to ${target} successfully`);
         } catch (error) {
             handleError(`Failed to copy file from ${source} to ${target}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
         }

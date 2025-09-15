@@ -192,7 +192,39 @@ The refactoring follows this pattern:
 import { logMessage } from '../../shared/utils/logger';
 logMessage('Module loaded successfully');
 
-// After  
+// After
 import { logInfo } from '../../shared/utils/logger';
 logInfo('Module loaded successfully');
 ```
+
+## Code Style and Language Guidelines
+
+### Language Standards
+- **All log messages MUST be in English** - No Chinese text in logs
+- **All code comments MUST be in English** - No Chinese text in comments
+- **All JSDoc documentation MUST be in English**
+- **Variable names, function names, and identifiers MUST be in English**
+
+### Logging Guidelines
+- Use appropriate log levels: `logDebug()`, `logInfo()`, `logWarn()`, `logError()`, `logSummary()`
+- Log messages should be concise and descriptive
+- Include context information (module name, operation type) in brackets: `[ModuleName] Operation completed`
+- Use consistent formatting for similar operations
+- Examples:
+  ```typescript
+  logInfo('[PlatformDetection] Operating System: Windows');
+  logDebug('[BuildCommands] Copied script to target directory');
+  logError('[FileHandler] Failed to read configuration file: ${error}');
+  ```
+
+### Comment Standards
+- Use JSDoc format for function and class documentation
+- Inline comments should explain "why" not "what"
+- Complex algorithms should have step-by-step explanations
+- All comments must be in English
+
+### Code Organization
+- Group related functionality into modules
+- Use descriptive file and folder names in English
+- Follow TypeScript naming conventions (camelCase for variables, PascalCase for classes)
+- Maintain consistent indentation and formatting
