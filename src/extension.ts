@@ -2,7 +2,6 @@
 
 import * as vscode from 'vscode';
 import { initLogger, disposeLogger, logInfo, logDebug, outputChannel } from './shared/utils/logger';
-import { detectPlatform, formatPlatformInfo } from './shared/utils/platform';
 import { registerStatusBarItems } from './shared/ui/statusBar';
 
 // Import all modules
@@ -10,18 +9,9 @@ import { registerVebBuildModule } from './veb-build';
 import { registerEdk2DebugModule } from './edk2-debug';
 import { registerLanguageSupportModule } from './language-support';
 
-export async function activate(context: vscode.ExtensionContext): Promise<void> {
+export function activate(context: vscode.ExtensionContext): void {
     initLogger(context);
     logInfo(`Extension activated at: ${new Date().toISOString()}`);
-
-    // Detect and log platform information
-    try {
-        const platformInfo = await detectPlatform();
-        logInfo(`Operating System: ${formatPlatformInfo(platformInfo)}`);
-        logInfo(`Platform details: ${platformInfo.platform}, WSL: ${platformInfo.isWSL}`);
-    } catch (error) {
-        logInfo(`Platform detection failed: ${error}, using fallback: ${process.platform}`);
-    }
 
     outputChannel.show();
 

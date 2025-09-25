@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { logInfo, logDebug } from '../utils/logger';
+import { logInfo, logDebug, logWarn } from '../utils/logger';
 import { readFile } from '../utils/file';
 
 let projectStatusBar: vscode.StatusBarItem;
@@ -111,14 +111,33 @@ export async function updateProjectStatus(): Promise<void> {
         const buildTask = tasksObject.tasks?.find((task: any) => task.label === "VebBuildTask");
         if (buildTask) {
             // Display project name when configured
-            const command = buildTask.command;
-            const vebMatch = command.match(/SET VEB=(\w+)/);
-            const currentProject = vebMatch ? vebMatch[1] : 'Unknown';
-            
+            let currentProject = 'Unknown';
+
+            // Try Windows format first (SET VEB=ProjectName)
+            if (buildTask.command && buildTask.command.includes('SET VEB=')) {
+                const vebMatch = buildTask.command.match(/SET VEB=(\w+)/);
+                currentProject = vebMatch ? vebMatch[1] : 'Unknown';
+                logDebug(`Windows VEB format detected: ${currentProject}`);
+            }
+            // Try Linux format (export VEB=ProjectName in command or env.VEB)
+            else if (buildTask.options && buildTask.options.env && buildTask.options.env.VEB) {
+                currentProject = buildTask.options.env.VEB;
+                logDebug(`Linux VEB format detected from env: ${currentProject}`);
+            }
+            // Try extracting from Linux command format (export VEB=ProjectName)
+            else if (buildTask.command && buildTask.command.includes('export VEB=')) {
+                const vebMatch = buildTask.command.match(/export VEB=(\w+)/);
+                currentProject = vebMatch ? vebMatch[1] : 'Unknown';
+                logDebug(`Linux VEB format detected from command: ${currentProject}`);
+            }
+            else {
+                logWarn(`Unable to extract VEB project name from task: ${JSON.stringify(buildTask)}`);
+            }
+
             projectStatusBar.text = `$(project) ${currentProject}`;
             projectStatusBar.tooltip = `Current VEB project: ${currentProject}\nClick to switch project (F8)`;
             projectStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
-            
+
             logDebug(`Status bar updated: Current project is ${currentProject}`);
         } else {
             // Display InitTask when tasks.json exists but no VebBuildTask

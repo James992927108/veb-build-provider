@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as util from 'util';
 import * as fs from 'fs/promises';
-import { logInfo, logDebug, logError, logSummary, handleError, outputChannel } from '../../shared/utils/logger';
+import { logInfo, logDebug, logError, logWarn, logSummary, handleError, outputChannel } from '../../shared/utils/logger';
 import { readFile, writeFile, copyFile, escapePath } from '../../shared/utils/file';
 import { EXTENSION_ID } from '../../shared/utils/constants';
 import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
@@ -17,6 +17,7 @@ const TASKS_JSON = "tasks.json";
 const VEB_EXTENSION = '.veb';
 const PREPARE_ENV_WIN_SCRIPT = 'PrepareEnvScript.bat';
 const PREPARE_ENV_LINUX_SCRIPT = 'PrepareEnvLinuxScript.sh';
+const ASKPASS_SCRIPT = 'askpass.sh';
 
 enum ShowType {
   InformationMessage = 0,
@@ -36,28 +37,6 @@ const buildStartTimes = new Map<string, BuildInfo>();
 
 // Utility Functions
 
-async function detectPlatform(): Promise<{ platform: string; isWSL: boolean }> {
-  const platform = process.platform;
-  let isWSL = false;
-
-  if (platform === 'linux') {
-    // Check environment variables first (fastest)
-    isWSL = !!(process.env.WSL_DISTRO_NAME || process.env.WSLENV);
-
-    if (!isWSL) {
-      // Check /proc/version as fallback
-      try {
-        const version = await fs.readFile('/proc/version', 'utf8');
-        isWSL = version.toLowerCase().includes('microsoft') || version.toLowerCase().includes('wsl');
-      } catch {
-        // If we can't read /proc/version, assume not WSL
-        logDebug("Unable to read /proc/version, assuming not WSL");
-      }
-    }
-  }
-
-  return { platform, isWSL };
-}
 
 function getFormattedTimestamp(): string {
   const now = new Date();
@@ -142,22 +121,56 @@ function setupTaskListener(context: vscode.ExtensionContext): void {
   context.subscriptions.push(taskEndListener, taskStartListener);
 }
 
+// Environment Selection Types
+type TargetEnvironment = 'windows' | 'linux';
+
+interface EnvironmentOption {
+  label: string;
+  description: string;
+  detail: string;
+  value: TargetEnvironment;
+}
+
+// Utility Functions
+
+// Environment Selection Functions
+
+async function showEnvironmentSelection(): Promise<TargetEnvironment | undefined> {
+  const items: EnvironmentOption[] = [
+    {
+      label: '$(terminal-powershell) Windows',
+      description: 'Use Windows batch script (PrepareEnvScript.bat)',
+      detail: 'For Windows native development environment',
+      value: 'windows'
+    },
+    {
+      label: '$(terminal-bash) Linux/WSL',
+      description: 'Use Linux shell script (PrepareEnvLinuxScript.sh)',
+      detail: 'For Linux or Windows Subsystem for Linux development',
+      value: 'linux'
+    }
+  ];
+
+  const selected = await vscode.window.showQuickPick(items, {
+    placeHolder: 'Select target build environment'
+  });
+
+  return selected?.value;
+}
+
 // Task Creation Functions
 
-async function BuildDefaultTask(folderpath: string, selection: string, TaskfileUpdate: string): Promise<string> {
+async function BuildDefaultTask(folderpath: string, selection: string, targetEnvironment: TargetEnvironment): Promise<string> {
   logDebug("BuildDefaultTask Start");
   const vebExtension = vscode.extensions.getExtension(EXTENSION_ID);
   if (!vebExtension) {
     throw new Error("Unable to get VEB build provider extension");
   }
 
-  const { platform, isWSL } = await detectPlatform();
-  const isLinux = platform === 'linux' && !isWSL;
-  const isWindows = platform === 'win32';
   let result: string;
-  logInfo(`Detected platform: ${platform}, WSL: ${isWSL}`);
+  logInfo(`Target environment: ${targetEnvironment}`);
 
-  if (isWindows) {
+  if (targetEnvironment === 'windows') {
     const teePath = escapePath(path.join(vebExtension.extensionPath, "tools", "tee.exe"));
     const sourceScriptPath = path.join(vebExtension.extensionPath, "tools", "scripts", PREPARE_ENV_WIN_SCRIPT);
     const targetScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_WIN_SCRIPT));
@@ -219,14 +232,57 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
       Veb, targetScriptPath, reBuildCommand, teePath, logFile,
       Veb, targetScriptPath, cleanCommand, teePath, logFile
     );
-  } else if (isLinux) {
+  } else if (targetEnvironment === 'linux') {
+    // Linux/WSL handling
     const Veb = selection.split('.')[0];
-    const sourceLinuxScript = path.join(vebExtension.extensionPath, "tools", "scripts", PREPARE_ENV_LINUX_SCRIPT);
-    const targetLinuxScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_LINUX_SCRIPT));
-    await copyFile(sourceLinuxScript, targetLinuxScriptPath);
-    logDebug(`Copied Linux prepare script to ${targetLinuxScriptPath}`);
+    // Create PrepareEnvLinuxScript.sh dynamically for Linux/WSL
+    const targetLinuxScriptPath = path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_LINUX_SCRIPT);
+    const askpassScriptPath = path.join(folderpath, VSCODE_FOLDER, ASKPASS_SCRIPT);
+    const linuxScriptContent = `export TOOLS_DIR=/home/sut/Desktop/VEB/Linux_x64_Aptio_5.x_TOOLS_54/Tools
+# export AARCH64_TOOLS_DIR=/opt/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu/bin
+export AARCH64_TOOLS_DIR=/home/sut/gcc-cross-compiler/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu/bin
+export AARCH64_TOOL_PREFIX=aarch64-none-linux-gnu-`;
+
+    try {
+      // Write file with LF line endings (normalize line endings)
+      const contentWithLF = linuxScriptContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      await writeFile(targetLinuxScriptPath, contentWithLF);
+      logDebug(`Created Linux prepare script for Linux/WSL at ${targetLinuxScriptPath}`);
+
+      logDebug('Linux prepare script created (permissions will be handled by task execution)');
+    } catch (error) {
+      logWarn(`Failed to create Linux prepare script: ${error}`);
+    }
+
+    // Create askpass.sh dynamically for Linux/WSL sudo operations
+    const targetAskpassScriptPath = path.join(folderpath, VSCODE_FOLDER, ASKPASS_SCRIPT);
+    const askpassContent = `#!/bin/bash
+# Simple askpass script that can be used with sudo -A
+# Auto-generated by VEB Build Provider
+echo "111111"`;
+
+    try {
+      // Write file with LF line endings (normalize line endings)
+      const askpassContentWithLF = askpassContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      await writeFile(targetAskpassScriptPath, askpassContentWithLF);
+      logDebug(`Created askpass script for Linux/WSL at ${targetAskpassScriptPath}`);
+
+      logDebug('Askpass script created (permissions will be handled by task execution)');
+    } catch (error) {
+      logWarn(`Failed to create askpass script: ${error}`);
+    }
+
+    // No wrapper scripts needed - tasks will call commands directly
+
+    // Use paths directly since extension runs in WSL/Linux environment
+    const linuxScriptPath = targetLinuxScriptPath;
+    const linuxAskpassPath = targetAskpassScriptPath;
     const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
-    const logFilePath = escapePath(path.join(folderpath, logFile));
+    const linuxLogFilePath = path.join(folderpath, logFile);
+
+    logDebug(`Linux script path: ${linuxScriptPath}`);
+    logDebug(`Linux askpass path: ${linuxAskpassPath}`);
+    logDebug(`Linux log file path: ${linuxLogFilePath}`);
 
     const taskfileLinux = `{
       "version": "3.4.0",
@@ -234,36 +290,33 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
         {
           "label": "VebBuildTask",
           "type": "shell",
-          "command": "source %s && make 2>&1 | tee %s",
+          "command": "chmod +x %s && chmod +x %s && sudo -A bash -c 'export VEB=%s && source %s && make 2>&1 | tee %s'",
           "options": {
-            "env": { "VEB": "%s" },
-            "shell": {
-              "executable": "/bin/bash",
-              "args": ["-c"]
+            "env": {
+              "VEB": "%s",
+              "SUDO_ASKPASS": "%s"
             }
           }
         },
         {
           "label": "VebReBuildTask",
           "type": "shell",
-          "command": "source %s && make rebuild 2>&1 | tee %s",
+          "command": "chmod +x %s && chmod +x %s && sudo -A bash -c 'export VEB=%s && source %s && make rebuild 2>&1 | tee %s'",
           "options": {
-            "env": { "VEB": "%s" },
-            "shell": {
-              "executable": "/bin/bash",
-              "args": ["-c"]
+            "env": {
+              "VEB": "%s",
+              "SUDO_ASKPASS": "%s"
             }
           }
         },
         {
           "label": "VebCleanTask",
           "type": "shell",
-          "command": "source %s && make clean 2>&1 | tee %s",
+          "command": "chmod +x %s && chmod +x %s && sudo -A bash -c 'export VEB=%s && source %s && make clean 2>&1 | tee %s'",
           "options": {
-            "env": { "VEB": "%s" },
-            "shell": {
-              "executable": "/bin/bash",
-              "args": ["-c"]
+            "env": {
+              "VEB": "%s",
+              "SUDO_ASKPASS": "%s"
             }
           }
         }
@@ -271,69 +324,15 @@ async function BuildDefaultTask(folderpath: string, selection: string, TaskfileU
     }`;
 
     result = util.format(taskfileLinux,
-      targetLinuxScriptPath, logFilePath, Veb,
-      targetLinuxScriptPath, logFilePath, Veb,
-      targetLinuxScriptPath, logFilePath, Veb
-    );
-  } else if (isWSL) {
-    // WSL-specific handling
-    const Veb = selection.split('.')[0];
-    const sourceLinuxScript = path.join(vebExtension.extensionPath, "tools", "scripts", PREPARE_ENV_LINUX_SCRIPT);
-    const targetLinuxScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_LINUX_SCRIPT));
-    await copyFile(sourceLinuxScript, targetLinuxScriptPath);
-    logDebug(`Copied Linux prepare script for WSL to ${targetLinuxScriptPath}`);
-    const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
-    const logFilePath = escapePath(path.join(folderpath, logFile));
-
-    const taskfileWSL = `{
-      "version": "3.4.0",
-      "tasks": [
-        {
-          "label": "VebBuildTask",
-          "type": "shell",
-          "command": "source %s && make 2>&1 | tee %s",
-          "options": {
-            "env": { "VEB": "%s" },
-            "shell": {
-              "executable": "/bin/bash",
-              "args": ["-c"]
-            }
-          }
-        },
-        {
-          "label": "VebReBuildTask",
-          "type": "shell",
-          "command": "source %s && make rebuild 2>&1 | tee %s",
-          "options": {
-            "env": { "VEB": "%s" },
-            "shell": {
-              "executable": "/bin/bash",
-              "args": ["-c"]
-            }
-          }
-        },
-        {
-          "label": "VebCleanTask",
-          "type": "shell",
-          "command": "source %s && make clean 2>&1 | tee %s",
-          "options": {
-            "env": { "VEB": "%s" },
-            "shell": {
-              "executable": "/bin/bash",
-              "args": ["-c"]
-            }
-          }
-        }
-      ]
-    }`;
-
-    result = util.format(taskfileWSL,
-      targetLinuxScriptPath, logFilePath, Veb,
-      targetLinuxScriptPath, logFilePath, Veb,
-      targetLinuxScriptPath, logFilePath, Veb
+      // VebBuildTask parameters
+      linuxAskpassPath, linuxScriptPath, Veb, linuxScriptPath, linuxLogFilePath, Veb, linuxAskpassPath,
+      // VebReBuildTask parameters
+      linuxAskpassPath, linuxScriptPath, Veb, linuxScriptPath, linuxLogFilePath, Veb, linuxAskpassPath,
+      // VebCleanTask parameters
+      linuxAskpassPath, linuxScriptPath, Veb, linuxScriptPath, linuxLogFilePath, Veb, linuxAskpassPath
     );
   } else {
-    throw new Error("Unsupported platform");
+    throw new Error(`Unsupported target environment: ${targetEnvironment}`);
   }
   
   logDebug("BuildDefaultTask completed");
@@ -363,16 +362,30 @@ async function writeTasksJson(folderpath: string, TaskfileUpdate: string): Promi
 async function CreateBuildtask(folderpath: string, targetFiles: string[], start: number, end: number, showType: ShowType): Promise<void> {
   logDebug("Starting CreateBuildtask");
   logDebug(`Show Veb array from (${start}) to (${end})`);
-  
+
   if (showType === ShowType.QuickPick) {
-    const selection = await vscode.window.showQuickPick([...targetFiles.slice(start, end)], { placeHolder: 'Start Build for ?' });
-    if (!selection) {
-      logInfo("No selection made, operation cancelled");
+    // Stage 1: VEB file selection
+    const vebSelection = await vscode.window.showQuickPick([...targetFiles.slice(start, end)], {
+      placeHolder: 'Select VEB file to build'
+    });
+    if (!vebSelection) {
+      logInfo("No VEB file selected, operation cancelled");
       return;
     }
+    logInfo(`Selected VEB file: ${vebSelection}`);
+
+    // Stage 2: Environment selection
+    const environmentSelection = await showEnvironmentSelection();
+    if (!environmentSelection) {
+      logInfo("No environment selected, operation cancelled");
+      return;
+    }
+    logInfo(`Selected environment: ${environmentSelection}`);
+
+    // Stage 3: Generate task configuration
     await createVscodeFolder(folderpath);
-    let TaskfileUpdate = await BuildDefaultTask(folderpath, selection, '');
-    await writeTasksJson(folderpath, TaskfileUpdate);
+    const taskConfig = await BuildDefaultTask(folderpath, vebSelection, environmentSelection);
+    await writeTasksJson(folderpath, taskConfig);
   } else {
     logError("Unsupported ShowType");
     vscode.window.showInformationMessage('!!! Not support yet !!!');
@@ -409,16 +422,28 @@ async function checkAndExecuteTask(taskName: string, errorMessage: string, track
             const tasksJson = await readFile(tasksJsonPath);
             const tasksData = JSON.parse(tasksJson);
             const task = tasksData.tasks?.find((t: any) => t.label === selection);
-            
-            if (task && task.command) {
-              // Windows: extract VEB from command
-              const vebMatch = task.command.match(/SET VEB=(\w+)/);
-              const currentProject = vebMatch ? vebMatch[1] : 'Unknown';
-              vebName = `${currentProject}.veb`;
-            } else if (task && task.options && task.options.env && task.options.env.VEB) {
-              // Linux: get VEB from environment variable
-              const currentProject = task.options.env.VEB;
-              vebName = `${currentProject}.veb`;
+            logDebug(`Found task: ${task ? 'yes' : 'no'}, selected task: ${selection}`);
+
+            if (task) {
+              if (task.command && task.command.includes('SET VEB=')) {
+                // Windows: extract VEB from command
+                const vebMatch = task.command.match(/SET VEB=(\w+)/);
+                const currentProject = vebMatch ? vebMatch[1] : 'Unknown';
+                vebName = `${currentProject}.veb`;
+                logDebug(`Windows VEB extracted: ${vebName}`);
+              } else if (task.options && task.options.env && task.options.env.VEB) {
+                // Linux: get VEB from environment variable
+                const currentProject = task.options.env.VEB;
+                vebName = `${currentProject}.veb`;
+                logDebug(`Linux VEB extracted from env: ${vebName}`);
+              } else {
+                // Try to extract from command for Linux tasks
+                logDebug(`Task command: ${task.command}`);
+                logDebug(`Task options: ${JSON.stringify(task.options)}`);
+                logWarn(`Unable to extract VEB name from task configuration`);
+              }
+            } else {
+              logWarn(`Selected task ${selection} not found in tasks.json`);
             }
           } catch (error) {
             logError(`Failed to parse VEB name from tasks.json: ${error}`);
@@ -443,16 +468,28 @@ async function checkAndExecuteTask(taskName: string, errorMessage: string, track
             const tasksJson = await readFile(tasksJsonPath);
             const tasksData = JSON.parse(tasksJson);
             const task = tasksData.tasks?.find((t: any) => t.label === taskName);
-            
-            if (task && task.command) {
-              // Windows: extract VEB from command
-              const vebMatch = task.command.match(/SET VEB=(\w+)/);
-              const currentProject = vebMatch ? vebMatch[1] : 'Unknown';
-              vebName = `${currentProject}.veb`;
-            } else if (task && task.options && task.options.env && task.options.env.VEB) {
-              // Linux: get VEB from environment variable
-              const currentProject = task.options.env.VEB;
-              vebName = `${currentProject}.veb`;
+            logDebug(`Found task: ${task ? 'yes' : 'no'}, task name: ${taskName}`);
+
+            if (task) {
+              if (task.command && task.command.includes('SET VEB=')) {
+                // Windows: extract VEB from command
+                const vebMatch = task.command.match(/SET VEB=(\w+)/);
+                const currentProject = vebMatch ? vebMatch[1] : 'Unknown';
+                vebName = `${currentProject}.veb`;
+                logDebug(`Windows VEB extracted: ${vebName}`);
+              } else if (task.options && task.options.env && task.options.env.VEB) {
+                // Linux: get VEB from environment variable
+                const currentProject = task.options.env.VEB;
+                vebName = `${currentProject}.veb`;
+                logDebug(`Linux VEB extracted from env: ${vebName}`);
+              } else {
+                // Try to extract from command for Linux tasks
+                logDebug(`Task command: ${task.command}`);
+                logDebug(`Task options: ${JSON.stringify(task.options)}`);
+                logWarn(`Unable to extract VEB name from task configuration`);
+              }
+            } else {
+              logWarn(`Task ${taskName} not found in tasks.json`);
             }
           } catch (error) {
             logError(`Failed to parse VEB name from tasks.json: ${error}`);
