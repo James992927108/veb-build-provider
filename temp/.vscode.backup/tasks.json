@@ -1,0 +1,38 @@
+{
+      "version": "3.4.0",
+      "tasks": [
+        {
+          "label": "VebBuildTask",
+          "type": "shell",
+          "command": "chmod +x /home/sut/Desktop/Oberon-GB200/.vscode/askpass.sh && chmod +x /home/sut/Desktop/Oberon-GB200/.vscode/PrepareEnvLinuxScript.sh && sudo -A bash -c 'export VEB=Standard && source /home/sut/Desktop/Oberon-GB200/.vscode/PrepareEnvLinuxScript.sh && make 2>&1 | tee /home/sut/Desktop/Oberon-GB200/Build-Standard-20250924-192757.log'",
+          "options": {
+            "env": {
+              "VEB": "Standard",
+              "SUDO_ASKPASS": "/home/sut/Desktop/Oberon-GB200/.vscode/askpass.sh"
+            }
+          }
+        },
+        {
+          "label": "VebReBuildTask",
+          "type": "shell",
+          "command": "chmod +x /home/sut/Desktop/Oberon-GB200/.vscode/askpass.sh && chmod +x /home/sut/Desktop/Oberon-GB200/.vscode/PrepareEnvLinuxScript.sh && sudo -A bash -c 'export VEB=Standard && source /home/sut/Desktop/Oberon-GB200/.vscode/PrepareEnvLinuxScript.sh && make rebuild 2>&1 | tee /home/sut/Desktop/Oberon-GB200/Build-Standard-20250924-192757.log'",
+          "options": {
+            "env": {
+              "VEB": "Standard",
+              "SUDO_ASKPASS": "/home/sut/Desktop/Oberon-GB200/.vscode/askpass.sh"
+            }
+          }
+        },
+        {
+          "label": "VebCleanTask",
+          "type": "shell",
+          "command": "chmod +x /home/sut/Desktop/Oberon-GB200/.vscode/askpass.sh && chmod +x /home/sut/Desktop/Oberon-GB200/.vscode/PrepareEnvLinuxScript.sh && sudo -A bash -c 'export VEB=Standard && source /home/sut/Desktop/Oberon-GB200/.vscode/PrepareEnvLinuxScript.sh && make clean 2>&1 | tee /home/sut/Desktop/Oberon-GB200/Build-Standard-20250924-192757.log'",
+          "options": {
+            "env": {
+              "VEB": "Standard",
+              "SUDO_ASKPASS": "/home/sut/Desktop/Oberon-GB200/.vscode/askpass.sh"
+            }
+          }
+        }
+      ]
+    }
