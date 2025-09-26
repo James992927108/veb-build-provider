@@ -180,7 +180,7 @@ VEB Build Provider 提供多種 EDK2 檔案類型的語言支援：
 
 ---
 
-## ⚙️ 模塊化配置 ✨ **新功能**
+## ⚙️ 模塊化配置 ✨ **v3.3.0 新功能**
 
 VEB Build Provider v3.3.0 新增模塊化功能，允許您按需啟用/停用特定功能模塊，實現更靈活的擴展配置。
 
@@ -271,4 +271,77 @@ VEB Build Provider v3.3.0 新增模塊化功能，允許您按需啟用/停用�
 - 執行 `Developer: Reload Window`
 
 ---
+
+## 🔧 全域配置系統 ✨ **v3.4.0 新功能**
+
+VEB Build Provider v3.4.0 引入全域配置系統，提供動態版本管理和集中化參數控制，大幅簡化開發和發布流程。
+
+### 🎯 **核心特性**
+
+#### **動態版本管理**
+- 版本號統一從 `package.json` 自動讀取
+- 建置任務 (`tasks.json`) 版本號自動同步
+- Python 腳本 (`debug_mode.py`, `release_mode.py`) 自動使用正確版本號
+- 無需手動維護多處版本資訊
+
+#### **集中參數管理**
+- 專案名稱、版本、發佈者等核心資訊統一配置
+- 減少程式碼中的硬編碼字串
+- 提高程式碼維護性和一致性
+
+### 📝 **開發者使用說明**
+
+#### **TypeScript 程式碼中使用**
+```typescript
+import { PROJECT_CONFIG } from '../../shared/config';
+
+// 使用動態版本號
+const version = PROJECT_CONFIG.VERSION;  // 自動從 package.json 讀取
+const projectName = PROJECT_CONFIG.NAME; // 'veb-build-provider'
+```
+
+#### **配置檔案結構**
+```
+src/shared/config/
+├── globalConfig.ts    # 主要配置檔案
+└── index.ts          # 統一匯出
+```
+
+### 🔄 **版本更新流程**
+
+使用全域配置系統後，版本更新變得更簡單：
+
+1. **修改版本號** - 只需更新 `package.json` 中的版本號
+2. **自動同步** - 所有相關檔案自動使用新版本號
+3. **一致性保證** - 避免版本號不同步的問題
+
+### 🛠️ **Python 腳本整合**
+
+#### **Debug Mode 流程**
+```bash
+python tools/debug_mode.py
+```
+- 修改 `package.json` 版本為 debug 版本 (如 3.4.1)
+- 編譯時 TypeScript 自動讀取新版本號
+- 建置產生的 `tasks.json` 使用正確的 debug 版本號
+
+#### **Release Mode 流程**
+```bash
+python tools/release_mode.py
+```
+- 自動遞增版本號並更新 `package.json`
+- 所有相關檔案自動使用新版本號
+- 無需手動修改 TypeScript 檔案
+
+### 💡 **最佳實踐**
+
+- ✅ **版本號管理**：只在 `package.json` 中維護版本號
+- ✅ **配置參數**：新增全域參數時加入 `globalConfig.ts`
+- ✅ **模組引用**：使用 `import { PROJECT_CONFIG } from '@/shared/config'`
+- ❌ **避免硬編碼**：不要在程式碼中直接寫入版本號或專案名稱
+
+---
+
+### 其他設定項目
+
 - `vebBuild.formatter.speceOnUni` - UNI 檔案格式化間距

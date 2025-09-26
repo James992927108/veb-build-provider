@@ -43,6 +43,12 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 - **靈活組合**：構建工具、調試分析、語言支持、Makefile 工具可獨立控制
 - **即時切換**：透過設定檔案快速調整擴展功能範圍
 
+### ⚙️ 全域配置系統 ✨ **v3.4.0 新功能**
+- **動態版本管理**：版本號統一從 package.json 自動讀取，無需手動同步
+- **集中參數管理**：專案名稱、版本、路徑等核心參數統一配置
+- **Python 腳本整合**：debug_mode.py 和 release_mode.py 自動使用正確版本號
+- **開發者友善**：減少硬編碼，提高程式碼維護性
+
 ---
 
 ## 📁 專案架構
@@ -61,7 +67,7 @@ veb-build-provider/
 ├── 📁 src/                        # 主要程式碼 (模組化架構)
 │   ├── 📁 veb-build/              # VEB 建置模組
 │   │   ├── 📁 commands/           # 建置相關指令
-│   │   │   └── buildCommands.ts   # 建置指令實作
+│   │   │   └── buildCommands.ts   # 建置指令實作 (✨ 支援動態版本)
 │   │   ├── 📁 tools/              # 建置工具
 │   │   │   └── expandMakefileVars.ts # Makefile 變數展開工具
 │   │   └── index.ts               # VEB 建置模組入口
@@ -96,6 +102,9 @@ veb-build-provider/
 │   │   │   └── formattingProvider.ts    # 自動格式化
 │   │   └── index.ts               # 語言支援模組入口
 │   ├── 📁 shared/                 # 共用模組
+│   │   ├── 📁 config/             # 全域配置系統 (✨ v3.4.0 新功能)
+│   │   │   ├── globalConfig.ts    # 動態版本與專案配置
+│   │   │   └── index.ts           # 配置系統統一匯出
 │   │   ├── 📁 ui/                 # UI 元件
 │   │   │   └── statusBar.ts       # 狀態列元件
 │   │   ├── 📁 utils/              # 共用工具函式
@@ -221,8 +230,8 @@ npm run compile
 ## 📈 版本歷史
 
 | 版本號 | 發布日期 |
-|--------|
-| v3.4.0 | 2025-09-05 |
+|--------|----------|
+| v3.4.0 | 2025-09-26 |
 | v3.3.0 | 2025-08-16 |
 | v3.2.0 | 2025-07-17 |
 | v3.1.0 | 2025-07-10 |
