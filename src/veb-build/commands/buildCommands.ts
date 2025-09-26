@@ -9,6 +9,7 @@ import { readFile, writeFile, copyFile, escapePath } from '../../shared/utils/fi
 import { EXTENSION_ID } from '../../shared/utils/constants';
 import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
 import { expandMakefileVars } from '../tools/expandMakefileVars';
+import { PROJECT_CONFIG } from '../../shared/config';
 
 // Constants & Enums
 
@@ -189,7 +190,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
     const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
 
     const TaskfileWindows = `{
-      "version": "3.4.0",
+      "version": "${PROJECT_CONFIG.VERSION}",
       "tasks": [
         {
           "label": "VebBuildTask",
@@ -285,7 +286,7 @@ echo "111111"`;
     logDebug(`Linux log file path: ${linuxLogFilePath}`);
 
     const taskfileLinux = `{
-      "version": "3.4.0",
+      "version": "${PROJECT_CONFIG.VERSION}",
       "tasks": [
         {
           "label": "VebBuildTask",
@@ -524,7 +525,7 @@ export function registerVebBuildCommands(context: vscode.ExtensionContext): void
   registerCommandWithLog(context, 'vebBuild.buildTool.vebBuild', handleVebBuild);
   registerCommandWithLog(context, 'vebBuild.buildTool.vebReBuild', handleVebReBuild);
   registerCommandWithLog(context, 'vebBuild.buildTool.stopTerminal', handleterminateTerminal);
-  
+
   // Conditionally register Makefile tools if enabled
   const moduleConfig = vscode.workspace.getConfiguration('vebBuild.modules');
   if (moduleConfig.get('enableMakefileTools', true)) {

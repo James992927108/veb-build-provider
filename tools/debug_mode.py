@@ -66,7 +66,7 @@ def create_debug_package_json(debug_version):
         with open(PACKAGE_JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(package_data, f, indent=2, ensure_ascii=False)
         
-        print(f"✓ Updated package.json to debug version: {debug_version}")
+        print(f"OK Updated package.json to debug version: {debug_version}")
         return True
     except Exception as e:
         print(f"Error updating package.json: {e}")
@@ -77,7 +77,7 @@ def restore_package_json():
     try:
         if os.path.exists(PACKAGE_JSON_BACKUP_PATH):
             shutil.move(PACKAGE_JSON_BACKUP_PATH, PACKAGE_JSON_PATH)
-            print("✓ Restored original package.json")
+            print("OK Restored original package.json")
         return True
     except Exception as e:
         print(f"Error restoring package.json: {e}")
@@ -90,13 +90,13 @@ def clean_build():
     # Remove out directory
     if os.path.exists(OUT_DIR_PATH):
         shutil.rmtree(OUT_DIR_PATH)
-        print("✓ Removed out directory")
+        print("OK Removed out directory")
     
     # Remove existing debug .vsix files in root
     vsix_files = glob.glob(os.path.join(PROJECT_ROOT, 'veb-build-provider-*.vsix'))
     for file in vsix_files:
         os.remove(file)
-        print(f"✓ Removed existing debug package: {file}")
+        print(f"OK Removed existing debug package: {file}")
 
 def build_project():
     """Build the project"""
@@ -106,7 +106,7 @@ def build_project():
         print("Build failed")
         return False
     
-    print("✓ Project built successfully")
+    print("OK Project built successfully")
     return True
 
 def package_extension(debug_version):
@@ -126,7 +126,7 @@ def package_extension(debug_version):
         print(f"Package file {package_path} was not created")
         return False, None
     
-    print(f"✓ Extension packaged successfully: {package_name}")
+    print(f"OK Extension packaged successfully: {package_name}")
     return True, package_name
 
 def main():
@@ -142,7 +142,7 @@ def main():
         print("Error: vsce is not installed.")
         print("Please install vsce first by running: npm install -g vsce")
         return False
-    print("✓ vsce is available")
+    print("OK vsce is available")
     
     # Get current version
     current_version = get_current_version()

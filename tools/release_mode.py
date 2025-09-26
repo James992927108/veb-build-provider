@@ -11,7 +11,6 @@ import shutil
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 PACKAGE_JSON_PATH = os.path.join(PROJECT_ROOT, 'package.json')
-BUILD_COMMANDS_PATH = os.path.join(PROJECT_ROOT, 'src', 'veb-build', 'commands', 'buildCommands.ts')
 README_PATH = os.path.join(PROJECT_ROOT, 'README.md')
 NODE_MODULES_PATH = os.path.join(PROJECT_ROOT, 'node_modules')
 OUT_DIR_PATH = os.path.join(PROJECT_ROOT, 'out')
@@ -75,21 +74,9 @@ def update_package_json(new_version):
         return False
 
 def update_build_commands(new_version):
-    """Update buildCommands.ts version"""
-    try:
-        with open(BUILD_COMMANDS_PATH, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        new_content = re.sub(r'"version":\s*"[^"]*"', f'"version": "{new_version}"', content)
-        
-        with open(BUILD_COMMANDS_PATH, 'w', encoding='utf-8') as f:
-            f.write(new_content)
-        
-        print(f"✓ Updated buildCommands.ts to version {new_version}")
-        return True
-    except Exception as e:
-        print(f"Error updating buildCommands.ts: {e}")
-        return False
+    """Update buildCommands.ts version - now uses dynamic version reading from package.json"""
+    print(f"✓ buildCommands.ts will automatically use version {new_version} from package.json")
+    return True  # No longer need to manually modify buildCommands.ts
 
 def update_readme(new_version):
     """Update README.md version"""
