@@ -228,3 +228,19 @@ logInfo('Module loaded successfully');
 - Use descriptive file and folder names in English
 - Follow TypeScript naming conventions (camelCase for variables, PascalCase for classes)
 - Maintain consistent indentation and formatting
+
+## Git Commit Guidelines
+
+### Commit Message Format
+- Use concise, descriptive commit messages
+- Follow conventional commit format: `type: description`
+- Common types: `feat`, `fix`, `docs`, `refactor`, `chore`, `test`
+- Keep commit messages simple and to the point
+- **DO NOT** include Claude Code attribution or Co-Authored-By lines
+- Examples:
+  ```
+  feat: add M5 environment support to PrepareEnvScript.bat
+  fix: resolve line ending issues in cross-platform scripts
+  docs: update README with new build instructions
+  refactor: simplify logging system implementation
+  ```
