@@ -137,12 +137,17 @@ def main():
     
     # Check vsce installation
     print("Checking if vsce is installed...")
-    result = subprocess.run('npx vsce --version', shell=True, capture_output=True, text=True, cwd=PROJECT_ROOT)
-    if result.returncode != 0:
-        print("Error: vsce is not installed.")
-        print("Please install vsce first by running: npm install -g vsce")
+    try:
+        result = subprocess.run('npx vsce --version', shell=True, capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30)
+        if result.returncode != 0:
+            print("Error: vsce is not installed or failed to run.")
+            print("Please install vsce first by running: npm install -g @vscode/vsce")
+            return False
+        print("OK vsce is available")
+    except subprocess.TimeoutExpired:
+        print("Error: Timeout while checking vsce.")
+        print("Please install vsce manually: npm install -g @vscode/vsce")
         return False
-    print("OK vsce is available")
     
     # Get current version
     current_version = get_current_version()

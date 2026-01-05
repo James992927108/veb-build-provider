@@ -42,10 +42,36 @@ VEB Build Provider 提供以下核心功能：
 ### 1. 建置流程管理
 
 - **F8**：初始化專案，選擇專案後會自動建立 `tasks.json` 檔案並加入 `PrepareEnvScript.bat` 作為初始環境變數
-- **F7**：執行 VEB Build 任務
+- **F7**：執行 VEB Build 任務 (標準模式)
 - **F9**：執行 VEB ReBuild 任務
+- **自定義建置**：透過 `VebCustomBuildTask` 執行使用者定義的腳本
 
-### 2. Enhanced Debug Log 轉跳功能
+### 2. 自定義建置任務 (Custom Build) ✨ **v3.5.0 新功能**
+
+VEB Build Provider v3.5.0 推出了 `CustomBuild.sh` 機制，讓開發者能整合專案原生的複雜建置腳本。
+
+#### 使用流程
+
+1. **初始化專案** (F8)
+   - 擴充套件會自動在 `.vscode` 資料夾下建立 `CustomBuild.sh` 模板檔案。
+
+2. **編輯自定義腳本**
+   - 開啟 `.vscode/CustomBuild.sh`。
+   - 填入您專案需要執行的指令，例如：
+     ```bash
+     # 執行專案目錄下的發布腳本，並帶入當前 VEB 參數
+     ./GB300_Release_Build.sh $VEB
+     ```
+   - *提示*：腳本中可以直接使用 `$VEB` 環境變數。
+
+3. **執行建置**
+   - 按 `F7` (或執行 `VEB: Build`)。
+   - 在選單中選擇 **`VebCustomBuildTask`**。
+   - 系統將會執行您的 `CustomBuild.sh`，並完整記錄日誌與耗時。
+
+### 3. Enhanced Debug Log 轉跳功能
+
+> **說明**：此功能目前功能完整且持續支援，但暫停新功能開發 (Maintenance Mode)。
 
 一鍵從 Enhanced Debug 日誌檔案跳轉到對應的源碼位置，大幅提升除錯效率。
 

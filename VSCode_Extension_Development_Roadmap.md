@@ -366,6 +366,11 @@ class IssueDetector {
 - [x] **使用者介面整合** - package.json 指令註冊與快捷鍵綁定
 - [x] **文件更新** - README.md 和 USAGE_GUIDE.md 完整說明
 
+### ✅ 已完成功能 (v3.5.0)
+- [x] **自定義建置任務** - 新增 `VebCustomBuildTask` 與 `CustomBuild.sh` 支援
+- [x] **開發工具鏈優化** - Python 腳本超時保護與 vsce 指令更新
+- [x] **日誌完整性** - VebBuildTask 計時功能修復與啟動日誌優化
+
 ### 短期目標 (1-2個月) - Phase 2 ✅ 已完成
 - [x] **源碼跳轉功能** - ✅ 已完成 Ctrl+Click 跳轉
 - [x] **統一切換面板** - ✅ 已完成 Enhanced Debug Provider 架構

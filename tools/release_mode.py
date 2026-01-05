@@ -152,7 +152,7 @@ def build_project():
     print("✓ Project compiled")
     
     print("Packaging extension...")
-    if not run_command('npx vsce package', cwd=PROJECT_ROOT):
+    if not run_command('npx @vscode/vsce package', cwd=PROJECT_ROOT):
         return False
     
     print("✓ Extension packaged")
@@ -224,12 +224,17 @@ def main():
     print("==========================================")
     
     print("Checking if vsce is installed...")
-    result = subprocess.run('npx vsce --version', shell=True, capture_output=True, text=True, cwd=PROJECT_ROOT)
-    if result.returncode != 0:
-        print("Error: vsce is not installed.")
-        print("Please install vsce first by running: npm install -g vsce")
+    try:
+        result = subprocess.run('npx vsce --version', shell=True, capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30)
+        if result.returncode != 0:
+            print("Error: vsce is not installed or failed to run.")
+            print("Please install vsce first by running: npm install -g @vscode/vsce")
+            return False
+        print("✓ vsce is available")
+    except subprocess.TimeoutExpired:
+        print("Error: Timeout while checking vsce.")
+        print("Please install vsce manually: npm install -g @vscode/vsce")
         return False
-    print("✓ vsce is available")
     
     current_version = get_current_version()
     if not current_version:
