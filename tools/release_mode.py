@@ -56,16 +56,39 @@ def increment_version(version):
         print(f"Invalid version format: {version}")
         return None
 
+def _adapt_scripts_for_platform(package_data):
+    """Adapt platform-specific commands in package.json scripts."""
+    if sys.platform == "linux":
+        print("Adapting package.json scripts for Linux...")
+        if 'scripts' in package_data and 'copy-scripts' in package_data['scripts']:
+            original_cmd = package_data['scripts']['copy-scripts']
+            script_cmd = original_cmd
+            
+            # Replace xcopy with cp -r
+            script_cmd = re.sub(r'xcopy tools\\scripts out\\scripts /E /I /Y', r'cp -r tools/scripts out/scripts', script_cmd, flags=re.IGNORECASE)
+            
+            if original_cmd != script_cmd:
+                print(f"  Modified script 'copy-scripts':")
+                print(f"    - Original: {original_cmd}")
+                print(f"    - New:      {script_cmd}")
+                package_data['scripts']['copy-scripts'] = script_cmd
+        print("Finished adapting package.json scripts for Linux.")
+    return package_data
+
 def update_package_json(new_version):
-    """Update package.json version"""
+    """Update package.json version and adapt scripts for the current platform."""
     try:
         with open(PACKAGE_JSON_PATH, 'r', encoding='utf-8') as f:
-            content = f.read()
+            package_data = json.load(f)
         
-        new_content = re.sub(r'"version":\s*"[^"]*"', f'"version": "{new_version}"', content)
+        # Update version
+        package_data['version'] = new_version
+        
+        # Adapt scripts for platform
+        package_data = _adapt_scripts_for_platform(package_data)
         
         with open(PACKAGE_JSON_PATH, 'w', encoding='utf-8') as f:
-            f.write(new_content)
+            json.dump(package_data, f, indent=2, ensure_ascii=False)
         
         print(f"✓ Updated package.json to version {new_version}")
         return True
@@ -142,13 +165,26 @@ def build_project():
     print("Installing dependencies...")
     if not run_command('npm install', cwd=PROJECT_ROOT):
         return False
-    
     print("✓ Dependencies installed")
-    
-    print("Compiling project...")
-    if not run_command('npm run compile', cwd=PROJECT_ROOT):
-        return False
-    
+
+    if sys.platform == "linux":
+        print("Compiling project for Linux...")
+        # Prepare environment for Linux
+        if not run_command('sh tools/scripts/PrepareEnvLinuxScript.sh', cwd=PROJECT_ROOT):
+            return False
+        
+        # Compile TypeScript
+        if not run_command('npx tsc -p ./', cwd=PROJECT_ROOT):
+            return False
+        
+        # Manually copy scripts
+        if not run_command('cp -r tools/scripts out/scripts', cwd=PROJECT_ROOT):
+            return False
+    else:
+        print("Compiling project for Windows...")
+        if not run_command('npm run compile', cwd=PROJECT_ROOT):
+            return False
+            
     print("✓ Project compiled")
     
     print("Packaging extension...")

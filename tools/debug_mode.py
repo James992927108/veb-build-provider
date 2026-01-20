@@ -50,6 +50,24 @@ def generate_debug_version(version):
     # Debug version always uses patch number 1
     return f"{major}.{minor}.1"
 
+def _adapt_scripts_for_platform(package_data):
+    """Adapt platform-specific commands in package.json scripts."""
+    if sys.platform == "linux":
+        print("Adapting package.json scripts for Linux...")
+        if 'scripts' in package_data and 'copy-scripts' in package_data['scripts']:
+            original_cmd = package_data['scripts']['copy-scripts']
+            script_cmd = original_cmd
+            
+            # Replace xcopy with cp -r
+            script_cmd = re.sub(r'xcopy tools\\scripts out\\scripts /E /I /Y', r'cp -r tools/scripts out/scripts', script_cmd, flags=re.IGNORECASE)
+            
+            if original_cmd != script_cmd:
+                print(f"  Modified script 'copy-scripts':")
+                print(f"    - Original: {original_cmd}")
+                print(f"    - New:      {script_cmd}")
+                package_data['scripts']['copy-scripts'] = script_cmd
+        print("Finished adapting package.json scripts for Linux.")
+
 def create_debug_package_json(debug_version):
     """Create a temporary package.json with debug version"""
     try:
@@ -62,6 +80,9 @@ def create_debug_package_json(debug_version):
         # Create backup
         shutil.copy2(PACKAGE_JSON_PATH, PACKAGE_JSON_BACKUP_PATH)
         
+        # Adapt scripts for platform before writing
+        _adapt_scripts_for_platform(package_data)
+
         # Write debug version
         with open(PACKAGE_JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(package_data, f, indent=2, ensure_ascii=False)
@@ -102,10 +123,24 @@ def build_project():
     """Build the project"""
     print("Building project...")
     
-    if not run_command('npm run compile', cwd=PROJECT_ROOT):
-        print("Build failed")
-        return False
-    
+    if sys.platform == "linux":
+        # Prepare environment for Linux
+        print("Preparing environment for Linux...")
+        if not run_command('sh tools/scripts/PrepareEnvLinuxScript.sh', cwd=PROJECT_ROOT):
+            print("Environment preparation failed")
+            return False
+        
+        # Compile TypeScript
+        print("Compiling TypeScript...")
+        if not run_command('npx tsc -p ./', cwd=PROJECT_ROOT):
+            print("TypeScript compilation failed")
+            return False
+    else:
+        # Default build for other platforms (Windows)
+        if not run_command('npm run compile', cwd=PROJECT_ROOT):
+            print("Build failed")
+            return False
+            
     print("OK Project built successfully")
     return True
 
