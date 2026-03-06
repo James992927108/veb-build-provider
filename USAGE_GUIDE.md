@@ -42,6 +42,7 @@ VEB Build Provider 提供以下核心功能：
 ### 1. 建置流程管理
 
 - **F8**：初始化專案，選擇專案後會自動建立 `tasks.json` 檔案並加入 `PrepareEnvScript.bat` 作為初始環境變數
+- **自動環境偵測 (Linux)**：✨ **新功能** 在 Linux/WSL 環境下，系統會自動執行 `env_discovery.py` 來偵測工具鏈路徑與環境變數，無需手動修改腳本。
 - **F7**：執行 VEB Build 任務 (標準模式)
 - **F9**：執行 VEB ReBuild 任務
 - **自定義建置**：透過 `VebCustomBuildTask` 執行使用者定義的腳本

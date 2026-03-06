@@ -27,7 +27,7 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
 
   constructor() {
     this.navigator = new CrossFolderNavigator();
-    logInfo(`[LogLinkProvider] Initialization completed`);
+    logDebug(`[LogLinkProvider] Initialization completed`);
   }
 
   /**
@@ -360,5 +360,5 @@ export function registerEnhancedDebugUriHandler(context: vscode.ExtensionContext
   });
   
   context.subscriptions.push(disposable);
-  logInfo(`[EnhancedDebugUriHandler] URI handler registration completed`);
+  logDebug(`[EnhancedDebugUriHandler] URI handler registration completed`);
 }

@@ -40,7 +40,7 @@ export class CrossFolderNavigator {
   private readonly SEARCH_CACHE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes expiry
   
   constructor() {
-    logInfo(`[CrossFolderNavigator] Initialization completed`);
+    logDebug(`[CrossFolderNavigator] Initialization completed`);
   }
 
   /**

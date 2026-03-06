@@ -13,17 +13,24 @@ PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 PACKAGE_JSON_PATH = os.path.join(PROJECT_ROOT, 'package.json')
 PACKAGE_JSON_BACKUP_PATH = os.path.join(PROJECT_ROOT, 'package.json.backup')
 OUT_DIR_PATH = os.path.join(PROJECT_ROOT, 'out')
+NODE_MODULES_PATH = os.path.join(PROJECT_ROOT, 'node_modules')
 
 
-def run_command(cmd, cwd=None):
+def run_command(cmd, cwd=None, timeout=None):
     """Execute command and return result"""
     try:
-        result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
+        result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True, timeout=timeout)
         if result.returncode != 0:
             print(f"Error executing command: {cmd}")
-            print(f"Error output: {result.stderr}")
+            if result.stdout:
+                print(f"Output: {result.stdout.strip()}")
+            if result.stderr:
+                print(f"Error output: {result.stderr.strip()}")
             return False
         return True
+    except subprocess.TimeoutExpired:
+        print(f"Command timed out: {cmd}")
+        return False
     except Exception as e:
         print(f"Exception executing command: {cmd}")
         print(f"Exception: {e}")
@@ -132,7 +139,7 @@ def build_project():
         
         # Compile TypeScript
         print("Compiling TypeScript...")
-        if not run_command('npx tsc -p ./', cwd=PROJECT_ROOT):
+        if not run_command('npx --yes tsc -p ./', cwd=PROJECT_ROOT):
             print("TypeScript compilation failed")
             return False
     else:
@@ -150,7 +157,7 @@ def package_extension(debug_version):
     
     # Package the extension
     package_name = f"veb-build-provider-{debug_version}.vsix"
-    cmd = f'npx vsce package --out "{package_name}"'
+    cmd = f'npx --yes vsce package --out "{package_name}"'
     
     if not run_command(cmd, cwd=PROJECT_ROOT):
         print("Packaging failed")
@@ -170,10 +177,16 @@ def main():
     print("       VEB Build Provider Debug Mode")
     print("===========================================")
     
+    # Check node_modules
+    if not os.path.exists(NODE_MODULES_PATH):
+        print("Error: node_modules directory not found.")
+        print("Please run 'npm install' first to install project dependencies.")
+        return False
+
     # Check vsce installation
     print("Checking if vsce is installed...")
     try:
-        result = subprocess.run('npx vsce --version', shell=True, capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30)
+        result = subprocess.run('npx --yes vsce --version', shell=True, capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=30)
         if result.returncode != 0:
             print("Error: vsce is not installed or failed to run.")
             print("Please install vsce first by running: npm install -g @vscode/vsce")

@@ -88,7 +88,11 @@ The extension follows a modular architecture with three main modules:
 - Generated .vsix files for distribution
 
 ### Tools and Scripts
-- `tools/scripts/ExpandMakefileVars.py` - Python script for Makefile variable expansion and analysis
+- **tools/scripts/env_discovery.py** - Python script for Linux environment and toolchain discovery (✨ 新功能)
+  - Automatically detects `AARCH64_TOOLS_DIR` using `which` and common paths
+  - Sources user-specific setup scripts if available
+  - Outputs environment variables in shell or JSON format
+- **tools/scripts/ExpandMakefileVars.py** - Python script for Makefile variable expansion and analysis
   - Recursively expands `$(variable)` references in Makefile
   - Generates `*_expanded.mak` with expanded variables and aligned comments
   - Creates `*_miss.mak` report for unresolved variables

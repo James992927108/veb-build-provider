@@ -238,10 +238,39 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
     const Veb = selection.split('.')[0];
     // Create PrepareEnvLinuxScript.sh dynamically for Linux/WSL
     const targetLinuxScriptPath = path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_LINUX_SCRIPT);
-    const linuxScriptContent = `export TOOLS_DIR=/home/sut/Desktop/VEB/Linux_x64_Aptio_5.x_TOOLS_54/Tools
-# export AARCH64_TOOLS_DIR=/opt/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu/bin
-export AARCH64_TOOLS_DIR=/home/sut/gcc-cross-compiler/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu/bin
-export AARCH64_TOOL_PREFIX=aarch64-none-linux-gnu-`;
+    
+    // Discover environment using python script
+    let envVars = {
+      TOOLS_DIR: "/home/sut/Desktop/VEB/Linux_x64_Aptio_5.x_TOOLS_54/Tools",
+      AARCH64_TOOLS_DIR: "/home/sut/gcc-cross-compiler/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu/bin",
+      AARCH64_TOOL_PREFIX: "aarch64-none-linux-gnu-"
+    };
+
+    try {
+      const pythonScript = path.join(vebExtension.extensionPath, "tools", "scripts", "env_discovery.py");
+      const { exec } = require('child_process');
+      const execPromise = util.promisify(exec);
+      
+      logDebug(`Running discovery script: python3 ${pythonScript} --json`);
+      const { stdout } = await execPromise(`python3 "${pythonScript}" --json`);
+      envVars = JSON.parse(stdout);
+      logDebug(`Environment discovered: ${JSON.stringify(envVars)}`);
+    } catch (error) {
+      logWarn(`Failed to run environment discovery script, using defaults: ${error}`);
+    }
+
+    const linuxScriptContent = `#!/bin/bash
+# VEB Build Provider - Environment Setup Script
+
+# 1. Set environment variables (automatically detected)
+export TOOLS_DIR="${envVars.TOOLS_DIR}"
+export AARCH64_TOOLS_DIR="${envVars.AARCH64_TOOLS_DIR}"
+export AARCH64_TOOL_PREFIX="${envVars.AARCH64_TOOL_PREFIX}"
+
+echo "Environment initialized:"
+echo "  TOOLS_DIR: $TOOLS_DIR"
+echo "  AARCH64_TOOLS_DIR: $AARCH64_TOOLS_DIR"
+`;
 
     try {
       // Write file with LF line endings (normalize line endings)

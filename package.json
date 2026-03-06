@@ -575,12 +575,18 @@
         },
         "vebBuild.enhancedDebug.logFileOpenLocation": {
           "type": "string",
-          "enum": ["beside", "active", "one", "two", "three"],
+          "enum": [
+            "beside",
+            "active",
+            "one",
+            "two",
+            "three"
+          ],
           "enumDescriptions": [
             "Open beside current editor (default)",
             "Replace current active editor",
             "Open in first editor column",
-            "Open in second editor column", 
+            "Open in second editor column",
             "Open in third editor column"
           ],
           "default": "beside",
@@ -620,7 +626,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./ && npm run copy-scripts",
     "watch": "tsc -watch -p ./",
-    "copy-scripts": "xcopy tools\\scripts out\\scripts /E /I /Y"
+    "copy-scripts": "cp -r tools/scripts out/scripts"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",

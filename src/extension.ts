@@ -11,7 +11,7 @@ import { registerLanguageSupportModule } from './language-support';
 
 export function activate(context: vscode.ExtensionContext): void {
     initLogger(context);
-    logInfo(`Extension activated at: ${new Date().toISOString()}`);
+    logDebug(`Extension activated at: ${new Date().toISOString()}`);
 
     outputChannel.show();
 
@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext): void {
     // Set workspace context (if needed for UI)
     vscode.commands.executeCommand('setContext', 'vebBuild.hasEdk2Workspace', !!vscode.workspace.workspaceFolders?.length);
 
-    logInfo('Extension activation completed successfully');
+    logDebug('Extension activation completed successfully');
 }
 
 export function deactivate(): void {

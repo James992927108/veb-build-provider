@@ -20,6 +20,7 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 ### 🏗️ 核心建置功能
 - **一鍵建置**：快速執行 VEB 專案的建置流程，支援完整的建置鏈
 - **專案清理**：一鍵清理專案產生的暫存或編譯檔案，保持專案整潔
+- **自動環境偵測**：✨ **新功能** 透過 Python 腳本自動偵測 Linux 建置環境與工具鏈路徑
 - **命令面板支援**：所有功能皆可透過 VS Code 命令面板 (`Ctrl+Shift+P`) 呼叫
 - **快捷鍵觸發**：預設建置指令已綁定快捷鍵，使用更方便
 
@@ -117,6 +118,7 @@ veb-build-provider/
 │   └── extension.ts               # 擴充套件入口點
 ├── 📁 tools/                      # 統一工具檔案 (✨ 重新整合)
 │   ├── 📁 scripts/                # 建置腳本
+│   │   ├── env_discovery.py       # Linux 環境自動偵測 (✨ 新功能)
 │   │   ├── ExpandMakefileVars.py  # Makefile 變數展開
 │   │   ├── PrepareEnvScript.bat   # Windows 環境準備
 │   │   └── PrepareEnvLinuxScript.sh # Linux 環境準備
@@ -232,7 +234,7 @@ npm run compile
 
 | 版本號 | 發布日期 |
 |--------|----------|
-| v3.5.0 | 2026-01-05 |
+| v3.5.0 | 2026-03-06 |
 | v3.4.0 | 2025-09-26 |
 | v3.3.0 | 2025-08-16 |
 | v3.2.0 | 2025-07-17 |
@@ -262,3 +264,4 @@ MIT License
 ---
 
 > 本專案持續開發中，詳細技術規劃請參考：[VSCode Extension Development Roadmap](./VSCode_Extension_Development_Roadmap.md)，歡迎大家共同參與完善！
+ 
