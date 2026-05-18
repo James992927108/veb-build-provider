@@ -191,7 +191,8 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
     const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
 
     const TaskfileWindows = `{
-      "version": "${PROJECT_CONFIG.VERSION}",
+      "version": "2.0.0",
+      "vebBuildProviderVersion": "${PROJECT_CONFIG.VERSION}",
       "tasks": [
         {
           "label": "VebBuildTask",
@@ -324,7 +325,8 @@ echo "  MAKEFLAGS: $MAKEFLAGS"
     // No wrapper scripts needed - tasks will call commands directly
 
     const taskfileLinux = `{
-      "version": "${PROJECT_CONFIG.VERSION}",
+      "version": "2.0.0",
+      "vebBuildProviderVersion": "${PROJECT_CONFIG.VERSION}",
       "tasks": [
         {
           "label": "VebBuildTask",

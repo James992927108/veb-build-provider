@@ -32,44 +32,44 @@ def find_toolchain():
     return "/home/sut/gcc-cross-compiler/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu/bin"
 
 def find_java_home():
-    """Auto-detect JAVA_HOME directory."""
-    # 1. Check existing JAVA_HOME environment variable
+    """Auto-detect JAVA_HOME, preferring Java 8 (required by ParseVeB.jar + javax.json)."""
+    # 1. Honor explicit JAVA_HOME if already set by the user
     java_home = os.environ.get("JAVA_HOME", "")
-    if java_home and os.path.isdir(java_home):
+    if java_home and os.path.isdir(os.path.join(java_home, "bin")):
         return java_home
 
-    # 2. Try resolving via 'java' or 'javac' binary (follow symlinks)
+    # 2. Prefer Java 8 at well-known paths before resolving 'java' from PATH.
+    #    ParseVeB.jar requires Java 8 + javax.json, which was removed in Java 9+.
+    #    The system default 'java' is often a newer version (e.g. Java 21 on Ubuntu 22.04).
+    java8_patterns = [
+        "/usr/lib/jvm/java-8-openjdk-amd64",
+        "/usr/lib/jvm/java-8-openjdk-arm64",
+        "/usr/lib/jvm/java-1.8.0-openjdk-amd64",
+        "/usr/lib/jvm/java-1.8*",
+        "/usr/lib/jvm/java-8-*",
+    ]
+    for pattern in java8_patterns:
+        for candidate in sorted(glob.glob(pattern)) or [pattern]:
+            if os.path.isdir(os.path.join(candidate, "bin")):
+                return candidate
+
+    # 3. Fall back to resolving 'java' / 'javac' from PATH
     for binary in ["java", "javac"]:
         try:
             binary_path = subprocess.check_output(["which", binary], stderr=subprocess.STDOUT).decode().strip()
             if binary_path:
-                # Resolve symlinks to get the real path
                 real_path = os.path.realpath(binary_path)
-                # JAVA_HOME is two levels up from the binary (bin/java -> JAVA_HOME)
                 candidate = os.path.dirname(os.path.dirname(real_path))
                 if os.path.isdir(os.path.join(candidate, "bin")):
                     return candidate
         except (subprocess.CalledProcessError, FileNotFoundError):
             pass
 
-    # 3. Check common JVM installation paths
-    common_paths = [
-        "/usr/lib/jvm/java-8-openjdk-amd64",
-        "/usr/lib/jvm/java-11-openjdk-amd64",
-        "/usr/lib/jvm/java-17-openjdk-amd64",
-        "/usr/lib/jvm/java-21-openjdk-amd64",
-        "/usr/local/java",
-    ]
-    for path in common_paths:
-        if os.path.isdir(path):
-            return path
-
-    # 4. Glob search for any openjdk installation, prefer newer versions
-    for pattern in ["/usr/lib/jvm/java-*-openjdk-amd64", "/usr/lib/jvm/java-*"]:
-        matches = sorted(glob.glob(pattern))
-        for match in reversed(matches):
-            if os.path.isdir(match):
-                return match
+    # 4. Check other common JVM installation paths
+    for p in ["/usr/lib/jvm/java-11-openjdk-amd64", "/usr/lib/jvm/java-17-openjdk-amd64",
+              "/usr/lib/jvm/java-21-openjdk-amd64", "/usr/local/java"]:
+        if os.path.isdir(os.path.join(p, "bin")):
+            return p
 
     # 5. Default fallback
     return "/usr/lib/jvm/java-8-openjdk-amd64"
