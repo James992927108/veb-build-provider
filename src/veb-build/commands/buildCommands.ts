@@ -244,7 +244,8 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
     let envVars = {
       TOOLS_DIR: "/home/sut/Desktop/VEB/Linux_x64_Aptio_5.x_TOOLS_54/Tools",
       AARCH64_TOOLS_DIR: "/home/sut/gcc-cross-compiler/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu/bin",
-      AARCH64_TOOL_PREFIX: "aarch64-none-linux-gnu-"
+      AARCH64_TOOL_PREFIX: "aarch64-none-linux-gnu-",
+      JAVA_HOME: "/usr/lib/jvm/java-8-openjdk-amd64"
     };
 
     try {
@@ -267,10 +268,15 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
 export TOOLS_DIR="${envVars.TOOLS_DIR}"
 export AARCH64_TOOLS_DIR="${envVars.AARCH64_TOOLS_DIR}"
 export AARCH64_TOOL_PREFIX="${envVars.AARCH64_TOOL_PREFIX}"
+export JAVA_HOME="${envVars.JAVA_HOME}"
+export PATH="$JAVA_HOME/bin:$PATH"
+export MAKEFLAGS="JAVA=$JAVA_HOME/bin/java"
 
 echo "Environment initialized:"
 echo "  TOOLS_DIR: $TOOLS_DIR"
 echo "  AARCH64_TOOLS_DIR: $AARCH64_TOOLS_DIR"
+echo "  JAVA_HOME: $JAVA_HOME"
+echo "  MAKEFLAGS: $MAKEFLAGS"
 `;
 
     try {
