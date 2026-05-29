@@ -2,7 +2,7 @@
   "name": "veb-build-provider",
   "displayName": "veb-build-provider",
   "description": "This tools provider building project veb module explorer.",
-  "version": "3.7.0",
+  "version": "3.8.0",
   "license": "MIT",
   "publisher": "aivres-bios",
   "repository": {
@@ -90,7 +90,9 @@
         "command": "vebBuild.edk2Debug.analyzeLogFile",
         "key": "ctrl+shift+f5",
         "mac": "cmd+shift+f5"
-      }
+      },
+      { "command": "vebBuild.agentConfig.pull", "key": "ctrl+shift+alt+p", "mac": "ctrl+shift+alt+p" },
+      { "command": "vebBuild.agentConfig.push", "key": "ctrl+shift+alt+u", "mac": "ctrl+shift+alt+u" }
     ],
     "languages": [
       {
@@ -382,7 +384,9 @@
         "title": "Locate in Enhanced Debug TreeView",
         "category": "Enhanced Debug",
         "icon": "$(search-view)"
-      }
+      },
+      { "command": "vebBuild.agentConfig.pull", "title": "Agent Configs: Pull (GitHub → local)", "category": "VEB" },
+      { "command": "vebBuild.agentConfig.push", "title": "Agent Configs: Push (local → GitHub)", "category": "VEB" }
     ],
     "viewsContainers": {
       "activitybar": [

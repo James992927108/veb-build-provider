@@ -8,6 +8,7 @@ import { registerStatusBarItems } from './shared/ui/statusBar';
 import { registerVebBuildModule } from './veb-build';
 import { registerEdk2DebugModule } from './edk2-debug';
 import { registerLanguageSupportModule } from './language-support';
+import { registerAgentConfigModule } from './agent-config';
 
 export function activate(context: vscode.ExtensionContext): void {
     initLogger(context);
@@ -35,6 +36,8 @@ export function activate(context: vscode.ExtensionContext): void {
         logDebug('Loading Language Support module');
         registerLanguageSupportModule(context);
     }
+
+    registerAgentConfigModule(context);
 
     // Set workspace context (if needed for UI)
     vscode.commands.executeCommand('setContext', 'vebBuild.hasEdk2Workspace', !!vscode.workspace.workspaceFolders?.length);
