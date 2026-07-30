@@ -2,7 +2,7 @@
   "name": "veb-build-provider",
   "displayName": "veb-build-provider",
   "description": "This tools provider building project veb module explorer.",
-  "version": "3.8.0",
+  "version": "3.8.1",
   "license": "MIT",
   "publisher": "aivres-bios",
   "repository": {
@@ -626,7 +626,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./ && npm run copy-scripts",
     "watch": "tsc -watch -p ./",
-    "copy-scripts": "cp -r tools/scripts out/scripts"
+    "copy-scripts": "mkdir -p out/scripts && cp -r tools/scripts/. out/scripts/"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",

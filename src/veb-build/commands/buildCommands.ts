@@ -243,19 +243,27 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
     
     // Discover environment using python script
     let envVars = {
-      TOOLS_DIR: "/home/sut/Desktop/VEB/Linux_x64_Aptio_5.x_TOOLS_54/Tools",
-      AARCH64_TOOLS_DIR: "/home/sut/gcc-cross-compiler/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu/bin",
+      TOOLS_DIR: "/home/sut/Desktop/VEB/Linux_x64_Aptio_5.x_TOOLS_59/Tools",
+      TOOLS_VERSION: 59,
+      TOOLS_SOURCE: "fallback",
+      PROFILE: "vr",
+      AARCH64_TOOLS_DIR: "/home/sut/Desktop/VEB/toolchains/arm-gnu-toolchain-12.3.rel1-x86_64-aarch64-none-linux-gnu/bin",
       AARCH64_TOOL_PREFIX: "aarch64-none-linux-gnu-",
       JAVA_HOME: "/usr/lib/jvm/java-8-openjdk-amd64"
     };
 
     try {
       const pythonScript = path.join(vebExtension.extensionPath, "tools", "scripts", "env_discovery.py");
-      const { exec } = require('child_process');
-      const execPromise = util.promisify(exec);
+      const { execFile } = require('child_process');
+      const execFilePromise = util.promisify(execFile);
       
-      logDebug(`Running discovery script: python3 ${pythonScript} --json`);
-      const { stdout } = await execPromise(`python3 "${pythonScript}" --json`);
+      logDebug(`Running environment discovery for ${selection} in ${folderpath}`);
+      const { stdout } = await execFilePromise('python3', [
+        pythonScript,
+        '--json',
+        '--workspace', folderpath,
+        '--veb', selection
+      ]);
       envVars = JSON.parse(stdout);
       logDebug(`Environment discovered: ${JSON.stringify(envVars)}`);
     } catch (error) {
@@ -266,7 +274,9 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
 # VEB Build Provider - Environment Setup Script
 
 # 1. Set environment variables (automatically detected)
+export VEB_BUILD_PROFILE="${envVars.PROFILE}"
 export TOOLS_DIR="${envVars.TOOLS_DIR}"
+export TOOLS_VERSION="${envVars.TOOLS_VERSION}"
 export AARCH64_TOOLS_DIR="${envVars.AARCH64_TOOLS_DIR}"
 export AARCH64_TOOL_PREFIX="${envVars.AARCH64_TOOL_PREFIX}"
 export JAVA_HOME="${envVars.JAVA_HOME}"
@@ -274,7 +284,9 @@ export PATH="$JAVA_HOME/bin:$PATH"
 export MAKEFLAGS="JAVA=$JAVA_HOME/bin/java"
 
 echo "Environment initialized:"
+echo "  VEB_BUILD_PROFILE: $VEB_BUILD_PROFILE"
 echo "  TOOLS_DIR: $TOOLS_DIR"
+echo "  TOOLS_VERSION: $TOOLS_VERSION (${envVars.TOOLS_SOURCE})"
 echo "  AARCH64_TOOLS_DIR: $AARCH64_TOOLS_DIR"
 echo "  JAVA_HOME: $JAVA_HOME"
 echo "  MAKEFLAGS: $MAKEFLAGS"
