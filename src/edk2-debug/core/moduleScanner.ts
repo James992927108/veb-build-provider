@@ -54,7 +54,8 @@ export class ModuleScanner {
   
   constructor(private workspaceRoot: string) { }
 
-  async scanInfFiles(options: Partial<Edk2ScanOptions> = {}): Promise<string[]> {
+  async scanInfFiles(options: Partial<Edk2ScanOptions> = {}, scanRoot?: string): Promise<string[]> {
+    const root = scanRoot || this.workspaceRoot;
     const scanOptions: Edk2ScanOptions = {
       recursive: options.recursive ?? DEFAULT_SCAN_OPTIONS.recursive,
       excludePatterns: options.excludePatterns ?? [...DEFAULT_EXCLUDE_PATTERNS],
@@ -69,23 +70,21 @@ export class ModuleScanner {
         title: "Scanning EDK2 modules...",
         cancellable: true
       }, async (progress, token) => {
-        return this.performScan(this.workspaceRoot, scanOptions, progress, token);
+        return this.performScan(root, scanOptions, progress, token);
       });
     } else {
-      return this.performScan(this.workspaceRoot, scanOptions);
+      return this.performScan(root, scanOptions);
     }
   }
 
   // Scan all INF files in the workspace
   async scanWorkspace(workspaceRoot?: string): Promise<string[]> {
-    const targetRoot = workspaceRoot || this.workspaceRoot;
-    return this.scanInfFiles();
+    return this.scanInfFiles({}, workspaceRoot || this.workspaceRoot);
   }
 
   // Scan and parse all INF files in the workspace
   async scanAndParseWorkspace(workspaceRoot?: string): Promise<Edk2InfMeta[]> {
-    const targetRoot = workspaceRoot || this.workspaceRoot;
-    const infPaths = await this.scanInfFiles();
+    const infPaths = await this.scanInfFiles({}, workspaceRoot || this.workspaceRoot);
     const metas: Edk2InfMeta[] = [];
     let failedCount = 0;
 
@@ -144,7 +143,7 @@ export class ModuleScanner {
     let excludedCount = 0;
 
     try {
-      excludedCount = await this.scanDirectory(directory, infFiles, options, 0, progress, token);
+      excludedCount = await this.scanDirectory(directory, directory, infFiles, options, 0, progress, token);
     } catch (error) {
       handleError(`Scan directory error ${directory}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
     }
@@ -159,6 +158,7 @@ export class ModuleScanner {
   }
 
   private async scanDirectory(
+    root: string,
     directory: string,
     infFiles: string[],
     options: Edk2ScanOptions,
@@ -181,7 +181,7 @@ export class ModuleScanner {
         }
 
         const fullPath = path.join(directory, file.name);
-        const relativePath = path.relative(this.workspaceRoot, fullPath);
+        const relativePath = path.relative(root, fullPath);
 
         // Check if it should be excluded (check for all files and directories)
         if (this.matchesPatterns(relativePath, options.excludePatterns)) {
@@ -192,7 +192,7 @@ export class ModuleScanner {
 
         if (file.isDirectory() && options.recursive) {
           progress?.report({ message: `Scanning directory: ${relativePath}` });
-          const subExcludedCount = await this.scanDirectory(fullPath, infFiles, options, currentDepth + 1, progress, token);
+          const subExcludedCount = await this.scanDirectory(root, fullPath, infFiles, options, currentDepth + 1, progress, token);
           excludedCount += subExcludedCount;
         } else if (file.isFile()) {
           // Only files with the .inf extension (case-insensitive) are included

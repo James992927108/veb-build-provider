@@ -20,7 +20,7 @@
 
 ### P1
 - [ ] OPT-1  INF go-to-definition 回歸（dead provider audit 前先鎖測試）— `edk2Parser.ts`
-- [ ] OPT-2  workspaceRoot 貫穿 scanInfFiles — `moduleScanner.ts`
+- [x] OPT-2  workspaceRoot 貫穿 scanInfFiles — `moduleScanner.ts`
 - [x] OPT-3  以 debug 檔控 gate parseLogLine 每行 logDebug — `enhancedLogParser.ts`
 - [x] OPT-4  統一 VEB-name 擷取 helper — `buildCommands.ts`
 
@@ -35,7 +35,7 @@
 - [x] OPT-16 提取 extractValue + 校驗非空 — `buildCommands.ts`
 - [x] OPT-17 tasks.json 只讀一次 — `buildCommands.ts`
 - [ ] OPT-19 收斂整個文件 formatter — `edk2Formatter.ts`
-- [ ] OPT-21 gate outputChannel.show() — `extension.ts`
+- [x] OPT-21 gate outputChannel.show() — `extension.ts`
 
 ## 需先補回歸測試的高風險區（改之前）
 - edk2-debug：crossFolderNavigator、moduleScanner、logLinkProvider.performJump、moduleEnhancer
