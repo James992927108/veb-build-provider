@@ -5,7 +5,18 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { EnhancedLogParser } from '../analysis/enhancedLogParser';
-import { logError, logInfo, logDebug, logSummary } from '../../shared/utils/logger';
+import { logError, logInfo, logDebug, logWarn, logSummary } from '../../shared/utils/logger';
+
+/**
+ * Cap a candidate list to the first `cap` entries, reporting whether any were
+ * dropped. Pure helper so the search-bound is unit-testable.
+ */
+export function applySearchCap<T>(all: T[], cap: number): { files: T[]; truncated: boolean; cap: number } {
+  if (all.length <= cap) {
+    return { files: all, truncated: false, cap };
+  }
+  return { files: all.slice(0, cap), truncated: true, cap };
+}
 
 /**
  * File match result
@@ -237,20 +248,19 @@ export class CrossFolderNavigator {
    */
   private async searchByFunctionName(functionName: string): Promise<FileMatch[]> {
     const matches: FileMatch[] = [];
-    
+
     try {
       // Search all .c and .h files
       const allFiles = await vscode.workspace.findFiles('**/*.{c,h}', '**/node_modules/**');
       logDebug(`[CrossFolderNavigator] Function name search: checking ${allFiles.length} files`);
-      
-      // Limit search count to avoid performance issues (optimization: 500 -> 100)
-      const maxFiles = 100;
-      const filesToSearch = allFiles.slice(0, maxFiles);
-      
-      if (allFiles.length > maxFiles) {
-        logDebug(`[CrossFolderNavigator] Too many files (${allFiles.length}), limiting search to first ${maxFiles} files`);
+
+      // Bound the search for performance, but surface truncation instead of
+      // silently dropping matches beyond the cap (OPT-8).
+      const { files: filesToSearch, truncated, cap } = applySearchCap(allFiles, 500);
+      if (truncated) {
+        logWarn(`[CrossFolderNavigator] Too many files (${allFiles.length}); searching first ${cap} to bound cost`);
       }
-      
+
       for (const file of filesToSearch) {
         try {
           const content = fs.readFileSync(file.fsPath, 'utf-8');
