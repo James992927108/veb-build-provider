@@ -281,7 +281,6 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
       const pythonScript = path.join(vebExtension.extensionPath, "tools", "scripts", "env_discovery.py");
       const { execFile } = require('child_process');
       const execFilePromise = util.promisify(execFile);
-      
       logDebug(`Running environment discovery for ${selection} in ${folderpath}`);
       const { stdout } = await execFilePromise('python3', [
         pythonScript,

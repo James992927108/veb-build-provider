@@ -2,7 +2,7 @@
   "name": "veb-build-provider",
   "displayName": "veb-build-provider",
   "description": "This tools provider building project veb module explorer.",
-  "version": "3.11.1",
+  "version": "3.11.2",
   "license": "MIT",
   "publisher": "aivres-bios",
   "repository": {

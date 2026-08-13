@@ -53,7 +53,6 @@ def get_workspace_profile(workspace):
     }
     return matches.pop() if len(matches) == 1 else None
 
-
 def get_project_profile(veb_name):
     """Return the configured profile name for a VEB filename."""
     if not veb_name:
