@@ -9,13 +9,14 @@
 .history/
 
 # Built Visual Studio Code Extensions
-# *.vsix
+*.vsix
 
 # Claude Code AI assistant settings
 .claude/
 
 /node_modules/*
 /out/*
+/out-test/*
 
 # Python cache files
 __pycache__/
