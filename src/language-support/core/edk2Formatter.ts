@@ -27,7 +27,7 @@ interface FormatterContext {
 }
 
 // UNI formatter
-class UniLineFormatter implements LineFormatter {
+export class UniLineFormatter implements LineFormatter {
     getConfiguration(): FormatterConfig {
         const config = vscode.workspace.getConfiguration('vebBuild.formatter');
         return { speceOnUni: config['speceOnUni'] };
@@ -54,6 +54,11 @@ class UniLineFormatter implements LineFormatter {
             spacesBetweenIdentifierAndLang += context.spaceBefore;
             
             const identifierValue = line.trim().split(HASH_LANGUAGE)[1];
+            if (identifierValue === undefined) {
+                // #string line without #language: leave it untouched instead of
+                // emitting a literal "undefined" into the user's file.
+                return line;
+            }
             return HASH_STRING + identifierName + spacesBetweenIdentifierAndLang + HASH_LANGUAGE + identifierValue;
             
         } else if (line.trim().match(patternLanguage)) {

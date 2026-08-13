@@ -27,7 +27,7 @@
 ### P2
 - [ ] OPT-7  verifyWith fixer 單行 if 解析一致性 — `moduleEnhancer.ts`
 - [ ] OPT-8  findFiles 截斷 100 問題 — `crossFolderNavigator.ts`
-- [ ] OPT-9  UniLineFormatter 漏 #language 噴 undefined — `edk2Formatter.ts`
+- [x] OPT-9  UniLineFormatter 漏 #language 噴 undefined — `edk2Formatter.ts`
 - [x] OPT-10 CRLF `\r` 殘留 — `symbolProvider.ts`
 - [ ] OPT-12 tasks.json 用 object+JSON.stringify — `buildCommands.ts`
 - [x] OPT-14 預編譯 exclude regex — `moduleScanner.ts`
