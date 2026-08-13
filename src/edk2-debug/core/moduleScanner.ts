@@ -34,8 +34,23 @@ const DEFAULT_SCAN_OPTIONS: Edk2ScanOptions = {
   maxDepth: 10
 };
 
+/**
+ * Convert a glob pattern to an anchored, case-insensitive regular expression.
+ * Pure helper so the conversion is unit-testable and cacheable.
+ */
+export function globToRegExp(pattern: string): RegExp {
+  const regexPattern = pattern
+    .replace(/\./g, '\\.')              // Escape dots first
+    .replace(/\*\*/g, '§DOUBLESTAR§')   // Replace double asterisks
+    .replace(/\*/g, '[^/]*')            // Single asterisk doesn't match separators
+    .replace(/§DOUBLESTAR§/g, '.*')     // Double asterisk matches any char
+    .replace(/\?/g, '[^/]');            // Question mark = one non-separator char
+  return new RegExp('^' + regexPattern + '$', 'i');
+}
+
 export class ModuleScanner {
   private parser = new InfParser();
+  private patternRegexCache = new Map<string, RegExp>();
   
   constructor(private workspaceRoot: string) { }
 
@@ -196,19 +211,14 @@ export class ModuleScanner {
   }
 
   private matchesPatterns(filePath: string, patterns: string[]): boolean {
+    // Normalize path separators to forward slashes for cross-platform compatibility
+    const normalizedPath = filePath.replace(/\\/g, '/');
     return patterns.some(pattern => {
-      // Normalize path separators to forward slashes for cross-platform compatibility
-      const normalizedPath = filePath.replace(/\\/g, '/');
-      
-      // Convert glob pattern to regular expression
-      const regexPattern = pattern
-        .replace(/\./g, '\\.')             // Escape dots first
-        .replace(/\*\*/g, '§DOUBLESTAR§')  // Replace double asterisks
-        .replace(/\*/g, '[^/]*')           // Single asterisk doesn't match path separators
-        .replace(/§DOUBLESTAR§/g, '.*')    // Double asterisk matches any character
-        .replace(/\?/g, '[^/]');           // Question mark matches single non-path separator character
-      
-      const regex = new RegExp('^' + regexPattern + '$', 'i'); // Add case-insensitive flag
+      let regex = this.patternRegexCache.get(pattern);
+      if (!regex) {
+        regex = globToRegExp(pattern);
+        this.patternRegexCache.set(pattern, regex);
+      }
       return regex.test(normalizedPath);
     });
   }
