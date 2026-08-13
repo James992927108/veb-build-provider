@@ -11,18 +11,18 @@
 ## 優先化藍圖（多 agent 合成）
 
 ### Quick Wins（低風險、高價值，先做）
-- [ ] OPT-5  spawn error handler + 非 Windows 用 python3 — `expandMakefileVars.ts` (P1)
-- [ ] OPT-6  還原 Windows build-log 時間戳 HHMMSS — `buildCommands.ts` (P2)
+- [x] OPT-5  spawn error handler + 非 Windows 用 python3 — `expandMakefileVars.ts` (P1)
+- [x] OPT-6  還原 Windows build-log 時間戳 HHMMSS — `buildCommands.ts` (P2)
 - [ ] OPT-18 移除 dead imports/branch — `expandMakefileVars.ts`、`logLinkProvider.ts` 等
-- [ ] OPT-13/20 logging 政策：console.warn/console.error→logX；initLogger logMessage→logInfo；中文註解→英文 — `globalConfig.ts`、`infParser.ts`、`moduleEnhancer.ts`、`logger.ts`
-- [ ] OPT-11 修正 getRootPath whitespace no-op — `edk2Parser.ts`
-- [ ] OPT-22 DRY 錯誤描述 — `shared/utils/file.ts`
+- [x] OPT-13/20 logging 政策：console.warn/console.error→logX；initLogger logMessage→logInfo；中文註解→英文 — `globalConfig.ts`、`infParser.ts`、`moduleEnhancer.ts`、`logger.ts`
+- [x] OPT-11 修正 getRootPath whitespace no-op — `edk2Parser.ts`
+- [x] OPT-22 DRY 錯誤描述 — `shared/utils/file.ts`
 
 ### P1
 - [ ] OPT-1  INF go-to-definition 回歸（dead provider audit 前先鎖測試）— `edk2Parser.ts`
 - [ ] OPT-2  workspaceRoot 貫穿 scanInfFiles — `moduleScanner.ts`
-- [ ] OPT-3  以 debug 檔控 gate parseLogLine 每行 logDebug — `enhancedLogParser.ts`
-- [ ] OPT-4  統一 VEB-name 擷取 helper — `buildCommands.ts`
+- [x] OPT-3  以 debug 檔控 gate parseLogLine 每行 logDebug — `enhancedLogParser.ts`
+- [x] OPT-4  統一 VEB-name 擷取 helper — `buildCommands.ts`
 
 ### P2
 - [ ] OPT-7  verifyWith fixer 單行 if 解析一致性 — `moduleEnhancer.ts`
@@ -33,7 +33,7 @@
 - [ ] OPT-14 預編譯 exclude regex — `moduleScanner.ts`
 - [ ] OPT-15 去重 4 個 definition provider — `definitionProvider.ts`
 - [ ] OPT-16 提取 extractValue + 校驗非空 — `buildCommands.ts`
-- [ ] OPT-17 tasks.json 只讀一次 — `buildCommands.ts`
+- [x] OPT-17 tasks.json 只讀一次 — `buildCommands.ts`
 - [ ] OPT-19 收斂整個文件 formatter — `edk2Formatter.ts`
 - [ ] OPT-21 gate outputChannel.show() — `extension.ts`
 

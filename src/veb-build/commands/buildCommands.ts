@@ -499,6 +499,44 @@ async function CreateBuildtask(folderpath: string, targetFiles: string[], start:
 
 // Task Execution Functions
 
+/**
+ * Extract the VEB project file name from a tasks.json string for the given task
+ * label. Pure logic (no I/O) so it can be unit-tested headless.
+ * Returns 'Unknown.veb' when the task or a VEB value cannot be determined.
+ */
+export function extractVebNameFromJson(tasksJson: string, taskLabel: string): string {
+  let vebName = 'Unknown.veb';
+  try {
+    const tasksData = JSON.parse(tasksJson);
+    const task = tasksData.tasks?.find((t: any) => t.label === taskLabel);
+    logDebug(`Found task: ${task ? 'yes' : 'no'}, task: ${taskLabel}`);
+
+    if (task) {
+      if (task.command && task.command.includes('SET VEB=')) {
+        // Windows: extract VEB from the shell command
+        const vebMatch = task.command.match(/SET VEB=(\w+)/);
+        const currentProject = vebMatch ? vebMatch[1] : 'Unknown';
+        vebName = `${currentProject}.veb`;
+        logDebug(`Windows VEB extracted: ${vebName}`);
+      } else if (task.options && task.options.env && task.options.env.VEB) {
+        // Linux: get VEB from the environment variable
+        const currentProject = task.options.env.VEB;
+        vebName = `${currentProject}.veb`;
+        logDebug(`Linux VEB extracted from env: ${vebName}`);
+      } else {
+        logDebug(`Task command: ${task.command}`);
+        logDebug(`Task options: ${JSON.stringify(task.options)}`);
+        logWarn(`Unable to extract VEB name from task configuration`);
+      }
+    } else {
+      logWarn(`Task ${taskLabel} not found in tasks.json`);
+    }
+  } catch (error) {
+    logError(`Failed to parse VEB name from tasks.json: ${error}`);
+  }
+  return vebName;
+}
+
 async function checkAndExecuteTask(taskName: string, errorMessage: string, trackTime: boolean = false): Promise<void> {
   logDebug(`Starting ${taskName}`);
   const folderpath = getFolderPath();
@@ -521,39 +559,8 @@ async function checkAndExecuteTask(taskName: string, errorMessage: string, track
       if (selection) {
         logInfo(`Selected task: ${selection}`);
         if (trackTime) {
-          // Parse VEB file name from task configuration
-          let vebName = 'Unknown.veb';
-          try {
-            const tasksJson = await readFile(tasksJsonPath);
-            const tasksData = JSON.parse(tasksJson);
-            const task = tasksData.tasks?.find((t: any) => t.label === selection);
-            logDebug(`Found task: ${task ? 'yes' : 'no'}, selected task: ${selection}`);
-
-            if (task) {
-              if (task.command && task.command.includes('SET VEB=')) {
-                // Windows: extract VEB from command
-                const vebMatch = task.command.match(/SET VEB=(\w+)/);
-                const currentProject = vebMatch ? vebMatch[1] : 'Unknown';
-                vebName = `${currentProject}.veb`;
-                logDebug(`Windows VEB extracted: ${vebName}`);
-              } else if (task.options && task.options.env && task.options.env.VEB) {
-                // Linux: get VEB from environment variable
-                const currentProject = task.options.env.VEB;
-                vebName = `${currentProject}.veb`;
-                logDebug(`Linux VEB extracted from env: ${vebName}`);
-              } else {
-                // Try to extract from command for Linux tasks
-                logDebug(`Task command: ${task.command}`);
-                logDebug(`Task options: ${JSON.stringify(task.options)}`);
-                logWarn(`Unable to extract VEB name from task configuration`);
-              }
-            } else {
-              logWarn(`Selected task ${selection} not found in tasks.json`);
-            }
-          } catch (error) {
-            logError(`Failed to parse VEB name from tasks.json: ${error}`);
-          }
-          
+          // Reuse the tasksJson already read above; extract the VEB file name (OPT-4/17)
+          const vebName = extractVebNameFromJson(tasksJson, selection);
           buildStartTimes.set(selection, {
             startTime: Date.now(),
             vebFileName: vebName
@@ -570,45 +577,12 @@ async function checkAndExecuteTask(taskName: string, errorMessage: string, track
     } else {
       try {
         if (trackTime) {
-          // Parse VEB file name from task configuration
-          let vebName = 'Unknown.veb';
-          try {
-            const tasksJson = await readFile(tasksJsonPath);
-            const tasksData = JSON.parse(tasksJson);
-            const task = tasksData.tasks?.find((t: any) => t.label === taskName);
-            logDebug(`Found task: ${task ? 'yes' : 'no'}, task name: ${taskName}`);
-
-            if (task) {
-              if (task.command && task.command.includes('SET VEB=')) {
-                // Windows: extract VEB from command
-                const vebMatch = task.command.match(/SET VEB=(\w+)/);
-                const currentProject = vebMatch ? vebMatch[1] : 'Unknown';
-                vebName = `${currentProject}.veb`;
-                logDebug(`Windows VEB extracted: ${vebName}`);
-              } else if (task.options && task.options.env && task.options.env.VEB) {
-                // Linux: get VEB from environment variable
-                const currentProject = task.options.env.VEB;
-                vebName = `${currentProject}.veb`;
-                logDebug(`Linux VEB extracted from env: ${vebName}`);
-              } else {
-                // Try to extract from command for Linux tasks
-                logDebug(`Task command: ${task.command}`);
-                logDebug(`Task options: ${JSON.stringify(task.options)}`);
-                logWarn(`Unable to extract VEB name from task configuration`);
-              }
-            } else {
-              logWarn(`Task ${taskName} not found in tasks.json`);
-            }
-          } catch (error) {
-            logError(`Failed to parse VEB name from tasks.json: ${error}`);
-          }
-          
+          const vebName = await extractVebNameFromJson(await readFile(tasksJsonPath), taskName);
           buildStartTimes.set(taskName, {
             startTime: Date.now(),
             vebFileName: vebName
           });
           logDebug(`Started tracking time for task: ${taskName}, veb file: ${vebName}`);
-          
           logInfo(`VEB File: ${vebName}`);
         }
         await vscode.commands.executeCommand("workbench.action.tasks.runTask", taskName);
