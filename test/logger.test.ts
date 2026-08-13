@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { LogLevel, logMessageWithLevel, logInfo, logDebug, logWarn } from '../src/shared/utils/logger';
+import { LogLevel, logMessageWithLevel, logInfo, logDebug, logWarn, isDebugEnabled } from '../src/shared/utils/logger';
 
 /**
  * Baseline regression tests protecting logger behavior.
@@ -60,6 +60,12 @@ describe('logger', () => {
       resetCalls();
       logMessageWithLevel('just info', 'info');
       assert.strictEqual(callsWithPath(['window', 'showWarningMessage']).length, 0);
+    });
+  });
+
+  describe('isDebugEnabled (OPT-3 guard)', () => {
+    it('returns a boolean', () => {
+      assert.strictEqual(typeof isDebugEnabled(), 'boolean');
     });
   });
 

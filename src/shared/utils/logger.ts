@@ -71,6 +71,15 @@ export function logMessage(message: string, level: LogLevel = LogLevel.INFO) {
 }
 
 // Convenience functions
+/**
+ * Whether DEBUG-level logging is currently enabled. Callers should gate
+ * expensive debug-string construction (e.g. substring on huge log lines)
+ * behind this so the work is skipped when DEBUG is not the active level.
+ */
+export function isDebugEnabled(): boolean {
+    return LogLevel.DEBUG >= CURRENT_LOG_LEVEL;
+}
+
 export function logDebug(message: string) {
     logMessage(message, LogLevel.DEBUG);
 }

@@ -2,7 +2,7 @@
 // Enhanced Debug Log Parser - Supports log navigation functionality
 
 import * as vscode from 'vscode';
-import { logInfo, logDebug, logSummary, logError } from '../../shared/utils/logger';
+import { logInfo, logDebug, logSummary, logError, isDebugEnabled } from '../../shared/utils/logger';
 
 /**
  * Enhanced Debug Log Entry
@@ -52,7 +52,9 @@ export class EnhancedLogParser {
    * @returns Parse result
    */
   static parseLogLine(logLine: string, documentLine?: number): EnhancedLogEntry {
-    logDebug(`[EnhancedLogParser] Parsing log line: ${logLine.substring(0, 100)}...`);
+    if (isDebugEnabled()) {
+        logDebug(`[EnhancedLogParser] Parsing log line: ${logLine.substring(0, 100)}...`);
+    }
     
     const match = logLine.trim().match(this.DEBUG_PATTERN);
     
