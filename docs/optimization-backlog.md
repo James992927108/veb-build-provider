@@ -25,7 +25,7 @@
 - [x] OPT-4  統一 VEB-name 擷取 helper — `buildCommands.ts`
 
 ### P2
-- [ ] OPT-7  verifyWith fixer 單行 if 解析一致性 — `moduleEnhancer.ts`
+- [x] OPT-7  verifyWith fixer 單行 if 解析一致性 — `moduleEnhancer.ts`
 - [x] OPT-8  findFiles 截斷 100 問題 — `crossFolderNavigator.ts`
 - [x] OPT-9  UniLineFormatter 漏 #language 噴 undefined — `edk2Formatter.ts`
 - [x] OPT-10 CRLF `\r` 殘留 — `symbolProvider.ts`

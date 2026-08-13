@@ -6,6 +6,44 @@ import { Edk2InfMeta, StructInfo } from '../types';
 import { logInfo, logDebug, logWarn } from '../../shared/utils/logger';
 import { ENHANCED_DEBUG_CONSTANTS } from '../constants';
 
+/**
+ * Parse a single-line `if (condition) return ...;` STATEMENT WITHOUT braces.
+ * Uses bracket counting so nested-paren conditions are handled (unlike a naive
+ * `[^)]` regex). Shared by the add-brackets fixer and the structure verifier so
+ * the two never disagree. Returns null when the line is not such a statement.
+ */
+export function parseSingleLineIfReturn(
+  line: string
+): { indent: string; condition: string; returnStmt: string } | null {
+  const trimmed = line.trimStart();
+  if (!trimmed.startsWith('if')) { return null; }
+
+  const startIdx = line.indexOf('if');
+  const condStart = line.indexOf('(', startIdx);
+  if (condStart < 0) { return null; }
+
+  let depth = 0;
+  let condEnd = -1;
+  for (let i = condStart; i < line.length; i++) {
+    if (line[i] === '(') { depth++; }
+    else if (line[i] === ')') {
+      depth--;
+      if (depth === 0) { condEnd = i; break; }
+    }
+  }
+  if (condEnd < 0) { return null; }
+
+  const rest = line.slice(condEnd + 1).trim();
+  if (rest.startsWith('{')) { return null; } // already braced
+  if (!/^return\s+[^;]+;$/.test(rest)) { return null; }
+
+  return {
+    indent: line.slice(0, startIdx),
+    condition: line.slice(startIdx, condEnd + 1),
+    returnStmt: rest,
+  };
+}
+
 export class ModuleEnhancer {
   /**
    * Entry: Enhance INF and C files, insert debug macros
@@ -317,41 +355,12 @@ export class ModuleEnhancer {
     const fixed: string[] = [];
 
     for (const rawLine of lines) {
-      let line = rawLine;
-      const trimmed = line.trimStart();
-      if (!trimmed.startsWith('if')) {
+      const parsed = parseSingleLineIfReturn(rawLine);
+      if (!parsed) {
         fixed.push(rawLine);
         continue;
       }
-
-      // Find the end of the condition using bracket counting
-      const startIdx = rawLine.indexOf('if');
-      const condStart = rawLine.indexOf('(', startIdx);
-      if (condStart < 0) { fixed.push(rawLine); continue; }
-
-      let depth = 0;
-      let condEnd = -1;
-      for (let i = condStart; i < rawLine.length; i++) {
-        if (rawLine[i] === '(') {depth++;}
-        else if (rawLine[i] === ')') {depth--;}
-        if (depth === 0) {
-          condEnd = i;
-          break;
-        }
-      }
-      if (condEnd < 0) { fixed.push(rawLine); continue; }
-
-      // String after the condition
-      const rest = rawLine.slice(condEnd + 1).trim();
-      // Only process single-line return without original braces
-      if (!rest.startsWith('{') && rest.match(/^return\s+[^;]+;$/)) {
-        const indent = rawLine.slice(0, rawLine.indexOf('if'));
-        const condition = rawLine.slice(startIdx, condEnd + 1);
-        const returnStmt = rest;
-        fixed.push(`${indent}${condition} { ${returnStmt} }`);
-      } else {
-        fixed.push(rawLine);
-      }
+      fixed.push(`${parsed.indent}${parsed.condition} { ${parsed.returnStmt} }`);
     }
 
     return fixed.join('\n');
@@ -378,11 +387,12 @@ export class ModuleEnhancer {
     for (let i = 0; i < origLines.length; i++) {
       const orig = origLines[i].trim();
 
-      // Precisely match single-line if-return format
-      const match = orig.match(/^if\s*\(([^)]+)\)\s*return\s+[^;]+;/);
-      if (!match) { continue; }
+      // Precisely match single-line if-return format (shared parser handles
+      // nested-paren conditions, keeping checker and fixer consistent - OPT-7)
+      const parsed = parseSingleLineIfReturn(orig);
+      if (!parsed) { continue; }
 
-      const condition = match[1].trim();
+      const condition = parsed.condition.replace(/^if\s*\(/, '').replace(/\)$/, '').trim();
 
       // In the enhanced file, check if nearby lines contain if with braces
       let found = false;
