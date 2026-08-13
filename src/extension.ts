@@ -13,13 +13,13 @@ export function activate(context: vscode.ExtensionContext): void {
     initLogger(context);
     logDebug(`Extension activated at: ${new Date().toISOString()}`);
 
-    outputChannel.show();
-
     // Get module configuration
     const moduleConfig = vscode.workspace.getConfiguration('vebBuild.modules');
 
     // Conditionally register modules based on configuration
     if (moduleConfig.get('enableBuildTools', true)) {
+        // Only surface the build output channel when build tools are enabled (OPT-21)
+        outputChannel.show();
         logDebug('Loading VEB Build Tools module');
         registerVebBuildModule(context);
         // Register Status Bar only if build tools are enabled
