@@ -1,0 +1,99 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "source.ami_build",
+  "patterns": [
+    {
+      "include": "#ami_build_color"
+    }
+  ],
+  "repository": {
+    "ami_build_color": {
+      "patterns": [
+        {
+          "name": "comment.block.ami_build",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "match": "^\\s*(#define)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.ami_build"
+            },
+            "2": {
+              "name": "entity.name.function.ami_build"
+            }
+          }
+        },
+        {
+          "name": "keyword.control.ami_build",
+          "match": "^\\s*#(ifndef|ifdef|if|else|elif|endif|undef|include|pragma)\\b"
+        },
+        {
+          "name": "keyword.control.ami_build",
+          "match": "\\bdefined\\b"
+        },
+        {
+          "name": "comment.line.number-sign.ami_build",
+          "begin": "#",
+          "end": "$"
+        },
+        {
+          "name": "comment.line.double-slash.ami_build",
+          "begin": "//",
+          "end": "$"
+        },
+        {
+          "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*(=)",
+          "captures": {
+            "1": {
+              "name": "variable.language.ami_build"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.ami_build"
+            }
+          }
+        },
+        {
+          "name": "string.quoted.double.ami_build",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.ami_build",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.ami_build",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.ami_build",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "constant.numeric.ami_build",
+          "match": "\\b0[xX][0-9a-fA-F]+\\b|\\b\\d+(?:\\.\\d+)?\\b"
+        },
+        {
+          "name": "constant.language.ami_build",
+          "match": "\\b(TRUE|FALSE|NULL|Yes|No|On|Off)\\b"
+        },
+        {
+          "name": "keyword.operator.ami_build",
+          "match": "\\|"
+        },
+        {
+          "name": "variable.parameter.ami_build",
+          "match": "[A-Za-z0-9_./\\\\-]+\\.[A-Za-z0-9_]+|[A-Za-z_][A-Za-z0-9_]*"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.ami_build"
+}

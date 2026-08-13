@@ -12,16 +12,16 @@
         {
           "begin": "\\b(DSC_SPECIFICATION|PLATFORM_GUID|PLATFORM_VERSION|PLATFORM_NAME|SKUID_IDENTIFIER|SUPPORTED_ARCHITECTURES|BUILD_TARGETS|OUTPUT_DIRECTORY|FLASH_DEFINITION|BUILD_NUMBER|FIX_LOAD_TOP_MEMORY_ADDRESS|TIME_STAMP_FILE|DEFINE|RFC_LANGUAGES|ISO_LANGUAGES|VPD_TOOL_GUID|PCD_INFO_GENERATION|PREBUILD|POSTBUILD)\\b",
           "end": "=",
-          "name": "variable.function.constructor.BiosLanguage"
+          "name": "variable.function.constructor.edk2_dsc"
         },
         {
           "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*(=)",
           "captures": {
             "1": {
-              "name": "variable.function.constructor.BiosLanguage"
+              "name": "variable.function.constructor.edk2_dsc"
             },
             "2": {
-              "name": "variable.function.constructor.BiosLanguage"
+              "name": "variable.function.constructor.edk2_dsc"
             }
           }
         },
@@ -29,7 +29,7 @@
           "match": "^\\s*([A-Za-z][A-Za-z0-9_]*)\\s*(\\|)",
           "captures": {
             "1": {
-              "name": "variable.function.constructor.BiosLanguage"
+              "name": "variable.function.constructor.edk2_dsc"
             },
             "2": {
               "name": "keyword.operator.edk2_dsc"
@@ -41,7 +41,7 @@
           "end": "\\]",
           "patterns": [
             {
-              "name": "string.quoted.double.edk2_inf",
+              "name": "string.quoted.double.edk2_dsc",
               "match": "[a-zA-Z0-9.]+"
             }
           ]
@@ -49,10 +49,10 @@
         {
           "begin": " \"",
           "end": "\"",
-          "name": "invalid.illegal.BiosLanguage",
+          "name": "invalid.illegal.edk2_dsc",
           "patterns": [
             {
-              "name": "entity.name.type.BiosLanguage",
+              "name": "entity.name.type.edk2_dsc",
               "match": "."
             }
           ]
@@ -60,16 +60,16 @@
         {
           "begin": " '",
           "end": "'",
-          "name": "invalid.illegal.BiosLanguage",
+          "name": "invalid.illegal.edk2_dsc",
           "patterns": [
             {
-              "name": "entity.name.type.BiosLanguage",
+              "name": "entity.name.type.edk2_dsc",
               "match": "."
             }
           ]
         },
         {
-          "name": "entity.name.function.BiosLanguage",
+          "name": "entity.name.function.edk2_dsc",
           "match": "\\b(UINT64|UINT32|UINT16|UINT8|UINTN|BOOLEAN|VOID|TRUE|FALSE|NULL|ifdef|ifndef|if|endif|include|else|Defines|BuildOptions|SkuIds|LibraryClasses|Components|PcdsFeatureFlag|PcdsFixedAtBuild|PcdsPatchableInModule|PcdsDynamic|PcdsDynamicEx|UserExtensions)\\b"
         },
         {

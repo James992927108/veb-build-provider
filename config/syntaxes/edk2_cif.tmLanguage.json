@@ -10,22 +10,22 @@
         "keywords_cif": {
             "patterns": [
                 {
-                    "name": "entity.name.function.BiosLanguage",
+                    "name": "entity.name.function.edk2_cif",
                     "match": "\\b^(<component>|<endComponent>)\\b"
                 },
                 {
                     "begin": "\\b(name|category|LocalRoot|RefName|VERSION_STRING|ENTRY_POINT|FILE_GUID|MODULE_TYPE|LIBRARY_CLASS|CONSTRUCTOR|DESTRUCTOR|UNLOAD_IMAGE|PCD_IS_DRIVER|DPX_SOURCE|SHADOW)\\b",
                     "end": "=",
-                    "name": "variable.function.constructor.BiosLanguage"
+                    "name": "variable.function.constructor.edk2_cif"
                 },
                 {
                     "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*(=)",
                     "captures": {
                         "1": {
-                            "name": "variable.function.constructor.BiosLanguage"
+                            "name": "variable.function.constructor.edk2_cif"
                         },
                         "2": {
-                            "name": "variable.function.constructor.BiosLanguage"
+                            "name": "variable.function.constructor.edk2_cif"
                         }
                     }
                 },
@@ -34,7 +34,7 @@
                     "end": "\\]",
                     "patterns": [
                         {
-                            "name": "string.quoted.double.edk2_inf",
+                            "name": "string.quoted.double.edk2_cif",
                             "match": "[a-zA-Z0-9.]+"
                         }
                     ]
@@ -42,10 +42,10 @@
                 {
                     "begin": " \"",
                     "end": "\"",
-                    "name": "invalid.illegal.BiosLanguage",
+                    "name": "invalid.illegal.edk2_cif",
                     "patterns": [
                         {
-                            "name": "entity.name.type.BiosLanguage",
+                            "name": "entity.name.type.edk2_cif",
                             "match": "."
                         }
                     ]
@@ -53,16 +53,16 @@
                 {
                     "begin": " '",
                     "end": "'",
-                    "name": "invalid.illegal.BiosLanguage",
+                    "name": "invalid.illegal.edk2_cif",
                     "patterns": [
                         {
-                            "name": "entity.name.type.BiosLanguage",
+                            "name": "entity.name.type.edk2_cif",
                             "match": "."
                         }
                     ]
                 },
                 {
-                    "name": "entity.name.function.BiosLanguage",
+                    "name": "entity.name.function.edk2_cif",
                     "match": "\\b(ModulePart|eModule|eCore|eChipset|eBoard|FLASH|IO|Flavor|CPU|dep|sources|binaries|packages|protocols|guids|ppis|pcd|defines|depex|userextensions)\\b"
                 }
             ]

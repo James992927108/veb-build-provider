@@ -2,7 +2,7 @@
   "name": "veb-build-provider",
   "displayName": "veb-build-provider",
   "description": "This tools provider building project veb module explorer.",
-  "version": "3.9.1",
+  "version": "3.11.0",
   "license": "MIT",
   "publisher": "aivres-bios",
   "repository": {
@@ -42,7 +42,7 @@
         "command": "vebBuild.formatter.formatEdk2",
         "key": "shift+alt+F",
         "mac": "shift+alt+F",
-        "when": "resourceLangId == BiosLanguage_sdl || resourceLangId == edk2_uni"
+        "when": "resourceLangId == ami_sdl || resourceLangId == edk2_uni"
       },
       {
         "command": "editor.action.insertSnippet",
@@ -94,7 +94,7 @@
     ],
     "languages": [
       {
-        "id": "BiosLanguage_veb",
+        "id": "ami_veb",
         "extensions": [
           ".veb",
           ".vebpart"
@@ -102,7 +102,7 @@
         "configuration": "./config/languages/language-configuration_veb.json"
       },
       {
-        "id": "BiosLanguage_sdl",
+        "id": "ami_sdl",
         "extensions": [
           ".sdl"
         ],
@@ -176,16 +176,27 @@
           ".cif"
         ],
         "configuration": "./config/languages/edk2_cif.conf.json"
+      },
+      {
+        "id": "ami_build",
+        "aliases": [
+          "AMI Token",
+          "AMIToken"
+        ],
+        "extensions": [
+          ".mak",
+          ".txt"
+        ]
       }
     ],
     "grammars": [
       {
-        "language": "BiosLanguage_veb",
+        "language": "ami_veb",
         "scopeName": "source.veb",
         "path": "./config/syntaxes/BiosLanguage.tmLanguage_veb.json"
       },
       {
-        "language": "BiosLanguage_sdl",
+        "language": "ami_sdl",
         "scopeName": "source.sdl",
         "path": "./config/syntaxes/BiosLanguage.tmLanguage_sdl.json"
       },
@@ -228,6 +239,11 @@
         "language": "edk2_cif",
         "scopeName": "source.cif",
         "path": "./config/syntaxes/edk2_cif.tmLanguage.json"
+      },
+      {
+        "language": "ami_build",
+        "scopeName": "source.ami_build",
+        "path": "./config/syntaxes/ami_build.tmLanguage.json"
       }
     ],
     "snippets": [
@@ -411,7 +427,7 @@
           "group": "navigation"
         },
         {
-          "when": "resourceLangId == BiosLanguage_sdl",
+          "when": "resourceLangId == ami_sdl",
           "command": "vebBuild.formatter.formatEdk2",
           "group": "navigation"
         },
@@ -626,7 +642,8 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./ && npm run copy-scripts",
     "watch": "tsc -watch -p ./",
-    "copy-scripts": "mkdir -p out/scripts && cp -r tools/scripts/. out/scripts/"
+    "copy-scripts": "mkdir -p out/scripts && cp -r tools/scripts/. out/scripts/",
+    "deploy:server": "npm run compile && vsce package && code --install-extension veb-build-provider-*.vsix --force"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",

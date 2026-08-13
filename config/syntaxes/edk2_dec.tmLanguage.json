@@ -12,16 +12,16 @@
         {
           "begin": "\\b(PACKAGE_NAME|PACKAGE_GUID|PACKAGE_VERSION|PACKAGE_UNI_FILE|DEC_SPECIFICATION|DEFINE)\\b",
           "end": "=",
-          "name": "variable.function.constructor.BiosLanguage"
+          "name": "variable.function.constructor.edk2_dec"
         },
         {
           "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*(=)",
           "captures": {
             "1": {
-              "name": "variable.function.constructor.BiosLanguage"
+              "name": "variable.function.constructor.edk2_dec"
             },
             "2": {
-              "name": "variable.function.constructor.BiosLanguage"
+              "name": "variable.function.constructor.edk2_dec"
             }
           }
         },
@@ -40,7 +40,7 @@
           "match": "^\\s*([A-Za-z][A-Za-z0-9_]*)\\s*(\\|)",
           "captures": {
             "1": {
-              "name": "variable.function.constructor.BiosLanguage"
+              "name": "variable.function.constructor.edk2_dec"
             },
             "2": {
               "name": "keyword.operator.edk2_dec"
@@ -52,7 +52,7 @@
           "end": "\\]",
           "patterns": [
             {
-              "name": "string.quoted.double.edk2_inf",
+              "name": "string.quoted.double.edk2_dec",
               "match": "[a-zA-Z0-9.]+"
             }
           ]
@@ -71,10 +71,10 @@
         {
           "begin": " '",
           "end": "'",
-          "name": "invalid.illegal.BiosLanguage",
+          "name": "invalid.illegal.edk2_dec",
           "patterns": [
             {
-              "name": "entity.name.type.BiosLanguage",
+              "name": "entity.name.type.edk2_dec",
               "match": "."
             }
           ]
@@ -84,7 +84,7 @@
           "match": "\\b(UINT64|UINT32|UINT16|UINT8|UINTN|BOOLEAN|VOID\\*?|TRUE|FALSE|NULL)\\b"
         },
         {
-          "name": "entity.name.function.BiosLanguage",
+          "name": "entity.name.function.edk2_dec",
           "match": "\\b(ifdef|ifndef|if|endif|include|else|Includes|Guids|Ppis|Protocols|PcdsFeatureFlag|PcdsFixedAtBuild|PcdsPatchableInModule|PcdsDynamic|PcdsDynamicEx|LibraryClasses|UserExtensions)\\b"
         },
         {

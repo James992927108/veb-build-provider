@@ -10,49 +10,80 @@
 		"keywords_sdl": {
 			"patterns": [
 				{
-					"name": "entity.name.function.BiosLanguage",
-					"match": "\\b^(TOKEN|End|FFS_FILE|OUTPUTREGISTER|INFComponent|ELINK|MODULE|PATH|LibraryMapping|PcdMapping|FD_AREA|PCIDEVICE)\\b"
-				},
-				{
-					"begin": "\\b(Name|File|Index|INFComponent|Rule_Override|Parent|Arch|Skip_Packaging|Range|FD_AREA|FILE_Stmt|Template|Path|TargetFDF|InvokeOrder|GuidSpace|PcdType|Offset|Length|DataType|TargetDSC|Package|Value|Class|Instance|Override|ModuleTypes|Help|TokenType|Master|TargetH|TargetMAK|TargetEQU|Token)\\b",
-					"end": "=",
-					"name": "variable.function.constructor.BiosLanguage"
+					"name": "comment.line.number-sign.sdl",
+					"begin": "#",
+					"end": "$"
 				},
 				{
 					"begin": "\\[",
 					"end": "\\]",
 					"patterns": [
 						{
-							"name": "invalid.illegal.BiosLanguage",
-							"match": "[a-zA-Z0-9.]+"
+							"name": "entity.name.tag.sdl",
+							"match": "[A-Za-z_][A-Za-z0-9_\\-]*"
 						}
 					]
-				},					
-				{	
-					"begin": " \"",
+				},
+				{
+					"match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*(=)",
+					"captures": {
+						"1": {
+							"name": "variable.language.sdl"
+						},
+						"2": {
+							"name": "keyword.operator.assignment.sdl"
+						}
+					}
+				},
+				{
+					"name": "string.quoted.double.sdl",
+					"begin": "\"",
 					"end": "\"",
-					"name": "invalid.illegal.BiosLanguage",
-					"patterns": [			
+					"patterns": [
 						{
-							"name": "entity.name.type.BiosLanguage",
-							"match": "."
+							"name": "constant.character.escape.sdl",
+							"match": "\\\\."
 						}
 					]
-				},		
-				{	
-					"begin": " '",
+				},
+				{
+					"name": "string.quoted.single.sdl",
+					"begin": "'",
 					"end": "'",
-					"name": "invalid.illegal.BiosLanguage",
-					"patterns": [			
+					"patterns": [
 						{
-							"name": "entity.name.type.BiosLanguage",
-							"match": "."
+							"name": "constant.character.escape.sdl",
+							"match": "\\\\."
 						}
 					]
-				},				
-				{	
-					"name": "entity.name.function.BiosLanguage",
-					"match": "\\b(Integer|Yes|Expression|Boolean|AfterParent)\\b"
+				},
+				{
+					"name": "constant.numeric.sdl",
+					"match": "\\b0[xX][0-9a-fA-F]+\\b|\\b\\d+(?:\\.\\d+)?\\b"
+				},
+				{
+					"name": "constant.language.sdl",
+					"match": "\\b(TRUE|FALSE|NULL|Yes|No|On|Off)\\b"
+				},
+				{
+					"name": "entity.name.type.sdl",
+					"match": "\\b(Integer|Boolean|String|UINT64|UINT32|UINT16|UINT8|UINTN|BOOLEAN|VOID)\\b"
+				},
+				{
+					"name": "keyword.control.sdl",
+					"match": "\\b(TOKEN|End|FFS_FILE|OUTPUTREGISTER|INFComponent|ELINK|MODULE|PATH|LibraryMapping|PcdMapping|FD_AREA|PCIDEVICE|Rule_Override|Skip_Packaging|FILE_Stmt|InvokeOrder|GuidSpace|PcdType|DataType|ModuleTypes|Logic|Expression)\\b"
+				},
+				{
+					"name": "variable.parameter.sdl",
+					"match": "[A-Za-z0-9_./\\\\-]+\\.[A-Za-z0-9_]+"
+				},
+				{
+					"name": "support.function.sdl",
+					"match": "(?<=\\$\\()[A-Za-z0-9_]+(?=\\))"
+				},
+				{
+					"name": "keyword.operator.sdl",
+					"match": "\\|"
 				}
 			]
 		}

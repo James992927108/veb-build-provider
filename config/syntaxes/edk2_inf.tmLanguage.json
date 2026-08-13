@@ -12,16 +12,16 @@
         {
           "begin": "\\b(INF_VERSION|BASE_NAME|EDK_RELEASE_VERSION|PI_SPECIFICATION_VERSION|UEFI_SPECIFICATION_VERSION|FILE_GUID|MODULE_TYPE|BUILD_NUMBER|VERSION_STRING|MODULE_UNI_FILE|LIBRARY_CLASS|PCD_IS_DRIVER|ENTRY_POINT|UNLOAD_IMAGE|CONSTRUCTOR|DESTRUCTOR|SHADOW|PCI_DEVICE_ID|PCI_VENDOR_ID|PCI_CLASS_CODE|PCI_COMPRESS|UEFI_HII_RESOURCE_SECTION|DEFINE|SPEC|CUSTOM_MAKEFILE|DPX_SOURCE)\\b",
           "end": "=",
-          "name": "variable.function.constructor.BiosLanguage"
+          "name": "variable.function.constructor.edk2_inf"
         },
         {
           "match": "^\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*(=)",
           "captures": {
             "1": {
-              "name": "variable.function.constructor.BiosLanguage"
+              "name": "variable.function.constructor.edk2_inf"
             },
             "2": {
-              "name": "variable.function.constructor.BiosLanguage"
+              "name": "variable.function.constructor.edk2_inf"
             }
           }
         },
@@ -38,10 +38,10 @@
         {
           "begin": " \"",
           "end": "\"",
-          "name": "invalid.illegal.BiosLanguage",
+          "name": "invalid.illegal.edk2_inf",
           "patterns": [
             {
-              "name": "entity.name.type.BiosLanguage",
+              "name": "entity.name.type.edk2_inf",
               "match": "."
             }
           ]
@@ -49,16 +49,16 @@
         {
           "begin": " '",
           "end": "'",
-          "name": "invalid.illegal.BiosLanguage",
+          "name": "invalid.illegal.edk2_inf",
           "patterns": [
             {
-              "name": "entity.name.type.BiosLanguage",
+              "name": "entity.name.type.edk2_inf",
               "match": "."
             }
           ]
         },
         {
-          "name": "entity.name.function.BiosLanguage",
+          "name": "entity.name.function.edk2_inf",
           "match": "\\b(DXE_CORE|PEIM|PEI_CORE|SEC|DXE_DRIVER|DXE_RUNTIME_DRIVER|DXE_SAL_DRIVER|DXE_SMM_DRIVER|SMM_CORE|UEFI_APPLICATION|UEFI_DRIVER|USER_DEFINED|HOST_APPLICATION|MM_CORE_STANDALONE|MM_STANDALONE|TRUE|FALSE|NULL|Sources|Binaries|Packages|Protocols|Guids|Ppis|Pcd|LibraryClasses|Defines|Depex|UserExtensions)\\b"
         },
         {
