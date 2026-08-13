@@ -19,7 +19,7 @@
 - [x] OPT-22 DRY 錯誤描述 — `shared/utils/file.ts`
 
 ### P1
-- [!] OPT-1  INF go-to-definition 回歸（dead provider audit 前先鎖測試）— `edk2Parser.ts` （deferred：parser 刪 code，高風險，需監督下做）
+- [x] OPT-1  INF go-to-definition 回歸（dead provider audit 前先鎖測試）— `edk2Parser.ts`
 - [x] OPT-2  workspaceRoot 貫穿 scanInfFiles — `moduleScanner.ts`
 - [x] OPT-3  以 debug 檔控 gate parseLogLine 每行 logDebug — `enhancedLogParser.ts`
 - [x] OPT-4  統一 VEB-name 擷取 helper — `buildCommands.ts`
