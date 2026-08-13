@@ -40,7 +40,7 @@ const buildStartTimes = new Map<string, BuildInfo>();
 // Utility Functions
 
 
-function getFormattedTimestamp(): string {
+export function getFormattedTimestamp(): string {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -48,8 +48,7 @@ function getFormattedTimestamp(): string {
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
   const seconds = String(now.getSeconds()).padStart(2, '0');
-  // return `${year}${month}${day}-${hours}${minutes}${seconds}`;
-  return `${year}${month}${day}`;
+  return `${year}${month}${day}-${hours}${minutes}${seconds}`;
 }
 
 function formatDuration(milliseconds: number): string {

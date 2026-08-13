@@ -1,8 +1,15 @@
 // src/utils/file.ts
 
-import { logInfo, logDebug, handleError, outputChannel } from './logger';
+import { logInfo, logDebug, handleError } from './logger';
 
 import * as fs from 'fs/promises';
+
+/**
+ * Build a human-readable description from an arbitrary thrown value.
+ */
+export function describeError(error: any): string {
+    return error instanceof Error ? error.stack || error.message : String(error);
+}
 
 /**
  * Escape backslashes in a file path (for Windows compatibility).
@@ -24,7 +31,7 @@ export async function readFile(filePath: string): Promise<string> {
         logDebug(`Successfully read file: ${filePath}`);
         return content;
     } catch (error) {
-        handleError(`Failed to read file: ${filePath}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
+        handleError(`Failed to read file: ${filePath}: ${describeError(error)}`);
         return '';
     }
 }
@@ -39,7 +46,7 @@ export async function writeFile(filePath: string, content: string): Promise<void
         await fs.writeFile(filePath, content, 'utf8');
         logDebug(`Successfully wrote to file: ${filePath}`);
     } catch (error) {
-        handleError(`Failed to write to file: ${filePath}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
+        handleError(`Failed to write to file: ${filePath}: ${describeError(error)}`);
     }
 }
 
@@ -57,7 +64,7 @@ export async function copyFile(source: string, target: string): Promise<void> {
             await fs.copyFile(source, target);
             logDebug(`Copied ${source} to ${target} successfully`);
         } catch (error) {
-            handleError(`Failed to copy file from ${source} to ${target}: ${error instanceof Error ? error.stack || error.message : String(error)}`);
+            handleError(`Failed to copy file from ${source} to ${target}: ${describeError(error)}`);
         }
     }
 }

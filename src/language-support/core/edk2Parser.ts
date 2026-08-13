@@ -86,8 +86,12 @@ export class Edk2Parser {
 
             if (config.has('root.extend.path')) {
                 const s: string = config.get('root.extend.path') + '';
-                s.replace(/\s/g, '').split(',').forEach(function (v) {
-                    folder.push(vscode.workspace.workspaceFolders![0].uri.fsPath + '/' + v);
+                const cleaned = s.replace(/\s/g, ''); // replace does not mutate; capture result
+                cleaned.split(',').forEach(function (v) {
+                    const rel = v.trim();
+                    if (rel.length > 0) {
+                        folder.push(vscode.workspace.workspaceFolders![0].uri.fsPath + '/' + rel);
+                    }
                 });
             }
             return folder;

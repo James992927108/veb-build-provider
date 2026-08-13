@@ -367,7 +367,7 @@ export class ModuleEnhancer {
   ): { line: number; code: string }[] {
     const bakFile = `${srcFile}.bak`;
     if (!fs.existsSync(bakFile)) {
-      console.warn(`Backup file not found: ${bakFile}`);
+      logWarn(`Backup file not found: ${bakFile}`);
       return [];
     }
 

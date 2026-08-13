@@ -45,7 +45,7 @@ export function initLogger(context: vscode.ExtensionContext) {
     const logPath = path.join(logDir, fileName);
 
     logStream = fs.createWriteStream(logPath, { flags: 'a', encoding: 'utf8' });
-    logMessage(`Logger initialized, writing to ${logPath}`, LogLevel.INFO);
+    logInfo(`Logger initialized, writing to ${logPath}`);
 }
 
 /**

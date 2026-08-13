@@ -1,9 +1,17 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { logInfo, logDebug, logError, handleError, outputChannel } from '../../shared/utils/logger';
+import { logInfo, logDebug, logError } from '../../shared/utils/logger';
 import { spawn } from 'child_process';
 import { EXTENSION_ID } from '../../shared/utils/constants';
+
+/**
+ * Resolve the Python interpreter command. Many Linux distributions only ship
+ * 'python3', so prefer it on non-Windows platforms and fall back to 'python'.
+ */
+export function resolvePythonCommand(): string {
+    return process.platform === 'win32' ? 'python' : 'python3';
+}
 
 /**
  * Function to expand Makefile variables.
@@ -37,10 +45,15 @@ export async function expandMakefileVars(): Promise<void> {
         return;
     }
 
-    const pythonProcess = spawn('python', [pythonScriptPath, filePath], { cwd: fileDir });
+    const pythonProcess = spawn(resolvePythonCommand(), [pythonScriptPath, filePath], { cwd: fileDir });
 
     let stdoutData = '';
     let stderrData = '';
+
+    pythonProcess.on('error', (err) => {
+        logError(`Failed to launch Python interpreter: ${err.message}`);
+        vscode.window.showErrorMessage(`Failed to launch Python interpreter: ${err.message}`);
+    });
 
     pythonProcess.stdout.on('data', (data) => {
         stdoutData += data.toString();

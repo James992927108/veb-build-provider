@@ -1,40 +1,40 @@
 // src/shared/config/globalConfig.ts
-// Global Configuration for VEB Build Provider Extension
+// Global configuration for the VEB Build Provider extension.
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { logWarn } from '../../shared/utils/logger';
 
 /**
- * 動態讀取 package.json 版本號
+ * Read the extension version dynamically from the package.json at the project root.
  */
 function getPackageVersion(): string {
   try {
-    // 找到專案根目錄的 package.json
     const packageJsonPath = path.join(__dirname, '../../../package.json');
     const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
     return packageData.version || '3.4.0';
   } catch (error) {
-    console.warn('Warning: Could not read package.json version, using fallback:', error);
-    return '3.4.0'; // 備用版本號
+    logWarn(`Could not read package.json version, using fallback: ${error}`);
+    return '3.4.0'; // fallback version
   }
 }
 
 /**
- * 核心專案資訊
+ * Core project information.
  */
 const PROJECT_CONFIG = {
-  /** 專案名稱 */
+  /** Project name */
   NAME: 'veb-build-provider',
-  /** 顯示名稱 */
+  /** Display name */
   DISPLAY_NAME: 'VEB Build Provider',
-  /** 當前版本號 - 動態從 package.json 讀取 */
+  /** Current version - read dynamically from package.json */
   VERSION: getPackageVersion(),
-  /** 發佈者 */
+  /** Publisher */
   PUBLISHER: 'aivres-bios'
 } as const;
 
-// 導出配置
+// Export configuration
 export { PROJECT_CONFIG };
 
-// 便利別名
+// Convenience alias
 export const PROJECT = PROJECT_CONFIG;

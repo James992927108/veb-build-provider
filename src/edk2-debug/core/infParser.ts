@@ -2,6 +2,7 @@
 import * as path from 'path';
 import { Edk2InfMeta, Edk2ModuleType, Edk2Architecture } from '../types';
 import { Edk2Parser } from '../../language-support/core/edk2Parser';
+import { logError } from '../../shared/utils/logger';
 
 export class InfParser {
   async parse(content: string, filePath: string): Promise<Edk2InfMeta | null> {
@@ -33,7 +34,7 @@ export class InfParser {
 
       return meta;
     } catch (error) {
-      console.error(`Failed to parse INF file:`, error);
+      logError(`Failed to parse INF file: ${error}`);
       return null;
     }
   }
