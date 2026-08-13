@@ -19,7 +19,7 @@
 - [x] OPT-22 DRY 錯誤描述 — `shared/utils/file.ts`
 
 ### P1
-- [ ] OPT-1  INF go-to-definition 回歸（dead provider audit 前先鎖測試）— `edk2Parser.ts`
+- [!] OPT-1  INF go-to-definition 回歸（dead provider audit 前先鎖測試）— `edk2Parser.ts` （deferred：parser 刪 code，高風險，需監督下做）
 - [x] OPT-2  workspaceRoot 貫穿 scanInfFiles — `moduleScanner.ts`
 - [x] OPT-3  以 debug 檔控 gate parseLogLine 每行 logDebug — `enhancedLogParser.ts`
 - [x] OPT-4  統一 VEB-name 擷取 helper — `buildCommands.ts`
@@ -29,12 +29,12 @@
 - [x] OPT-8  findFiles 截斷 100 問題 — `crossFolderNavigator.ts`
 - [x] OPT-9  UniLineFormatter 漏 #language 噴 undefined — `edk2Formatter.ts`
 - [x] OPT-10 CRLF `\r` 殘留 — `symbolProvider.ts`
-- [ ] OPT-12 tasks.json 用 object+JSON.stringify — `buildCommands.ts`
+- [!] OPT-12 tasks.json 用 object+JSON.stringify — `buildCommands.ts` （deferred：改 build-關鍵 tasks.json 內容，需監督下驗證輸出等價）
 - [x] OPT-14 預編譯 exclude regex — `moduleScanner.ts`
 - [x] OPT-15 去重 4 個 definition provider — `definitionProvider.ts`
 - [x] OPT-16 提取 extractValue + 校驗非空 — `buildCommands.ts`
 - [x] OPT-17 tasks.json 只讀一次 — `buildCommands.ts`
-- [ ] OPT-19 收斂整個文件 formatter — `edk2Formatter.ts`
+- [!] OPT-19 收斂整個文件 formatter — `edk2Formatter.ts` （deferred：改使用者檔案排版，需監督下做）
 - [x] OPT-21 gate outputChannel.show() — `extension.ts`
 
 ## 需先補回歸測試的高風險區（改之前）
