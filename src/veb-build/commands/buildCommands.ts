@@ -180,6 +180,15 @@ async function showEnvironmentSelection(): Promise<TargetEnvironment | undefined
 
 // Task Creation Functions
 
+/**
+ * Extract the value of a quoted `key = "value"` entry from a .veb file.
+ * Pure helper, hoisted to module scope for reuse and testability.
+ */
+export function extractValue(data: string, key: string): string {
+  const match = data.match(new RegExp(`^\\s*${key} = \"(.*?)\"`, 'm'));
+  return match ? match[1] : "";
+}
+
 async function BuildDefaultTask(folderpath: string, selection: string, targetEnvironment: TargetEnvironment): Promise<string> {
   logDebug("BuildDefaultTask Start");
   const vebExtension = vscode.extensions.getExtension(EXTENSION_ID);
@@ -196,15 +205,13 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
     const targetScriptPath = escapePath(path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_WIN_SCRIPT));
     await copyFile(sourceScriptPath, targetScriptPath);
     const fileData = await readFile(path.join(folderpath, selection));
-    
-    function extractValue(data: string, key: string): string {
-      const match = data.match(new RegExp(`^\\s*${key} = \"(.*?)\"`, 'm'));
-      return match ? match[1] : "";
-    }
-    
+
     const buildCommand = extractValue(fileData, 'Build');
     const reBuildCommand = extractValue(fileData, 'BuildAll');
     const cleanCommand = extractValue(fileData, 'CleanCmd');
+    if (!buildCommand) {
+      logWarn(`Build command is empty in ${selection}; check the 'Build' entry in the .veb file`);
+    }
     const Veb = selection.split('.')[0];
     const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
 

@@ -32,7 +32,7 @@
 - [ ] OPT-12 tasks.json 用 object+JSON.stringify — `buildCommands.ts`
 - [ ] OPT-14 預編譯 exclude regex — `moduleScanner.ts`
 - [ ] OPT-15 去重 4 個 definition provider — `definitionProvider.ts`
-- [ ] OPT-16 提取 extractValue + 校驗非空 — `buildCommands.ts`
+- [x] OPT-16 提取 extractValue + 校驗非空 — `buildCommands.ts`
 - [x] OPT-17 tasks.json 只讀一次 — `buildCommands.ts`
 - [ ] OPT-19 收斂整個文件 formatter — `edk2Formatter.ts`
 - [ ] OPT-21 gate outputChannel.show() — `extension.ts`
