@@ -34,7 +34,7 @@
 - [x] OPT-15 去重 4 個 definition provider — `definitionProvider.ts`
 - [x] OPT-16 提取 extractValue + 校驗非空 — `buildCommands.ts`
 - [x] OPT-17 tasks.json 只讀一次 — `buildCommands.ts`
-- [!] OPT-19 收斂整個文件 formatter — `edk2Formatter.ts` （deferred：改使用者檔案排版，需監督下做）
+- [x] OPT-19 收斂整個文件 formatter — `edk2Formatter.ts`
 - [x] OPT-21 gate outputChannel.show() — `extension.ts`
 
 ## 需先補回歸測試的高風險區（改之前）

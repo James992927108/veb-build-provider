@@ -208,30 +208,31 @@ export class Edk2FormatterCore {
     }
 
     async formatContent(content: string, languageId: string): Promise<string> {
-        // For now, implement basic formatting logic
-        // In the future, this can be enhanced with more sophisticated formatting
+        // For now, implement basic formatting logic.
+        // OPT-19: be conservative — preserve leading indentation and blank lines
+        // instead of destroying document layout (FDF/INF), only normalize spacing.
         const lines = content.split('\n');
         const formattedLines = lines.map(line => {
-            // Basic formatting: trim whitespace and normalize spacing
             const trimmed = line.trim();
             if (trimmed === '') {
-                return '';
+                return line; // keep blank lines intact
             }
-            
+
             // Handle section headers
             if (trimmed.match(/^\[[\w\s\.]+\]$/)) {
                 return trimmed;
             }
-            
-            // Handle key-value pairs
+
+            // Handle key-value pairs (normalize spacing only)
             if (trimmed.includes('=')) {
                 const [key, value] = trimmed.split('=', 2);
                 return `${key.trim()} = ${value.trim()}`;
             }
-            
-            return trimmed;
+
+            // Other lines: strip trailing whitespace but preserve leading indentation
+            return line.replace(/\s+$/, '');
         });
-        
+
         return formattedLines.join('\n');
     }
 }
