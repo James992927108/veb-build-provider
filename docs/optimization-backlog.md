@@ -13,7 +13,7 @@
 ### Quick Wins（低風險、高價值，先做）
 - [x] OPT-5  spawn error handler + 非 Windows 用 python3 — `expandMakefileVars.ts` (P1)
 - [x] OPT-6  還原 Windows build-log 時間戳 HHMMSS — `buildCommands.ts` (P2)
-- [ ] OPT-18 移除 dead imports/branch — `expandMakefileVars.ts`、`logLinkProvider.ts` 等
+- [x] OPT-18 移除 dead imports/branch — `expandMakefileVars.ts`、`logLinkProvider.ts` 等
 - [x] OPT-13/20 logging 政策：console.warn/console.error→logX；initLogger logMessage→logInfo；中文註解→英文 — `globalConfig.ts`、`infParser.ts`、`moduleEnhancer.ts`、`logger.ts`
 - [x] OPT-11 修正 getRootPath whitespace no-op — `edk2Parser.ts`
 - [x] OPT-22 DRY 錯誤描述 — `shared/utils/file.ts`

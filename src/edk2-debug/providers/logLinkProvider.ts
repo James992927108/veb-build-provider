@@ -157,20 +157,12 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
       
       // Decide handling based on number of matches
       let targetFile: string | undefined;
-      
-      if (matchingFiles.length === 0) {
-        // No matching files found
-        vscode.window.showWarningMessage(
-          `Cannot find source file for function ${jumpInfo.function}. Please ensure the current workspace contains BIOS project source code.`
-        );
-        logDebug(`[LogLinkProvider] No matching files found: ${jumpInfo.module}:${jumpInfo.function}`);
-        return;
-        
-      } else if (matchingFiles.length === 1) {
+
+      if (matchingFiles.length === 1) {
         // Only one match, jump directly
         targetFile = matchingFiles[0];
         logDebug(`[LogLinkProvider] Found unique matching file: ${targetFile}`);
-        
+
       } else {
         // Multiple matches, show selection window
         logDebug(`[LogLinkProvider] Found ${matchingFiles.length} matching files, showing selection window`);
