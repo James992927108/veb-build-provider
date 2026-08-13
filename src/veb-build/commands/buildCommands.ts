@@ -189,6 +189,58 @@ export function extractValue(data: string, key: string): string {
   return match ? match[1] : "";
 }
 
+/** Build the Windows tasks.json body from objects instead of %s templates (OPT-12). */
+export function buildWindowsTasksJson(
+  veb: string,
+  prepareScript: string,
+  buildCommand: string,
+  rebuildCommand: string,
+  cleanCommand: string,
+  teePath: string,
+  logFile: string,
+  version: string
+): string {
+  const buildCmd = (body: string) =>
+    `cmd /V /C "SET VEB=${veb}&&echo veb = !VEB! &&${body} 2>&1| ${teePath} ${logFile}"`;
+  const shellTask = (label: string, command: string) => ({
+    label,
+    type: 'shell',
+    command,
+    options: { shell: { executable: 'cmd.exe', args: ['/c'] } },
+  });
+  const tasks = [
+    shellTask('VebBuildTask', buildCmd(`${prepareScript} && ${buildCommand}`)),
+    shellTask('VebReBuildTask', buildCmd(`${prepareScript} && ${rebuildCommand}`)),
+    shellTask('VebCleanTask', buildCmd(`${prepareScript} && ${cleanCommand}`)),
+  ];
+  return JSON.stringify({ version: '2.0.0', vebBuildProviderVersion: version, tasks }, null, 2);
+}
+
+/** Build the Linux tasks.json body from objects instead of %s templates (OPT-12). */
+export function buildLinuxTasksJson(veb: string, version: string): string {
+  const cmd = (action: string) =>
+    `bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && ${action} 2>&1 | tee \${workspaceFolder}/Build-$VEB-$(date +%Y%m%d-%H%M%S).log'`;
+  const env = { VEB: veb };
+  const tasks = [
+    { label: 'VebBuildTask', type: 'shell', command: cmd('make'), options: { env }, group: 'build' },
+    { label: 'VebReBuildTask', type: 'shell', command: cmd('make rebuild'), options: { env }, group: 'build' },
+    { label: 'VebCleanTask', type: 'shell', command: cmd('make clean'), options: { env } },
+    {
+      label: 'VebReleaseBuildTask',
+      type: 'shell',
+      command: `chmod +x \${workspaceFolder}/GB300_Release_Build.sh && bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && \${workspaceFolder}/GB300_Release_Build.sh $VEB'`,
+      options: { env },
+    },
+    {
+      label: 'VebCustomBuildTask',
+      type: 'shell',
+      command: `chmod +x \${workspaceFolder}/.vscode/CustomBuild.sh && bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && \${workspaceFolder}/.vscode/CustomBuild.sh'`,
+      options: { env },
+    },
+  ];
+  return JSON.stringify({ version: '2.0.0', vebBuildProviderVersion: version, tasks }, null, 2);
+}
+
 async function BuildDefaultTask(folderpath: string, selection: string, targetEnvironment: TargetEnvironment): Promise<string> {
   logDebug("BuildDefaultTask Start");
   const vebExtension = vscode.extensions.getExtension(EXTENSION_ID);
@@ -215,50 +267,9 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
     const Veb = selection.split('.')[0];
     const logFile = `Build-${Veb}-${getFormattedTimestamp()}.log`;
 
-    const TaskfileWindows = `{
-      "version": "2.0.0",
-      "vebBuildProviderVersion": "${PROJECT_CONFIG.VERSION}",
-      "tasks": [
-        {
-          "label": "VebBuildTask",
-          "type": "shell",
-          "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\"",
-          "options": {
-            "shell": {
-              "executable": "cmd.exe",
-              "args": ["/c"]
-            }
-          }
-        },
-        {
-          "label": "VebReBuildTask",
-          "type": "shell",
-          "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\"",
-          "options": {
-            "shell": {
-              "executable": "cmd.exe",
-              "args": ["/c"]
-            }
-          }
-        },
-        {
-          "label": "VebCleanTask",
-          "type": "shell",
-          "command": "cmd /V /C \\"SET VEB=%s&&echo veb = !VEB! &&%s && %s 2>&1| %s %s\\"",
-          "options": {
-            "shell": {
-              "executable": "cmd.exe",
-              "args": ["/c"]
-            }
-          }
-        }
-      ]
-    }`;
-
-    result = util.format(TaskfileWindows,
-      Veb, targetScriptPath, buildCommand, teePath, logFile,
-      Veb, targetScriptPath, reBuildCommand, teePath, logFile,
-      Veb, targetScriptPath, cleanCommand, teePath, logFile
+    result = buildWindowsTasksJson(
+      Veb, targetScriptPath, buildCommand, reBuildCommand, cleanCommand,
+      teePath, logFile, PROJECT_CONFIG.VERSION
     );
   } else if (targetEnvironment === 'linux') {
     // Linux/WSL handling
@@ -376,72 +387,7 @@ chmod +x "$PROJECT_ROOT/GB300_Release_Build.sh"
 
     // No wrapper scripts needed - tasks will call commands directly
 
-    const taskfileLinux = `{
-      "version": "2.0.0",
-      "vebBuildProviderVersion": "${PROJECT_CONFIG.VERSION}",
-      "tasks": [
-        {
-          "label": "VebBuildTask",
-          "type": "shell",
-          "command": "bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && make 2>&1 | tee \${workspaceFolder}/Build-$VEB-$(date +%%Y%%m%%d-%%H%%M%%S).log'",
-          "options": {
-            "env": {
-              "VEB": "%s"
-            }
-          },
-          "group": "build"
-        },
-        {
-          "label": "VebReBuildTask",
-          "type": "shell",
-          "command": "bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && make rebuild 2>&1 | tee \${workspaceFolder}/Build-$VEB-$(date +%%Y%%m%%d-%%H%%M%%S).log'",
-          "options": {
-            "env": {
-              "VEB": "%s"
-            }
-          },
-          "group": "build"
-        },
-        {
-          "label": "VebCleanTask",
-          "type": "shell",
-          "command": "bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && make clean 2>&1 | tee \${workspaceFolder}/Build-$VEB-$(date +%%Y%%m%%d-%%H%%M%%S).log'",
-          "options": {
-            "env": {
-              "VEB": "%s"
-            }
-          }
-        },
-        {
-          "label": "VebReleaseBuildTask",
-          "type": "shell",
-          "command": "chmod +x \${workspaceFolder}/GB300_Release_Build.sh && bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && \${workspaceFolder}/GB300_Release_Build.sh $VEB'",
-          "options": {
-            "env": {
-              "VEB": "%s"
-            }
-          }
-        },
-        {
-          "label": "VebCustomBuildTask",
-          "type": "shell",
-          "command": "chmod +x \${workspaceFolder}/.vscode/CustomBuild.sh && bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && \${workspaceFolder}/.vscode/CustomBuild.sh'",
-          "options": {
-            "env": {
-              "VEB": "%s"
-            }
-          }
-        }
-      ]
-    }`;
-
-    result = util.format(taskfileLinux,
-      Veb,  // VebBuildTask
-      Veb,  // VebReBuildTask
-      Veb,  // VebCleanTask
-      Veb,  // VebReleaseBuildTask
-      Veb   // VebCustomBuildTask
-    );
+    result = buildLinuxTasksJson(Veb, PROJECT_CONFIG.VERSION);
   } else {
     throw new Error(`Unsupported target environment: ${targetEnvironment}`);
   }

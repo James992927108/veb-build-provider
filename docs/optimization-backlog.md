@@ -29,7 +29,7 @@
 - [x] OPT-8  findFiles 截斷 100 問題 — `crossFolderNavigator.ts`
 - [x] OPT-9  UniLineFormatter 漏 #language 噴 undefined — `edk2Formatter.ts`
 - [x] OPT-10 CRLF `\r` 殘留 — `symbolProvider.ts`
-- [!] OPT-12 tasks.json 用 object+JSON.stringify — `buildCommands.ts` （deferred：改 build-關鍵 tasks.json 內容，需監督下驗證輸出等價）
+- [x] OPT-12 tasks.json 用 object+JSON.stringify — `buildCommands.ts`
 - [x] OPT-14 預編譯 exclude regex — `moduleScanner.ts`
 - [x] OPT-15 去重 4 個 definition provider — `definitionProvider.ts`
 - [x] OPT-16 提取 extractValue + 校驗非空 — `buildCommands.ts`
