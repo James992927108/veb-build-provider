@@ -6,7 +6,7 @@ import { Edk2Parser, Common } from '../core/edk2Parser';
 export class Edk2DscSymbolProvider implements vscode.DocumentSymbolProvider {
     provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
         const symbols: vscode.DocumentSymbol[] = [];
-        const lines = document.getText().split('\n');
+        const lines = document.getText().split(/\r?\n/);
         let currentSection: vscode.DocumentSymbol | null = null;
 
         for (let i = 0; i < lines.length; i++) {
@@ -51,7 +51,7 @@ export class Edk2DscSymbolProvider implements vscode.DocumentSymbolProvider {
 export class Edk2DecSymbolProvider implements vscode.DocumentSymbolProvider {
     provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
         const symbols: vscode.DocumentSymbol[] = [];
-        const lines = document.getText().split('\n');
+        const lines = document.getText().split(/\r?\n/);
         let currentSection: vscode.DocumentSymbol | null = null;
 
         for (let i = 0; i < lines.length; i++) {
@@ -93,7 +93,7 @@ export class Edk2DecSymbolProvider implements vscode.DocumentSymbolProvider {
 export class Edk2FdfSymbolProvider implements vscode.DocumentSymbolProvider {
     provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
         const symbols: vscode.DocumentSymbol[] = [];
-        const lines = document.getText().split('\n');
+        const lines = document.getText().split(/\r?\n/);
         let currentSection: vscode.DocumentSymbol | null = null;
 
         for (let i = 0; i < lines.length; i++) {
@@ -136,7 +136,7 @@ export class Edk2FdfSymbolProvider implements vscode.DocumentSymbolProvider {
 export class Edk2InfSymbolProvider implements vscode.DocumentSymbolProvider {
     provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
         const symbols: vscode.DocumentSymbol[] = [];
-        const lines = document.getText().split('\n');
+        const lines = document.getText().split(/\r?\n/);
         let currentSection: vscode.DocumentSymbol | null = null;
 
         for (let i = 0; i < lines.length; i++) {
