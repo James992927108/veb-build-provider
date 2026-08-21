@@ -72,6 +72,42 @@ class BuildToolsDiscoveryTests(unittest.TestCase):
         self.assertEqual(profile["TOOLS_VERSION"], 59)
         self.assertIn("java-21", profile["JAVA_HOME"])
 
+    def test_vera_chm_identifies_vr_workspace(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "Vera.chm").touch()
+
+            profile = build_env_config.get_workspace_profile(temp_dir)
+
+        self.assertEqual(profile, "vr")
+
+    def test_grace_chm_identifies_gb_workspace(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "Grace.chm").touch()
+
+            profile = build_env_config.get_workspace_profile(temp_dir)
+
+        self.assertEqual(profile, "gb")
+
+    def test_workspace_profile_is_ambiguous_when_both_markers_exist(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "Vera.chm").touch()
+            Path(temp_dir, "Grace.chm").touch()
+
+            profile = build_env_config.get_workspace_profile(temp_dir)
+
+        self.assertIsNone(profile)
+
+    def test_vr_workspace_overrides_ambiguous_standard_veb_mapping(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            Path(temp_dir, "Vera.chm").touch()
+            workspace_profile = build_env_config.get_workspace_profile(temp_dir)
+
+        profile_name = workspace_profile or build_env_config.get_project_profile(
+            "Standard.veb"
+        )
+
+        self.assertEqual(profile_name, "vr")
+
     def test_gb_targets_use_gb_profile(self):
         for veb_name in ("Grace.veb", "GB300Ali.veb", "GB300Standard.veb"):
             self.assertEqual(build_env_config.get_project_profile(veb_name), "gb")

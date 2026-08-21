@@ -6,6 +6,8 @@ import { readFile } from '../utils/file';
 
 let projectStatusBar: vscode.StatusBarItem;
 let updateTimeout: NodeJS.Timeout | undefined;
+let isBuilding = false;
+let buildingProject = '';
 
 /**
  * Initialize all VEB-related Status Bar buttons.
@@ -80,6 +82,15 @@ function debouncedUpdateProjectStatus(): void {
  */
 export async function updateProjectStatus(): Promise<void> {
     if (!projectStatusBar) {return;}
+
+    // Keep showing the building spinner while a build is in progress
+    if (isBuilding) {
+        const name = buildingProject || '...';
+        projectStatusBar.text = `$(sync~spin) Building ${name}`;
+        projectStatusBar.tooltip = 'VEB build in progress...';
+        projectStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
+        return;
+    }
 
     try {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
@@ -159,6 +170,34 @@ function resetToInitTask(): void {
         projectStatusBar.tooltip = 'Initialize VEB Tasks (F8)';
         projectStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
         logDebug('Status bar reset to InitTask');
+    }
+}
+
+/**
+ * Update the status bar to reflect a VEB build's running / finished state.
+ * Called from the task lifecycle listeners (onDidStartTask / onDidEndTaskProcess).
+ *
+ * @param running   TRUE while the build is in progress, FALSE when it has ended.
+ * @param project   Project name to display while building (optional; falls back
+ *                  to the last-known project).
+ */
+export function setBuildState(running: boolean, project?: string): void {
+    if (!projectStatusBar) { return; }
+
+    if (running) {
+        isBuilding = true;
+        buildingProject = project || buildingProject;
+        const name = buildingProject || '...';
+        projectStatusBar.text = `$(sync~spin) Building ${name}`;
+        projectStatusBar.tooltip = 'VEB build in progress...';
+        projectStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
+        logDebug(`Status bar: building ${name}`);
+    } else {
+        isBuilding = false;
+        buildingProject = '';
+        // Restore the normal project / InitTask display
+        updateProjectStatus();
+        logDebug('Status bar: build finished');
     }
 }
 

@@ -124,7 +124,7 @@ def update_readme(new_version):
         if re.search(version_table_pattern, new_content):
             new_content = re.sub(
                 version_table_pattern,
-                f'\1\n{new_version_row}\n',
+                lambda match: f'{match.group(1)}\n{new_version_row}\n',
                 new_content
             )
         

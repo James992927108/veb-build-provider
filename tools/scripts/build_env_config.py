@@ -34,6 +34,25 @@ _PROJECT_PROFILES = {
     "Vera": "vr",
 }
 
+_WORKSPACE_PROFILE_MARKERS = {
+    "Vera.chm": "vr",
+    "Grace.chm": "gb",
+}
+
+
+def get_workspace_profile(workspace):
+    """Return the profile identified by a unique CHM marker in the workspace."""
+    if not workspace:
+        return None
+
+    workspace_path = Path(workspace)
+    matches = {
+        profile_name
+        for marker_name, profile_name in _WORKSPACE_PROFILE_MARKERS.items()
+        if (workspace_path / marker_name).is_file()
+    }
+    return matches.pop() if len(matches) == 1 else None
+
 
 def get_project_profile(veb_name):
     """Return the configured profile name for a VEB filename."""

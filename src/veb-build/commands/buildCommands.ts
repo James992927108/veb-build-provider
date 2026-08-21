@@ -10,6 +10,7 @@ import { EXTENSION_ID } from '../../shared/utils/constants';
 import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
 import { expandMakefileVars } from '../tools/expandMakefileVars';
 import { PROJECT_CONFIG } from '../../shared/config';
+import { setBuildState } from '../../shared/ui/statusBar';
 
 // Constants & Enums
 
@@ -88,9 +89,10 @@ function setupTaskListener(context: vscode.ExtensionContext): void {
       const endTimeStr = new Date(endTime).toLocaleTimeString();
       
       buildStartTimes.delete(taskName);
-      
+      setBuildState(false);
+
       const folderPath = getFolderPath();
-      
+
       // Log build completion info
       logInfo(`Folder: ${folderPath}`);
       logInfo(`VEB File: ${buildInfo.vebFileName}`);
@@ -118,9 +120,26 @@ function setupTaskListener(context: vscode.ExtensionContext): void {
     const taskName = e.execution.task.name;
     const startTimeStr = new Date().toLocaleTimeString();
     logInfo(`Task [${taskName}] started at ${startTimeStr}`);
+
+    // Flip the status-bar to a "building" state for a tracked build task
+    const buildInfo = buildStartTimes.get(taskName);
+    if (buildInfo) {
+      const project = buildInfo.vebFileName.replace(/\.veb$/i, '');
+      setBuildState(true, project);
+    }
   });
-  
-  context.subscriptions.push(taskEndListener, taskStartListener);
+
+  // Reliably reset the status bar once the build process actually terminates
+  // (onDidEndTaskProcess fires per process end; needed for shell/terminal tasks).
+  const taskProcessEndListener = vscode.tasks.onDidEndTaskProcess((e) => {
+    const taskName = e.execution.task.name;
+    const buildInfo = buildStartTimes.get(taskName);
+    if (buildInfo) {
+      setBuildState(false);
+    }
+  });
+
+  context.subscriptions.push(taskEndListener, taskStartListener, taskProcessEndListener);
 }
 
 // Environment Selection Types

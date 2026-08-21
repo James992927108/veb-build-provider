@@ -11,6 +11,7 @@ from build_env_config import (
     get_profile,
     get_profile_for_tools_version,
     get_project_profile,
+    get_workspace_profile,
 )
 
 TOOLS_DIRECTORY_PATTERN = "Linux_x64_Aptio_5.x_TOOLS_*"
@@ -168,7 +169,9 @@ def main():
 
     workspace = argument_value("--workspace")
     veb_name = argument_value("--veb")
-    profile_name = get_project_profile(veb_name)
+    # Standard.veb exists in both product families, so identify the product
+    # from its release-notes CHM before falling back to the VEB filename.
+    profile_name = get_workspace_profile(workspace) or get_project_profile(veb_name)
 
     if profile_name:
         result = get_profile(profile_name)
