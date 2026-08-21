@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { Edk2ModuleProvider } from '../core/edk2ModuleProvider';
 import { EnhancedLogParser } from '../analysis/enhancedLogParser';
+import { applyLogFilter, logFilterDescription, LogFilter } from '../analysis/logFilter';
 import { logError, logInfo, logDebug, handleError } from '../../shared/utils/logger';
 
 export type DebugMode = 'modules' | 'logs';
@@ -29,6 +30,7 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
     private logParser: EnhancedLogParser;
     private currentLogFile?: string;
     private logAnalysisData: LogAnalysisItem[] = [];
+    private logFilter: LogFilter = {};
     private treeView?: vscode.TreeView<any>;
     private statusBarItem?: vscode.StatusBarItem;
 
@@ -86,7 +88,13 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
                 if (this.currentLogFile) {
                     const fileName = path.basename(this.currentLogFile);
                     const totalEntries = this.logAnalysisData.length;
-                    this.treeView.message = `Log: ${fileName} | ${totalEntries} entries`;
+                    const visibleEntries = this.getFilteredLogEntries().length;
+                    const filterDesc = logFilterDescription(this.logFilter);
+                    let message = `Log: ${fileName} | ${visibleEntries}/${totalEntries} entries`;
+                    if (filterDesc) {
+                        message += ` | Filter: ${filterDesc}`;
+                    }
+                    this.treeView.message = message;
                 } else {
                     this.treeView.message = 'No log file loaded. Click "Open Log File" to start analysis.';
                 }
@@ -130,18 +138,26 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
 
     // Log Analysis mode child items
     private async getLogChildren(element?: LogAnalysisItem): Promise<LogAnalysisItem[]> {
+        const filtered = this.getFilteredLogEntries();
+
         if (!element) {
             // Root node - display module groups or log entries
-            if (this.logAnalysisData.length === 0) {
+            if (filtered.length === 0) {
+                if (this.logAnalysisData.length === 0) {
+                    return [{
+                        label: '📁 Click "Open Log File" to load Enhanced Debug logs',
+                    }];
+                }
                 return [{
-                    label: '📁 Click "Open Log File" to load Enhanced Debug logs',
+                    label: '🔍 No log entries match the current filter',
+                    message: 'Adjust or clear the filter to see more entries.',
                 }];
             }
 
             // Group by module
             const groupedByModule = new Map<string, LogAnalysisItem[]>();
-            
-            for (const item of this.logAnalysisData) {
+
+            for (const item of filtered) {
                 if (item.module) {
                     if (!groupedByModule.has(item.module)) {
                         groupedByModule.set(item.module, []);
@@ -164,13 +180,18 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
         } else {
             // Expand module - display log entries for this module
             if (element.module) {
-                return this.logAnalysisData
+                return filtered
                     .filter(item => item.module === element.module && item.sequence !== undefined)
                     .sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
             }
         }
 
         return [];
+    }
+
+    // Log entries matching the active filter
+    private getFilteredLogEntries(): LogAnalysisItem[] {
+        return applyLogFilter(this.logAnalysisData, this.logFilter);
     }
 
     // Log Analysis mode TreeItem
@@ -342,6 +363,98 @@ export class EnhancedDebugProvider implements vscode.TreeDataProvider<any> {
         } catch (error) {
             handleError(`Failed to change log file open location: ${error instanceof Error ? error.message : String(error)}`);
         }
+    }
+
+    // Interactive log filter: text search / module / phase / clear
+    async filterLogs(): Promise<void> {
+        try {
+            if (this.logAnalysisData.length === 0) {
+                vscode.window.showWarningMessage('No Enhanced Debug log loaded. Open a log file first.');
+                return;
+            }
+
+            const modules = Array.from(
+                new Set(this.logAnalysisData.map((item) => item.module).filter((m): m is string => !!m))
+            ).sort();
+            // Phases already present in the loaded log (preserves canonical order).
+            const phaseOrder = ['PEI', 'DXE', 'BDS', 'Runtime'];
+            const phases = phaseOrder.filter((p) =>
+                this.logAnalysisData.some((item) => item.phase === p)
+            );
+
+            const active = logFilterDescription(this.logFilter);
+            const options = [
+                { label: 'Search text', icon: '$(search)', description: this.logFilter.text ? `current: "${this.logFilter.text}"` : 'Match module, function or message' },
+                { label: 'Filter by module', icon: '$(file-code)', description: this.logFilter.module ? `current: ${this.logFilter.module}` : `${modules.length} modules available` },
+                { label: 'Filter by phase', icon: '$(clock)', description: this.logFilter.phase ? `current: ${this.logFilter.phase}` : phases.join(', ') },
+                { label: 'Clear filter', icon: '$(clear-all)', description: active ? `active: ${active}` : 'no active filter' },
+            ] as const;
+
+            // `as const` labels are unique; `label` alone is the reliable key.
+            const choice = await vscode.window.showQuickPick(
+                options,
+                { placeHolder: 'Filter Enhanced Debug logs', ignoreFocusOut: true }
+            );
+            if (!choice) {
+                return;
+            }
+
+            switch (choice.label) {
+                case 'Search text': {
+                    const text = await vscode.window.showInputBox({
+                        prompt: 'Filter log entries (matches module / function / message, case-insensitive)',
+                        value: this.logFilter.text,
+                        placeHolder: 'e.g. DMA or PEICORE',
+                    });
+                    if (text === undefined) { return; } // user cancelled
+                    this.logFilter.text = text.trim() || undefined;
+                    break;
+                }
+                case 'Filter by module': {
+                    const items = [
+                        { label: 'All modules', value: '' },
+                        ...modules.map((m) => ({ label: m, value: m })),
+                    ];
+                    const selected = await vscode.window.showQuickPick(items, {
+                        placeHolder: `Filter by module (current: ${this.logFilter.module || 'all'})`,
+                    });
+                    if (!selected) { return; }
+                    this.logFilter.module = selected.value || undefined;
+                    break;
+                }
+                case 'Filter by phase': {
+                    const items = [
+                        { label: 'All phases', value: '' },
+                        ...phases.map((p) => ({ label: p, value: p })),
+                    ];
+                    const selected = await vscode.window.showQuickPick(items, {
+                        placeHolder: `Filter by phase (current: ${this.logFilter.phase || 'all'})`,
+                    });
+                    if (!selected) { return; }
+                    this.logFilter.phase = selected.value || undefined;
+                    break;
+                }
+                case 'Clear filter': {
+                    this.logFilter = {};
+                    break;
+                }
+                default:
+                    return;
+            }
+
+            logInfo(`Log filter updated: ${logFilterDescription(this.logFilter) || '(cleared)'}`);
+            this.updateTreeViewMessage();
+            this._onDidChangeTreeData.fire(undefined);
+        } catch (error) {
+            handleError(`Log filtering failed: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    clearLogFilter(): void {
+        this.logFilter = {};
+        this.updateTreeViewMessage();
+        this._onDidChangeTreeData.fire(undefined);
+        logInfo('Log filter cleared');
     }
 
     // Jump to specific line in log file

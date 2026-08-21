@@ -46,7 +46,7 @@ export function registerEdk2DebugCommands(context: vscode.ExtensionContext): voi
         updateContexts();
     });
     registerCommandWithLog(context, 'vebBuild.enhancedDebug.openLogFile', () => enhancedDebugProvider.openLogFile());
-    registerCommandWithLog(context, 'vebBuild.enhancedDebug.filterLogs', () => handleFilterLogs());
+    registerCommandWithLog(context, 'vebBuild.enhancedDebug.filterLogs', () => handleFilterLogs(enhancedDebugProvider));
     registerCommandWithLog(context, 'vebBuild.enhancedDebug.jumpToSource', (jumpInfo) => handleJumpToSource(jumpInfo));
     registerCommandWithLog(context, 'vebBuild.enhancedDebug.jumpToLogLine', (jumpInfo) => enhancedDebugProvider.jumpToLogLine(jumpInfo));
     registerCommandWithLog(context, 'vebBuild.enhancedDebug.locateInTreeView', () => enhancedDebugProvider.locateInTreeView());
@@ -130,13 +130,8 @@ async function handleRestoreModuleEnhance(enhancedDebugProvider: EnhancedDebugPr
 }
 
 // New Enhanced Debug command handlers
-async function handleFilterLogs(): Promise<void> {
-    try {
-        // TODO: Implement log filtering functionality
-        vscode.window.showInformationMessage('Log filtering functionality coming soon!');
-    } catch (error) {
-        handleError(`Log filtering failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
+async function handleFilterLogs(enhancedDebugProvider: EnhancedDebugProvider): Promise<void> {
+    await enhancedDebugProvider.filterLogs();
 }
 
 async function handleJumpToSource(jumpInfo: any): Promise<void> {
