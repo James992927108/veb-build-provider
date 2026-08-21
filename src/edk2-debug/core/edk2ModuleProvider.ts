@@ -6,7 +6,7 @@ import { ModuleScanner } from './moduleScanner';
 import { ProjectAnalyzer } from './projectAnalyzer';
 import { Edk2InfMeta } from '../types';
 import { ModuleEnhancer } from './moduleEnhancer';
-import { logMessage, logMessageWithLevel, logDebug, logSummary, logError, handleError } from '../../shared/utils/logger';
+import { logMessageWithLevel, logDebug, logSummary, logError, handleError } from '../../shared/utils/logger';
 
 export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> {
     private _onDidChangeTreeData: vscode.EventEmitter<Edk2InfMeta | undefined | null | void> = new vscode.EventEmitter<Edk2InfMeta | undefined | null | void>();
