@@ -4,8 +4,21 @@ src/**
 .gitignore
 vsc-extension-quickstart.md
 **/tsconfig.json
+**/tsconfig.test.json
 **/tslint.json
 **/.eslintrc.json
 **/*.map
 **/*.ts
 !out/**
+
+# Dev / scratch artifacts that must not ship
+temp/**
+out-test/**
+test/**
+docs/**
+.claude/**
+CLAUDE.md
+USAGE_GUIDE.md
+VSCode_Extension_Development_Roadmap.md
+**/__pycache__/**
+**/*.pyc
