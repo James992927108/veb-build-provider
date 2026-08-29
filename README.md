@@ -40,8 +40,8 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 - **模組管理**：EDK2 模組掃描、增強與管理功能
 
 ### 🧭 EDK2 跨檔案語言服務 ✨ **新功能**
-- **跨檔案 Go to Definition**：GUID / PCD / LibraryClass / 模組 BaseName 一鍵跳到宣告位置（如 INF 的 `gTokenSpace.PcdXXX` → 對應 .dec 宣告、LibraryClass → 對應 .inf），與原本的 `!include` / 路徑跳轉合併顯示
-- **Find References**：跨 .dec / .inf / .dsc 搜尋 symbol 的所有使用位置
+- **跨檔案 Go to Definition**：GUID / PCD / LibraryClass / 模組 BaseName 一鍵跳到宣告位置（如 INF 的 `gTokenSpace.PcdXXX` → 對應 .dec 宣告、LibraryClass → 對應 .inf），與原本的 `!include` / 路徑跳轉合併顯示；沿用 VS Code 內建按鍵 **F12**，無需額外設定
+- **Find References**：跨 .dec / .inf / .dsc 搜尋 symbol 的所有使用位置；沿用 VS Code 內建按鍵 **Shift+F12**
 - **EDK2 Lint（診斷）**：即時檢查缺少 `[Defines]` 必填欄位、未宣告 PCD Token、重複 GUID/PCD、缺檔案的 `!include` / Sources / Package，錯誤與警告直接顯示在編輯器波浪線
 - **智慧自動補全**：section 名稱、`MODULE_TYPE` / architecture 值、PCD token space 與 PCD 名稱、GUID、模組 / LibraryClass 名稱
 - **符號索引**：自動建立 workspace symbol index（命令：`VEB Build: Rebuild EDK2 Symbol Index`），存檔後增量更新，大型 EDK2 tree 不需整棵重掃
@@ -203,6 +203,42 @@ vsce package
 - **開啟位置設定**: 面板工具列 → "Change Log File Open Location"
 
 📖 **完整功能說明請參考：[使用指南 USAGE_GUIDE.md](./USAGE_GUIDE.md)**
+
+---
+
+## ⌨️ 快捷鍵一覽
+
+### 🏗️ 建置 / 除錯分析
+
+| 按鍵 | 功能 | `when` 條件 |
+|------|------|-------------|
+| `F7` | 執行建置 (vebBuild) | — |
+| `F8` | 初始化專案環境 (tasks.json) | — |
+| `F9` | 重新建置 (vebReBuild) | — |
+| `Ctrl+Shift+F8` | 掃描 EDK2 模組 | — |
+| `Ctrl+Shift+F7` | 增強模組 | — |
+| `Ctrl+Shift+F6` | 還原模組增強 | — |
+| `Ctrl+Shift+F5` | 分析日誌檔案 | — |
+
+### 📝 編輯 / 格式化 / 除錯片段
+
+| 按鍵 | 功能 | `when` 條件 |
+|------|------|-------------|
+| `Shift+Alt+F` | 格式化 EDK2 檔案 | `ami_sdl` / `edk2_uni` |
+| `Ctrl+F1` | 插入 debug_user_snippet | C / C++ |
+| `Ctrl+F2` | 插入 debug_start_snippet | C / C++ |
+| `Ctrl+F3` | 插入 debug_end_snippet | C / C++ |
+
+### 🧭 跨檔案 Symbol 導覽（沿用 VS Code 內建按鍵）
+
+| 按鍵 | 功能 | 適用語言 |
+|------|------|----------|
+| `F12` | Go to Definition（跳到定義） | edk2_inf / edk2_dsc / edk2_dec / edk2_fdf |
+| `Shift+F12` | Find All References（查詢所有引用） | 同上 |
+
+> 跨檔案導覽是透過註冊 `DefinitionProvider` / `ReferenceProvider` 提供，直接套用 VS Code 預設按鍵，因此**不需要、也不佔用**自訂快捷鍵；F7/F8/F9 等建置按鍵與其完全互不衝突。
+
+> **注意**：Enhanced Debug 狀態列提示的 `Ctrl+Shift+L`（定位到 TreeView）目前**尚未綁定實際快捷鍵**，且該組合與 VS Code 內建的「選取所有相符處 (Select All Occurrences)」相衝突，需使用者主動覆寫後才可使用。
 
 ---
 
