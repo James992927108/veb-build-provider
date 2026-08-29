@@ -706,7 +706,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./ && npm run copy-scripts",
-    "test": "tsc -p tsconfig.test.json && mocha --require ./test/setup/mock-vscode.js \"out-test/test/**/*.test.js\"",
+    "test": "tsc -p tsconfig.test.json && mocha --require ./test/setup/mock-vscode.js \"out-test/test/**/*.test.js\" && python3 -m unittest tools/scripts/test_env_discovery.py",
     "test:syntax": "node tools/scripts/validate_syntax_scopes.js",
     "watch": "tsc -watch -p ./",
     "copy-scripts": "mkdir -p out/scripts && cp -r tools/scripts/. out/scripts/",
