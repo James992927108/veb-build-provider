@@ -2,7 +2,7 @@
   "name": "veb-build-provider",
   "displayName": "veb-build-provider",
   "description": "This tools provider building project veb module explorer.",
-  "version": "3.11.3",
+  "version": "3.12.0",
   "license": "MIT",
   "publisher": "aivres-bios",
   "repository": {
@@ -710,7 +710,7 @@
     "test:syntax": "node tools/scripts/validate_syntax_scopes.js",
     "watch": "tsc -watch -p ./",
     "copy-scripts": "mkdir -p out/scripts && cp -r tools/scripts/. out/scripts/",
-    "deploy:server": "npm run compile && vsce package && code --install-extension veb-build-provider-*.vsix --force"
+    "deploy:server": "npm run compile && vsce package && mkdir -p dist && mv veb-build-provider-*.vsix dist/ && code --install-extension \"dist/veb-build-provider-$(npm pkg get version | tr -d '\"').vsix\" --force"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
