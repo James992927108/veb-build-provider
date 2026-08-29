@@ -39,6 +39,13 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 - **Debug 工具**：內建 Debug Snippet 插入功能，協助開發除錯
 - **模組管理**：EDK2 模組掃描、增強與管理功能
 
+### 🧭 EDK2 跨檔案語言服務 ✨ **新功能**
+- **跨檔案 Go to Definition**：GUID / PCD / LibraryClass / 模組 BaseName 一鍵跳到宣告位置（如 INF 的 `gTokenSpace.PcdXXX` → 對應 .dec 宣告、LibraryClass → 對應 .inf），與原本的 `!include` / 路徑跳轉合併顯示
+- **Find References**：跨 .dec / .inf / .dsc 搜尋 symbol 的所有使用位置
+- **EDK2 Lint（診斷）**：即時檢查缺少 `[Defines]` 必填欄位、未宣告 PCD Token、重複 GUID/PCD、缺檔案的 `!include` / Sources / Package，錯誤與警告直接顯示在編輯器波浪線
+- **智慧自動補全**：section 名稱、`MODULE_TYPE` / architecture 值、PCD token space 與 PCD 名稱、GUID、模組 / LibraryClass 名稱
+- **符號索引**：自動建立 workspace symbol index（命令：`VEB Build: Rebuild EDK2 Symbol Index`），存檔後增量更新，大型 EDK2 tree 不需整棵重掃
+
 ### 🔧 模塊化配置 ✨ **v3.3.0 新功能**
 - **按需載入**：可選擇啟用/停用特定功能模塊，實現客製化配置
 - **輕量版本**：純語法高亮版本，適合效能敏感或資源受限環境

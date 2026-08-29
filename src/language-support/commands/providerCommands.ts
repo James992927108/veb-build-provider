@@ -24,6 +24,16 @@ import {
     Edk2DocumentRangeFormattingProvider
 } from '../providers/formattingProvider';
 
+import {
+    Edk2SymbolNavigationProvider,
+    Edk2SymbolReferenceProvider,
+    EDK2_NAV_LANGUAGES
+} from '../providers/navigationProvider';
+
+import { Edk2DiagnosticsProvider } from '../providers/diagnosticsProvider';
+import { Edk2CompletionProvider } from '../providers/completionProvider';
+import { getWorkspaceIndex } from '../core/workspaceIndex';
+
 /**
  * Registers all EDK2 language providers
  * @param context The extension context for registering disposables
@@ -34,12 +44,25 @@ export function registerLanguageProviders(context: vscode.ExtensionContext): voi
     try {
         // Register Definition Providers
         registerDefinitionProviders(context);
-        
+
+        // Semantic navigation (Go to Definition / Find References) merges with
+        // the path-only definition providers already registered above.
+        registerNavigationProviders(context);
+
         // Register Symbol Providers
         registerSymbolProviders(context);
-        
+
         // Register Formatting Providers
         registerFormattingProviders(context);
+
+        // Register Diagnostics Providers
+        registerDiagnosticsProviders(context);
+
+        // Register Completion Providers
+        registerCompletionProviders(context);
+
+        // Register symbol index support (rebuild command + auto refresh)
+        registerSymbolIndexSupport(context);
 
         logDebug("All unified language providers registered successfully");
     } catch (error) {
@@ -133,6 +156,89 @@ function registerSymbolProviders(context: vscode.ExtensionContext): void {
             logError(`Failed to register ${description}: ${error}`);
         }
     });
+}
+
+/**
+ * Registers semantic navigation providers (Go to Definition / Find References).
+ * Multiple definition providers for the same language are allowed - VS Code
+ * merges results, so symbol resolution composes with the path-only jumps.
+ */
+function registerNavigationProviders(context: vscode.ExtensionContext): void {
+    const navigationProvider = new Edk2SymbolNavigationProvider();
+    const referenceProvider = new Edk2SymbolReferenceProvider();
+
+    for (const language of EDK2_NAV_LANGUAGES) {
+        try {
+            context.subscriptions.push(
+                vscode.languages.registerDefinitionProvider(
+                    { scheme: 'file', language: language },
+                    navigationProvider
+                ),
+                vscode.languages.registerReferenceProvider(
+                    { scheme: 'file', language: language },
+                    referenceProvider
+                )
+            );
+            logDebug(`Registered navigation providers for ${language}`);
+        } catch (error) {
+            logError(`Failed to register navigation providers for ${language}: ${error}`);
+        }
+    }
+}
+
+/**
+ * Registers the EDK2 lint diagnostics provider.
+ */
+function registerDiagnosticsProviders(context: vscode.ExtensionContext): void {
+    const diagnosticsProvider = new Edk2DiagnosticsProvider();
+    diagnosticsProvider.register(context);
+    context.subscriptions.push({ dispose: () => diagnosticsProvider.dispose() });
+}
+
+/**
+ * Registers completion providers for the EDK2 languages.
+ */
+function registerCompletionProviders(context: vscode.ExtensionContext): void {
+    const completionLanguages = ['edk2_inf', 'edk2_dsc', 'edk2_dec', 'edk2_fdf'];
+    for (const language of completionLanguages) {
+        try {
+            context.subscriptions.push(
+                vscode.languages.registerCompletionItemProvider(
+                    { scheme: 'file', language: language },
+                    new Edk2CompletionProvider(language),
+                    '.', '[', 'g'
+                )
+            );
+            logDebug(`Registered completion provider for ${language}`);
+        } catch (error) {
+            logError(`Failed to register completion provider for ${language}: ${error}`);
+        }
+    }
+}
+
+/**
+ * Registers the workspace symbol index lifecycle: a manual rebuild command and
+ * an automatic refresh whenever an EDK2 source file is saved.
+ */
+function registerSymbolIndexSupport(context: vscode.ExtensionContext): void {
+    const index = getWorkspaceIndex();
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vebBuild.language.rebuildSymbolIndex', async () => {
+            await index.build();
+            const stats = index.getStats();
+            vscode.window.showInformationMessage(
+                `EDK2 symbol index rebuilt: ${stats.defs} definitions from ${stats.files} files (${stats.roots} root folder${stats.roots === 1 ? '' : 's'})`
+            );
+        }),
+        vscode.workspace.onDidSaveTextDocument((document) => {
+            if (/\.(inf|dec|dsc)$/i.test(document.fileName)) {
+                // Incremental single-file refresh so saving never blocks the
+                // editor or re-scans a large tree.
+                index.refreshFile(document.fileName).catch(() => { });
+            }
+        })
+    );
+    logDebug('Registered symbol index support');
 }
 
 /**

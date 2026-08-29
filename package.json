@@ -282,6 +282,12 @@
         "title": "Expand Makefile Variables"
       },
       {
+        "command": "vebBuild.language.rebuildSymbolIndex",
+        "title": "Rebuild EDK2 Symbol Index",
+        "category": "VEB Build",
+        "icon": "$(symbol-reference)"
+      },
+      {
         "command": "vebBuild.edk2Debug.scanProject",
         "title": "Rescan EDK2 Project",
         "category": "VEB Build",
