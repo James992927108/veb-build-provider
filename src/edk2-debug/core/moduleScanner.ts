@@ -7,13 +7,10 @@ import { Edk2ScanOptions, Edk2InfMeta } from '../types';
 import { InfParser } from './infParser';
 
 const DEFAULT_EXCLUDE_PATTERNS = [
+  // Case-insensitive globs (see globToRegExp), so only one casing is listed.
   "**/Build/**",
-  "**/build/**",
-  "**/BUILD/**",
-  "**/BuildBrh/**",
   "Build/**",
-  "build/**",
-  "BUILD/**",
+  "**/BuildBrh/**",
   "BuildBrh/**",
   "**/Conf/**",
   "Conf/**",

@@ -23,18 +23,9 @@ function getPackageVersion(): string {
  * Core project information.
  */
 const PROJECT_CONFIG = {
-  /** Project name */
-  NAME: 'veb-build-provider',
-  /** Display name */
-  DISPLAY_NAME: 'VEB Build Provider',
   /** Current version - read dynamically from package.json */
-  VERSION: getPackageVersion(),
-  /** Publisher */
-  PUBLISHER: 'aivres-bios'
+  VERSION: getPackageVersion()
 } as const;
 
 // Export configuration
 export { PROJECT_CONFIG };
-
-// Convenience alias
-export const PROJECT = PROJECT_CONFIG;

@@ -150,11 +150,6 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
         return this.modules;
     }
 
-    getElementByFilePath(filePath: string): Edk2InfMeta | undefined {
-        // Use modules for global search to ensure all modules are included
-        return this.modules.find(m => m.filePath === filePath);
-    }
-
     // Enhanced error logging - scanModules method
     async scanModules(): Promise<void> {
         try {
@@ -339,14 +334,6 @@ export class Edk2ModuleProvider implements vscode.TreeDataProvider<Edk2InfMeta> 
         };
 
         return item;
-    }
-
-    getModuleCount(): number {
-        return this.filteredModules.length;
-    }
-
-    async getAllModules(): Promise<Edk2InfMeta[]> {
-        return this.filteredModules;
     }
 
     async getModuleByPath(infPath: string): Promise<Edk2InfMeta | undefined> {

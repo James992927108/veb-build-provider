@@ -288,26 +288,6 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
   }
 
   /**
-   * Get cache statistics
-   */
-  getCacheStats(): { size: number; keys: string[] } {
-    return {
-      size: this.documentLinksCache.size,
-      keys: Array.from(this.documentLinksCache.keys())
-    };
-  }
-
-  /**
-   * Clear all cache
-   */
-  clearAllCache(): void {
-    const size = this.documentLinksCache.size;
-    this.documentLinksCache.clear();
-    this.navigator.clearCache();
-    logInfo(`[LogLinkProvider] Cleared all cache (${size} DocumentLinks + CrossFolderNavigator cache)`);
-  }
-
-  /**
    * Create DocumentLink for a single line
    */
   private createDocumentLink(line: string, lineIndex: number): vscode.DocumentLink | null {
@@ -334,23 +314,4 @@ export class LogLinkProvider implements vscode.DocumentLinkProvider {
     
     return null;
   }
-}
-
-/**
- * Register Enhanced Debug jump URI handler
- */
-export function registerEnhancedDebugUriHandler(context: vscode.ExtensionContext): void {
-  const disposable = vscode.window.registerUriHandler({
-    handleUri(uri: vscode.Uri): vscode.ProviderResult<void> {
-      if (uri.scheme === 'enhanced-debug' && uri.authority === 'jump') {
-        logDebug(`[EnhancedDebugUriHandler] Handling jump URI: ${uri.toString()}`);
-        
-        // Additional jump logic can be added here
-        // Currently main logic is handled in LogLinkProvider.resolveDocumentLink
-      }
-    }
-  });
-  
-  context.subscriptions.push(disposable);
-  logDebug(`[EnhancedDebugUriHandler] URI handler registration completed`);
 }

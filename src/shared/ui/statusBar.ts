@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { logInfo, logDebug, logWarn } from '../utils/logger';
+import { logDebug } from '../utils/logger';
 import { readFile } from '../utils/file';
+import { extractVebNameFromJson } from '../utils/taskConfig';
 
 let projectStatusBar: vscode.StatusBarItem;
 let updateTimeout: NodeJS.Timeout | undefined;
@@ -118,43 +119,25 @@ export async function updateProjectStatus(): Promise<void> {
         // Try to read current project from tasks.json
         const tasksJson = await readFile(tasksJsonPath);
         const tasksObject = JSON.parse(tasksJson);
-        
-        const buildTask = tasksObject.tasks?.find((task: any) => task.label === "VebBuildTask");
-        if (buildTask) {
-            // Display project name when configured
-            let currentProject = 'Unknown';
 
-            // Try Windows format first (SET VEB=ProjectName)
-            if (buildTask.command && buildTask.command.includes('SET VEB=')) {
-                const vebMatch = buildTask.command.match(/SET VEB=(\w+)/);
-                currentProject = vebMatch ? vebMatch[1] : 'Unknown';
-                logDebug(`Windows VEB format detected: ${currentProject}`);
-            }
-            // Try Linux format (export VEB=ProjectName in command or env.VEB)
-            else if (buildTask.options && buildTask.options.env && buildTask.options.env.VEB) {
-                currentProject = buildTask.options.env.VEB;
-                logDebug(`Linux VEB format detected from env: ${currentProject}`);
-            }
-            // Try extracting from Linux command format (export VEB=ProjectName)
-            else if (buildTask.command && buildTask.command.includes('export VEB=')) {
-                const vebMatch = buildTask.command.match(/export VEB=(\w+)/);
-                currentProject = vebMatch ? vebMatch[1] : 'Unknown';
-                logDebug(`Linux VEB format detected from command: ${currentProject}`);
-            }
-            else {
-                logWarn(`Unable to extract VEB project name from task: ${JSON.stringify(buildTask)}`);
-            }
-
-            projectStatusBar.text = `$(project) ${currentProject}`;
-            projectStatusBar.tooltip = `Current VEB project: ${currentProject}\nClick to switch project (F8)`;
-            projectStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
-
-            logDebug(`Status bar updated: Current project is ${currentProject}`);
-        } else {
+        // Keep the "no VebBuildTask" distinction (InitTask) separate from an
+        // unextractable project name (Unknown); reuse the extraction rules the
+        // build-time tracking uses so the two never drift apart.
+        const buildTaskFound = !!tasksObject.tasks?.find((task: any) => task.label === "VebBuildTask");
+        if (!buildTaskFound) {
             // Display InitTask when tasks.json exists but no VebBuildTask
             resetToInitTask();
+            return;
         }
-        
+
+        // Shared parser returns 'Name.veb'; the status bar shows the bare name.
+        const vebName = extractVebNameFromJson(tasksJson, 'VebBuildTask').replace(/\.veb$/, '');
+        projectStatusBar.text = `$(project) ${vebName}`;
+        projectStatusBar.tooltip = `Current VEB project: ${vebName}\nClick to switch project (F8)`;
+        projectStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
+
+        logDebug(`Status bar updated: Current project is ${vebName}`);
+
     } catch (error) {
         // Display InitTask when no tasks.json or read failed
         resetToInitTask();

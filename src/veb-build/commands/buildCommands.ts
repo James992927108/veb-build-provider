@@ -12,6 +12,7 @@ import { expandMakefileVars } from '../tools/expandMakefileVars';
 import { PROJECT_CONFIG } from '../../shared/config';
 import { setBuildState } from '../../shared/ui/statusBar';
 import { isModuleFeatureEnabled } from '../../shared/utils/moduleConfig';
+import { extractVebNameFromJson } from '../../shared/utils/taskConfig';
 
 // Constants & Enums
 
@@ -452,44 +453,6 @@ async function CreateBuildtask(folderpath: string, targetFiles: string[], start:
 
 // Task Execution Functions
 
-/**
- * Extract the VEB project file name from a tasks.json string for the given task
- * label. Pure logic (no I/O) so it can be unit-tested headless.
- * Returns 'Unknown.veb' when the task or a VEB value cannot be determined.
- */
-export function extractVebNameFromJson(tasksJson: string, taskLabel: string): string {
-  let vebName = 'Unknown.veb';
-  try {
-    const tasksData = JSON.parse(tasksJson);
-    const task = tasksData.tasks?.find((t: any) => t.label === taskLabel);
-    logDebug(`Found task: ${task ? 'yes' : 'no'}, task: ${taskLabel}`);
-
-    if (task) {
-      if (task.command && task.command.includes('SET VEB=')) {
-        // Windows: extract VEB from the shell command
-        const vebMatch = task.command.match(/SET VEB=(\w+)/);
-        const currentProject = vebMatch ? vebMatch[1] : 'Unknown';
-        vebName = `${currentProject}.veb`;
-        logDebug(`Windows VEB extracted: ${vebName}`);
-      } else if (task.options && task.options.env && task.options.env.VEB) {
-        // Linux: get VEB from the environment variable
-        const currentProject = task.options.env.VEB;
-        vebName = `${currentProject}.veb`;
-        logDebug(`Linux VEB extracted from env: ${vebName}`);
-      } else {
-        logDebug(`Task command: ${task.command}`);
-        logDebug(`Task options: ${JSON.stringify(task.options)}`);
-        logWarn(`Unable to extract VEB name from task configuration`);
-      }
-    } else {
-      logWarn(`Task ${taskLabel} not found in tasks.json`);
-    }
-  } catch (error) {
-    logError(`Failed to parse VEB name from tasks.json: ${error}`);
-  }
-  return vebName;
-}
-
 async function checkAndExecuteTask(taskName: string, errorMessage: string, trackTime: boolean = false): Promise<void> {
   logDebug(`Starting ${taskName}`);
   const folderpath = getFolderPath();
@@ -530,7 +493,7 @@ async function checkAndExecuteTask(taskName: string, errorMessage: string, track
     } else {
       try {
         if (trackTime) {
-          const vebName = await extractVebNameFromJson(await readFile(tasksJsonPath), taskName);
+          const vebName = extractVebNameFromJson(await readFile(tasksJsonPath), taskName);
           buildStartTimes.set(taskName, {
             startTime: Date.now(),
             vebFileName: vebName

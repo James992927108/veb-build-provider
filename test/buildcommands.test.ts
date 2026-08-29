@@ -1,5 +1,6 @@
 import * as assert from 'assert';
-import { extractVebNameFromJson, extractValue } from '../src/veb-build/commands/buildCommands';
+import { extractVebNameFromJson } from '../src/shared/utils/taskConfig';
+import { extractValue } from '../src/veb-build/commands/buildCommands';
 
 describe('extractVebNameFromJson (OPT-4/17)', () => {
   const win = JSON.stringify({
@@ -11,6 +12,12 @@ describe('extractVebNameFromJson (OPT-4/17)', () => {
   const linuxEnv = JSON.stringify({
     tasks: [
       { label: 'VebReBuildTask', options: { env: { VEB: 'OtherProject' } }, command: 'echo hi' }
+    ]
+  });
+
+  const linuxCmd = JSON.stringify({
+    tasks: [
+      { label: 'VebBuildTask', command: 'export VEB=LinuxCmdProject' }
     ]
   });
 
@@ -26,6 +33,10 @@ describe('extractVebNameFromJson (OPT-4/17)', () => {
 
   it('extracts VEB from Linux options.env.VEB', () => {
     assert.strictEqual(extractVebNameFromJson(linuxEnv, 'VebReBuildTask'), 'OtherProject.veb');
+  });
+
+  it('extracts VEB from Linux export VEB= command', () => {
+    assert.strictEqual(extractVebNameFromJson(linuxCmd, 'VebBuildTask'), 'LinuxCmdProject.veb');
   });
 
   it('returns Unknown.veb when task has no VEB value', () => {

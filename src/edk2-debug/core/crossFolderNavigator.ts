@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { EnhancedLogParser } from '../analysis/enhancedLogParser';
-import { logError, logInfo, logDebug, logWarn, logSummary } from '../../shared/utils/logger';
+import { logError, logDebug, logWarn, logSummary } from '../../shared/utils/logger';
 
 /**
  * Cap a candidate list to the first `cap` entries, reporting whether any were
@@ -445,28 +445,4 @@ export class CrossFolderNavigator {
     }
   }
 
-  /**
-   * Clear search cache
-   */
-  clearCache(): void {
-    const size = this.searchCache.size;
-    this.searchCache.clear();
-    logInfo(`[CrossFolderNavigator] Search cache cleared (${size} entries)`);
-  }
-
-  /**
-   * Get cache statistics
-   */
-  getCacheStats(): { size: number; keys: string[]; totalMatches: number } {
-    let totalMatches = 0;
-    for (const cache of this.searchCache.values()) {
-      totalMatches += cache.matches.length;
-    }
-    
-    return {
-      size: this.searchCache.size,
-      keys: Array.from(this.searchCache.keys()),
-      totalMatches
-    };
-  }
 }

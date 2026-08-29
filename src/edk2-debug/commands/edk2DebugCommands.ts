@@ -4,10 +4,9 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { logInfo, logDebug, logError, logSummary, handleError } from '../../shared/utils/logger';
 import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
-import { Edk2ModuleProvider } from '../core/edk2ModuleProvider';
 import { EnhancedDebugProvider } from '../providers/enhancedDebugProvider';
 import { ModuleEnhancer } from '../core/moduleEnhancer';
-import { LogLinkProvider, registerEnhancedDebugUriHandler } from '../providers/logLinkProvider';
+import { LogLinkProvider } from '../providers/logLinkProvider';
 import { EnhancedLogParser } from '../analysis/enhancedLogParser';
 
 export function registerEdk2DebugCommands(context: vscode.ExtensionContext): void {
@@ -126,9 +125,6 @@ function registerLogLinkProviders(context: vscode.ExtensionContext): void {
         )
     );
 
-    // Register URI handler
-    registerEnhancedDebugUriHandler(context);
-
     // Listen for active editor changes, auto-detect Enhanced Debug files
     context.subscriptions.push(
         vscode.window.onDidChangeActiveTextEditor((editor) => {
@@ -214,17 +210,10 @@ async function handleJumpToSource(jumpInfo: any): Promise<void> {
             return;
         }
 
-        // Use existing jump-to-source functionality
-        const jumpToSourceCommand = vscode.commands.getCommands().then(commands => {
-            if (commands.includes('vebBuild.enhancedDebug.jumpToSourceFromLog')) {
-                return vscode.commands.executeCommand('vebBuild.enhancedDebug.jumpToSourceFromLog', jumpInfo);
-            } else {
-                // Fallback: try to find and open the source file manually
-                return findAndOpenSourceFile(jumpInfo);
-            }
-        });
-
         logDebug(`Jumping to source: ${jumpInfo.module}:${jumpInfo.function}:${jumpInfo.line}`);
+        // The legacy command 'vebBuild.enhancedDebug.jumpToSourceFromLog' was removed;
+        // jump directly using the workspace source-file search.
+        await findAndOpenSourceFile(jumpInfo);
     } catch (error) {
         handleError(`Jump to source failed: ${error instanceof Error ? error.message : String(error)}`);
     }
