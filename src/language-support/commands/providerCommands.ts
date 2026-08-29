@@ -33,6 +33,7 @@ import {
 import { Edk2DiagnosticsProvider } from '../providers/diagnosticsProvider';
 import { Edk2CompletionProvider } from '../providers/completionProvider';
 import { getWorkspaceIndex } from '../core/workspaceIndex';
+import { isModuleFeatureEnabled } from '../../shared/utils/moduleConfig';
 
 /**
  * Registers all EDK2 language providers
@@ -75,6 +76,10 @@ export function registerLanguageProviders(context: vscode.ExtensionContext): voi
  * Registers definition providers for various EDK2 file types
  */
 function registerDefinitionProviders(context: vscode.ExtensionContext): void {
+    if (!isModuleFeatureEnabled('language', 'enableDefinition')) {
+        logDebug('[Providers] Language definition providers disabled by configuration');
+        return;
+    }
     const definitionProviders = [
         {
             language: 'edk2_fdf',
@@ -121,6 +126,10 @@ function registerDefinitionProviders(context: vscode.ExtensionContext): void {
  * Registers document symbol providers for various EDK2 file types
  */
 function registerSymbolProviders(context: vscode.ExtensionContext): void {
+    if (!isModuleFeatureEnabled('language', 'enableSymbols')) {
+        logDebug('[Providers] Language outline providers disabled by configuration');
+        return;
+    }
     const symbolProviders = [
         {
             language: 'edk2_dsc',
@@ -164,6 +173,10 @@ function registerSymbolProviders(context: vscode.ExtensionContext): void {
  * merges results, so symbol resolution composes with the path-only jumps.
  */
 function registerNavigationProviders(context: vscode.ExtensionContext): void {
+    if (!isModuleFeatureEnabled('language', 'enableNavigation')) {
+        logDebug('[Providers] Cross-file symbol navigation disabled by configuration');
+        return;
+    }
     const navigationProvider = new Edk2SymbolNavigationProvider();
     const referenceProvider = new Edk2SymbolReferenceProvider();
 
@@ -190,6 +203,10 @@ function registerNavigationProviders(context: vscode.ExtensionContext): void {
  * Registers the EDK2 lint diagnostics provider.
  */
 function registerDiagnosticsProviders(context: vscode.ExtensionContext): void {
+    if (!isModuleFeatureEnabled('language', 'enableLint')) {
+        logDebug('[Providers] EDK2 lint diagnostics disabled by configuration');
+        return;
+    }
     const diagnosticsProvider = new Edk2DiagnosticsProvider();
     diagnosticsProvider.register(context);
     context.subscriptions.push({ dispose: () => diagnosticsProvider.dispose() });
@@ -199,6 +216,10 @@ function registerDiagnosticsProviders(context: vscode.ExtensionContext): void {
  * Registers completion providers for the EDK2 languages.
  */
 function registerCompletionProviders(context: vscode.ExtensionContext): void {
+    if (!isModuleFeatureEnabled('language', 'enableCompletion')) {
+        logDebug('[Providers] Language completion disabled by configuration');
+        return;
+    }
     const completionLanguages = ['edk2_inf', 'edk2_dsc', 'edk2_dec', 'edk2_fdf'];
     for (const language of completionLanguages) {
         try {
@@ -221,6 +242,10 @@ function registerCompletionProviders(context: vscode.ExtensionContext): void {
  * an automatic refresh whenever an EDK2 source file is saved.
  */
 function registerSymbolIndexSupport(context: vscode.ExtensionContext): void {
+    if (!isModuleFeatureEnabled('language', 'enableSymbolIndex')) {
+        logDebug('[Providers] Workspace symbol index disabled by configuration');
+        return;
+    }
     const index = getWorkspaceIndex();
     context.subscriptions.push(
         vscode.commands.registerCommand('vebBuild.language.rebuildSymbolIndex', async () => {
@@ -245,6 +270,10 @@ function registerSymbolIndexSupport(context: vscode.ExtensionContext): void {
  * Registers formatting providers for various EDK2 file types
  */
 function registerFormattingProviders(context: vscode.ExtensionContext): void {
+    if (!isModuleFeatureEnabled('language', 'enableFormatting')) {
+        logDebug('[Providers] Language formatting providers disabled by configuration');
+        return;
+    }
     const edk2Languages = ['edk2_fdf', 'edk2_dsc', 'edk2_dec', 'edk2_inf', 'edk2_vfr'];
     const documentFormattingProvider = new Edk2DocumentFormattingProvider();
     const rangeFormattingProvider = new Edk2DocumentRangeFormattingProvider();

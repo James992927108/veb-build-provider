@@ -90,6 +90,12 @@
         "command": "vebBuild.edk2Debug.analyzeLogFile",
         "key": "ctrl+shift+f5",
         "mac": "cmd+shift+f5"
+      },
+      {
+        "command": "vebBuild.enhancedDebug.locateInTreeView",
+        "key": "ctrl+shift+l",
+        "mac": "cmd+shift+l",
+        "when": "editorTextFocus && (resourceExtname == .log || resourceExtname == .txt)"
       }
     ],
     "languages": [
@@ -617,33 +623,81 @@
         "vebBuild.modules.enableBuildTools": {
           "type": "boolean",
           "default": true,
-          "description": "Enable VEB build tools (F7/F8/F9 shortcuts, task management)"
+          "description": "Master switch: Enable VEB build tools (F7/F8/F9, task management). Sub-switches live under vebBuild.modules.build.*"
         },
         "vebBuild.modules.enableDebugTools": {
           "type": "boolean",
-          "default": false,
-          "description": "Enable EDK2 debug analysis tools (log parsing, module scanning)"
+          "default": true,
+          "description": "Master switch: Enable EDK2 debug analysis tools (Enhanced Debug panel, log parsing, module scanning). Sub-switches live under vebBuild.modules.debug.*"
         },
         "vebBuild.modules.enableLanguageSupport": {
           "type": "boolean",
           "default": true,
-          "description": "Enable EDK2 language support (syntax highlighting, formatting)"
+          "description": "Master switch: Enable EDK2 language support (navigation, lint, completion, formatting). Sub-switches live under vebBuild.modules.language.*"
         },
-        "vebBuild.modules.enableMakefileTools": {
+        "vebBuild.modules.build.enableMakefileTools": {
           "type": "boolean",
-          "default": false,
-          "description": "Enable Makefile variable expansion tools"
+          "default": true,
+          "description": "Enable Makefile variable expansion tools (requires vebBuild.modules.enableBuildTools)"
+        },
+        "vebBuild.modules.debug.enableTreeView": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the Enhanced Debug unified panel (TreeView, mode switching, locate in TreeView)"
+        },
+        "vebBuild.modules.debug.enableModuleManagement": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable EDK2 module management (scan, enhance, restore, statistics, search, filters)"
+        },
+        "vebBuild.modules.debug.enableLogAnalysis": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Enhanced Debug log analysis (open/analyze log files, jump between log lines and source)"
+        },
+        "vebBuild.modules.debug.enableLogLinks": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable document links in log files (Ctrl+Click to jump to source) and auto-detect"
+        },
+        "vebBuild.modules.language.enableDefinition": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable path-based Go to Definition (!include / relative paths) for EDK2 files"
+        },
+        "vebBuild.modules.language.enableNavigation": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable cross-file symbol navigation (Go to Definition / Find References via F12 / Shift+F12)"
+        },
+        "vebBuild.modules.language.enableSymbols": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable document outline / symbol providers for EDK2 files"
+        },
+        "vebBuild.modules.language.enableFormatting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable EDK2 formatting (formatter command Shift+Alt+F and formatting providers)"
+        },
+        "vebBuild.modules.language.enableLint": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable EDK2 lint diagnostics (missing fields, duplicate GUID/PCD, missing includes)"
+        },
+        "vebBuild.modules.language.enableCompletion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable EDK2 smart auto-completion (sections, types, PCDs, GUIDs, module names)"
+        },
+        "vebBuild.modules.language.enableSymbolIndex": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the workspace symbol index (Rebuild EDK2 Symbol Index command + incremental refresh on save)"
         }
       }
     }
   },
-  "keybindings": [
-    {
-      "command": "vebBuild.enhancedDebug.locateInTreeView",
-      "key": "ctrl+shift+l",
-      "when": "editorTextFocus && (resourceExtname == .log || resourceExtname == .txt)"
-    }
-  ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./ && npm run copy-scripts",

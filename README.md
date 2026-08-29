@@ -46,11 +46,36 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 - **智慧自動補全**：section 名稱、`MODULE_TYPE` / architecture 值、PCD token space 與 PCD 名稱、GUID、模組 / LibraryClass 名稱
 - **符號索引**：自動建立 workspace symbol index（命令：`VEB Build: Rebuild EDK2 Symbol Index`），存檔後增量更新，大型 EDK2 tree 不需整棵重掃
 
-### 🔧 模塊化配置 ✨ **v3.3.0 新功能**
-- **按需載入**：可選擇啟用/停用特定功能模塊，實現客製化配置
-- **輕量版本**：純語法高亮版本，適合效能敏感或資源受限環境
-- **靈活組合**：構建工具、調試分析、語言支持、Makefile 工具可獨立控制
-- **即時切換**：透過設定檔案快速調整擴展功能範圍
+### 🔧 模塊化配置（雙層開關）✨
+採用**雙層開關**：上層為三大 Master 開關（控制整個模組），下層為各模組內的功能開關。全部設定皆預設開啟，關閉後需 **Reload Window** 生效：
+
+**Level 1 — Master 開關：**
+
+| 設定 key | 預設 | 控制內容 |
+|----------|------|----------|
+| `vebBuild.modules.enableBuildTools` | `true` | 建置工具（F7/F8/F9、task 管理）|
+| `vebBuild.modules.enableDebugTools` | `true` | Enhanced Debug（面板、日誌分析、模組掃描）|
+| `vebBuild.modules.enableLanguageSupport` | `true` | EDK2 語言支援（導覽、lint、補全、格式化）|
+
+**Level 2 — 功能開關（需對應 Master 開啟才有效）：**
+
+| 設定 key | 預設 | 控制內容 |
+|----------|------|----------|
+| `vebBuild.modules.build.enableMakefileTools` | `true` | Makefile 變數展開工具 |
+| `vebBuild.modules.debug.enableTreeView` | `true` | Enhanced Debug 統一面板（TreeView、模式切換、locate）|
+| `vebBuild.modules.debug.enableModuleManagement` | `true` | 模組管理（scan / enhance / restore / search / filter）|
+| `vebBuild.modules.debug.enableLogAnalysis` | `true` | 日誌分析（open / analyze / jump）|
+| `vebBuild.modules.debug.enableLogLinks` | `true` | 日誌文件連結（Ctrl+Click 跳轉源碼）|
+| `vebBuild.modules.language.enableDefinition` | `true` | 路徑式 Go to Definition（!include / 相對路徑）|
+| `vebBuild.modules.language.enableNavigation` | `true` | 跨檔案 Symbol 導覽（F12 / Shift+F12）|
+| `vebBuild.modules.language.enableSymbols` | `true` | Outline / 符號大綱 |
+| `vebBuild.modules.language.enableFormatting` | `true` | EDK2 格式化（Shift+Alt+F）|
+| `vebBuild.modules.language.enableLint` | `true` | 診斷（缺欄位、重複 GUID/PCD、缺 include）|
+| `vebBuild.modules.language.enableCompletion` | `true` | 智慧自動補全 |
+| `vebBuild.modules.language.enableSymbolIndex` | `true` | Symbol Index（rebuild + 存檔增量）|
+
+- **輕量版本**：全部關閉 → 僅保留純語法高亮（由 VS Code 自動載入 grammar，不需 activate），適合效能敏感或資源受限環境
+- **靈活組合**：構建工具、調試分析、語言支持與各子功能皆可獨立控制
 
 ### ⚙️ 全域配置系統 ✨ **v3.4.0 新功能**
 - **動態版本管理**：版本號統一從 package.json 自動讀取，無需手動同步
@@ -219,6 +244,7 @@ vsce package
 | `Ctrl+Shift+F7` | 增強模組 | — |
 | `Ctrl+Shift+F6` | 還原模組增強 | — |
 | `Ctrl+Shift+F5` | 分析日誌檔案 | — |
+| `Ctrl+Shift+L` | 定位到 Enhanced Debug TreeView | `.log` / `.txt` |
 
 ### 📝 編輯 / 格式化 / 除錯片段
 
@@ -238,7 +264,7 @@ vsce package
 
 > 跨檔案導覽是透過註冊 `DefinitionProvider` / `ReferenceProvider` 提供，直接套用 VS Code 預設按鍵，因此**不需要、也不佔用**自訂快捷鍵；F7/F8/F9 等建置按鍵與其完全互不衝突。
 
-> **注意**：Enhanced Debug 狀態列提示的 `Ctrl+Shift+L`（定位到 TreeView）目前**尚未綁定實際快捷鍵**，且該組合與 VS Code 內建的「選取所有相符處 (Select All Occurrences)」相衝突，需使用者主動覆寫後才可使用。
+> **注意**：`Ctrl+Shift+L` 已由本套件貢獻為「定位到 Enhanced Debug TreeView」，但僅在 `.log` / `.txt` 檔案內生效（`when` 條件限制）；其他語言的 `Ctrl+Shift+L` 仍是 VS Code 內建的「選取所有相符處 (Select All Occurrences)」。
 
 ---
 

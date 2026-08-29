@@ -11,6 +11,7 @@ import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
 import { expandMakefileVars } from '../tools/expandMakefileVars';
 import { PROJECT_CONFIG } from '../../shared/config';
 import { setBuildState } from '../../shared/ui/statusBar';
+import { isModuleFeatureEnabled } from '../../shared/utils/moduleConfig';
 
 // Constants & Enums
 
@@ -560,9 +561,8 @@ export function registerVebBuildCommands(context: vscode.ExtensionContext): void
   registerCommandWithLog(context, 'vebBuild.buildTool.vebCustomBuild', handleVebCustomBuild);
   registerCommandWithLog(context, 'vebBuild.buildTool.stopTerminal', handleterminateTerminal);
 
-  // Conditionally register Makefile tools if enabled
-  const moduleConfig = vscode.workspace.getConfiguration('vebBuild.modules');
-  if (moduleConfig.get('enableMakefileTools', true)) {
+  // Level-2 build feature switch: Makefile variable expansion tools
+  if (isModuleFeatureEnabled('build', 'enableMakefileTools')) {
     registerCommandWithLog(context, 'extension.expandMakefileVars', expandMakefileVars);
   }
   

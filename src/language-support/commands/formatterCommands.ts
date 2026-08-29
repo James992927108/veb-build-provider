@@ -7,6 +7,7 @@ import * as util from 'util';
 import { formatUni, formatSdl } from '../core/edk2Formatter';
 import { logInfo, logDebug, logError, logSummary, handleError, outputChannel } from '../../shared/utils/logger';
 import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
+import { isModuleFeatureEnabled } from '../../shared/utils/moduleConfig';
 
 // Type definitions
 interface EncodingConfig {
@@ -141,6 +142,10 @@ export default Edk2Formatter;
 
 // Command registration
 export function registerFormatterCommands(context: vscode.ExtensionContext): void {
+    if (!isModuleFeatureEnabled('language', 'enableFormatting')) {
+        logDebug('[Formatter] EDK2 formatter command disabled by configuration');
+        return;
+    }
     registerCommandWithLog(context, 'vebBuild.formatter.formatEdk2', handleEdk2Formatter);
 }
 

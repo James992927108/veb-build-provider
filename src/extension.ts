@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { initLogger, disposeLogger, logInfo, logDebug, outputChannel } from './shared/utils/logger';
 import { registerStatusBarItems } from './shared/ui/statusBar';
+import { isMasterModuleEnabled } from './shared/utils/moduleConfig';
 
 // Import all modules
 import { registerVebBuildModule } from './veb-build';
@@ -13,11 +14,9 @@ export function activate(context: vscode.ExtensionContext): void {
     initLogger(context);
     logDebug(`Extension activated at: ${new Date().toISOString()}`);
 
-    // Get module configuration
-    const moduleConfig = vscode.workspace.getConfiguration('vebBuild.modules');
-
-    // Conditionally register modules based on configuration
-    if (moduleConfig.get('enableBuildTools', true)) {
+    // Level-1 master switches gate each top-level module. Per-module feature
+    // switches are consumed inside each module itself.
+    if (isMasterModuleEnabled('enableBuildTools')) {
         // Only surface the build output channel when build tools are enabled (OPT-21)
         outputChannel.show();
         logDebug('Loading VEB Build Tools module');
@@ -26,12 +25,12 @@ export function activate(context: vscode.ExtensionContext): void {
         registerStatusBarItems(context);
     }
 
-    if (moduleConfig.get('enableDebugTools', true)) {
+    if (isMasterModuleEnabled('enableDebugTools')) {
         logDebug('Loading EDK2 Debug Tools module');
         registerEdk2DebugModule(context);
     }
 
-    if (moduleConfig.get('enableLanguageSupport', true)) {
+    if (isMasterModuleEnabled('enableLanguageSupport')) {
         logDebug('Loading Language Support module');
         registerLanguageSupportModule(context);
     }

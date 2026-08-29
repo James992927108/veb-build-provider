@@ -7,79 +7,152 @@ import { registerCommandWithLog } from '../../shared/utils/commandRegistry';
 import { Edk2ModuleProvider } from '../core/edk2ModuleProvider';
 import { EnhancedDebugProvider } from '../providers/enhancedDebugProvider';
 import { ModuleEnhancer } from '../core/moduleEnhancer';
+import { LogLinkProvider, registerEnhancedDebugUriHandler } from '../providers/logLinkProvider';
+import { EnhancedLogParser } from '../analysis/enhancedLogParser';
 
 export function registerEdk2DebugCommands(context: vscode.ExtensionContext): void {
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    
+
     if (!workspaceRoot) {
         logError("No workspace root found, skipping EDK2 debug commands registration");
         return;
     }
 
-    // Initialize Enhanced Debug Provider (unified panel)
+    // Level-2 debug feature switches (the Level-1 master gate lives in extension.ts).
+    // The provider is shared infrastructure for every debug sub-feature (module
+    // management and log analysis both read module data through it), so it is
+    // constructed once whenever the debug module itself is enabled.
+    const debugConfig = vscode.workspace.getConfiguration('vebBuild.modules.debug');
+    const enableTreeView = debugConfig.get('enableTreeView', true);
+    const enableModuleManagement = debugConfig.get('enableModuleManagement', true);
+    const enableLogAnalysis = debugConfig.get('enableLogAnalysis', true);
+    const enableLogLinks = debugConfig.get('enableLogLinks', true);
+
     const enhancedDebugProvider = new EnhancedDebugProvider(workspaceRoot, context);
-    
-    // Tree view for Enhanced Debug (replaces original EDK2 Modules)
-    const enhancedDebugTreeView = vscode.window.createTreeView('vebBuildEnhancedDebug', {
-        treeDataProvider: enhancedDebugProvider,
-        showCollapseAll: true,
-        canSelectMany: true
-    });
 
-    // Let provider know TreeView reference
-    enhancedDebugProvider.setTreeView(enhancedDebugTreeView);
+    let enhancedDebugTreeView: vscode.TreeView<any> | undefined;
 
-    // Set context variables to control button display
-    const updateContexts = () => {
-        const mode = enhancedDebugProvider.getCurrentMode();
-        vscode.commands.executeCommand('setContext', 'enhancedDebug.mode', mode);
-    };
-    updateContexts();
+    // Enhanced Debug unified panel (TreeView + mode switching + navigation)
+    if (enableTreeView) {
+        // Tree view for Enhanced Debug (replaces original EDK2 Modules)
+        enhancedDebugTreeView = vscode.window.createTreeView('vebBuildEnhancedDebug', {
+            treeDataProvider: enhancedDebugProvider,
+            showCollapseAll: true,
+            canSelectMany: true
+        });
 
-    // Register Enhanced Debug panel commands
-    registerCommandWithLog(context, 'vebBuild.enhancedDebug.switchToModules', async () => {
-        await enhancedDebugProvider.switchMode('modules');
+        // Let provider know TreeView reference
+        enhancedDebugProvider.setTreeView(enhancedDebugTreeView);
+
+        // Set context variables to control button display
+        const updateContexts = () => {
+            const mode = enhancedDebugProvider.getCurrentMode();
+            vscode.commands.executeCommand('setContext', 'enhancedDebug.mode', mode);
+        };
         updateContexts();
-    });
-    registerCommandWithLog(context, 'vebBuild.enhancedDebug.switchToLogs', async () => {
-        await enhancedDebugProvider.switchMode('logs');
-        updateContexts();
-    });
-    registerCommandWithLog(context, 'vebBuild.enhancedDebug.openLogFile', () => enhancedDebugProvider.openLogFile());
-    registerCommandWithLog(context, 'vebBuild.enhancedDebug.filterLogs', () => handleFilterLogs(enhancedDebugProvider));
-    registerCommandWithLog(context, 'vebBuild.enhancedDebug.jumpToSource', (jumpInfo) => handleJumpToSource(jumpInfo));
-    registerCommandWithLog(context, 'vebBuild.enhancedDebug.jumpToLogLine', (jumpInfo) => enhancedDebugProvider.jumpToLogLine(jumpInfo));
-    registerCommandWithLog(context, 'vebBuild.enhancedDebug.locateInTreeView', () => enhancedDebugProvider.locateInTreeView());
-    registerCommandWithLog(context, 'vebBuild.enhancedDebug.changeLogOpenLocation', () => enhancedDebugProvider.changeLogFileOpenLocation());
 
-    // Register module management commands (delegated to enhancedDebugProvider)
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.scanProject', () => handleScanProject(enhancedDebugProvider));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.enhanceModule', (moduleNode) => handleEnhanceModule(enhancedDebugProvider, moduleNode));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.restoreModuleEnhance', (moduleNode) => handleRestoreModuleEnhance(enhancedDebugProvider, moduleNode));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.showStatistics', () => handleShowStatistics(enhancedDebugProvider));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.searchModules', () => handleSearchModules(enhancedDebugProvider));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.clearSearch', () => handleClearSearch(enhancedDebugProvider));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByModuleType', () => handleFilterByModuleType(enhancedDebugProvider));
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByStatus', () => handleFilterByStatus(enhancedDebugProvider));
-    
-    // Register log analysis commands
-    registerCommandWithLog(context, 'vebBuild.edk2Debug.analyzeLogFile', handleOpenLogFile);
-    
-    // Auto-highlight active editor
-    setupAutoHighlight(enhancedDebugTreeView, enhancedDebugProvider);
+        // Register Enhanced Debug panel commands
+        registerCommandWithLog(context, 'vebBuild.enhancedDebug.switchToModules', async () => {
+            await enhancedDebugProvider.switchMode('modules');
+            updateContexts();
+        });
+        registerCommandWithLog(context, 'vebBuild.enhancedDebug.switchToLogs', async () => {
+            await enhancedDebugProvider.switchMode('logs');
+            updateContexts();
+        });
+        registerCommandWithLog(context, 'vebBuild.enhancedDebug.locateInTreeView', () => enhancedDebugProvider.locateInTreeView());
+        registerCommandWithLog(context, 'vebBuild.enhancedDebug.changeLogOpenLocation', () => enhancedDebugProvider.changeLogFileOpenLocation());
 
-    // Auto scan (if enabled in settings)
-    const config = vscode.workspace.getConfiguration('vebBuild.edk2Debug');
-    if (config.get('autoScan', true)) {
-        enhancedDebugProvider.refreshModules();
+        // Auto-highlight active editor
+        setupAutoHighlight(enhancedDebugTreeView, enhancedDebugProvider);
+
+        // Listen for editor changes to update status bar
+        const onDidChangeActiveEditor = vscode.window.onDidChangeActiveTextEditor(() => {
+            enhancedDebugProvider.updateStatusBarItem();
+        });
+
+        context.subscriptions.push(enhancedDebugTreeView, onDidChangeActiveEditor);
     }
 
-    // Listen for editor changes to update status bar
-    const onDidChangeActiveEditor = vscode.window.onDidChangeActiveTextEditor(() => {
-        enhancedDebugProvider.updateStatusBarItem();
-    });
+    // Module management commands (scan / enhance / restore / statistics / search / filters)
+    if (enableModuleManagement) {
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.scanProject', () => handleScanProject(enhancedDebugProvider));
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.enhanceModule', (moduleNode) => handleEnhanceModule(enhancedDebugProvider, moduleNode));
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.restoreModuleEnhance', (moduleNode) => handleRestoreModuleEnhance(enhancedDebugProvider, moduleNode));
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.showStatistics', () => handleShowStatistics(enhancedDebugProvider));
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.searchModules', () => handleSearchModules(enhancedDebugProvider));
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.clearSearch', () => handleClearSearch(enhancedDebugProvider));
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByModuleType', () => handleFilterByModuleType(enhancedDebugProvider));
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.filterByStatus', () => handleFilterByStatus(enhancedDebugProvider));
 
-    context.subscriptions.push(enhancedDebugTreeView, onDidChangeActiveEditor);
+        // Auto scan (if enabled in settings)
+        const config = vscode.workspace.getConfiguration('vebBuild.edk2Debug');
+        if (config.get('autoScan', true)) {
+            enhancedDebugProvider.refreshModules();
+        }
+    }
+
+    // Log analysis commands (open / analyze / jump between log lines and source)
+    if (enableLogAnalysis) {
+        registerCommandWithLog(context, 'vebBuild.enhancedDebug.openLogFile', () => enhancedDebugProvider.openLogFile());
+        registerCommandWithLog(context, 'vebBuild.enhancedDebug.filterLogs', () => handleFilterLogs(enhancedDebugProvider));
+        registerCommandWithLog(context, 'vebBuild.enhancedDebug.jumpToSource', (jumpInfo) => handleJumpToSource(jumpInfo));
+        registerCommandWithLog(context, 'vebBuild.enhancedDebug.jumpToLogLine', (jumpInfo) => enhancedDebugProvider.jumpToLogLine(jumpInfo));
+        registerCommandWithLog(context, 'vebBuild.edk2Debug.analyzeLogFile', handleOpenLogFile);
+    }
+
+    // Log link integration (Ctrl+Click document links + URI handler + auto detect)
+    if (enableLogLinks) {
+        registerLogLinkProviders(context);
+    }
+}
+
+/**
+ * Registers document-link navigation and URI handling for Enhanced Debug logs.
+ * Gated by the `enableLogLinks` Level-2 debug feature switch.
+ */
+function registerLogLinkProviders(context: vscode.ExtensionContext): void {
+    // Register DocumentLinkProvider for multiple file types
+    const logLinkProvider = new LogLinkProvider();
+
+    // Support .log and .txt files
+    context.subscriptions.push(
+        vscode.languages.registerDocumentLinkProvider(
+            [
+                { scheme: 'file', pattern: '**/*.log' },
+                { scheme: 'file', pattern: '**/*.txt' }
+            ],
+            logLinkProvider
+        )
+    );
+
+    // Register URI handler
+    registerEnhancedDebugUriHandler(context);
+
+    // Listen for active editor changes, auto-detect Enhanced Debug files
+    context.subscriptions.push(
+        vscode.window.onDidChangeActiveTextEditor((editor) => {
+            if (editor && editor.document) {
+                const fileName = editor.document.fileName;
+
+                // Check if this could be a log file
+                if (fileName.match(/\.(log|txt)$/i)) {
+                    // Asynchronously check if it contains Enhanced Debug content
+                    setTimeout(() => {
+                        if (EnhancedLogParser.hasEnhancedDebugContent(editor.document)) {
+                            logDebug(`[EDK2DebugModule] Detected Enhanced Debug log file: ${fileName}`);
+
+                            // Show status bar notification to user
+                            vscode.window.setStatusBarMessage(
+                                '$(debug) Enhanced Debug log detected - Ctrl+Click functions to jump to source',
+                                5000
+                            );
+                        }
+                    }, 100);
+                }
+            }
+        })
+    );
 }
 
 // Command handlers
