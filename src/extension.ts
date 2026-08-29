@@ -17,8 +17,13 @@ export function activate(context: vscode.ExtensionContext): void {
     // Level-1 master switches gate each top-level module. Per-module feature
     // switches are consumed inside each module itself.
     if (isMasterModuleEnabled('enableBuildTools')) {
-        // Only surface the build output channel when build tools are enabled (OPT-21)
-        outputChannel.show();
+        // Surface the build output channel at startup only when the user opted
+        // in (default off) - calling show() every launch pops the Output panel
+        // open, which is noisy. preserveFocus keeps the editor focused even
+        // when the channel is revealed.
+        if (vscode.workspace.getConfiguration('vebBuild.outputChannel').get('revealOnStartup', false)) {
+            outputChannel.show(true);
+        }
         logDebug('Loading VEB Build Tools module');
         registerVebBuildModule(context);
         // Register Status Bar only if build tools are enabled

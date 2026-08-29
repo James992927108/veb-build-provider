@@ -627,8 +627,8 @@
         },
         "vebBuild.modules.enableDebugTools": {
           "type": "boolean",
-          "default": true,
-          "description": "Master switch: Enable EDK2 debug analysis tools (Enhanced Debug panel, log parsing, module scanning). Sub-switches live under vebBuild.modules.debug.*"
+          "default": false,
+          "description": "Master switch: Enable EDK2 debug analysis tools (Enhanced Debug panel, log parsing, module scanning). Off by default - only needed when analyzing BIOS boot logs. Sub-switches live under vebBuild.modules.debug.*"
         },
         "vebBuild.modules.enableLanguageSupport": {
           "type": "boolean",
@@ -694,6 +694,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable the workspace symbol index (Rebuild EDK2 Symbol Index command + incremental refresh on save)"
+        },
+        "vebBuild.outputChannel.revealOnStartup": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the VEB Build output channel in the Output panel on extension startup. Off by default so the panel does not pop open every launch"
         }
       }
     }

@@ -54,7 +54,7 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 | 設定 key | 預設 | 控制內容 |
 |----------|------|----------|
 | `vebBuild.modules.enableBuildTools` | `true` | 建置工具（F7/F8/F9、task 管理）|
-| `vebBuild.modules.enableDebugTools` | `true` | Enhanced Debug（面板、日誌分析、模組掃描）|
+| `vebBuild.modules.enableDebugTools` | `false` | Enhanced Debug（需搭配 BIOS log 使用，需要時再開啟）|
 | `vebBuild.modules.enableLanguageSupport` | `true` | EDK2 語言支援（導覽、lint、補全、格式化）|
 
 **Level 2 — 功能開關（需對應 Master 開啟才有效）：**
@@ -76,6 +76,8 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 
 - **輕量版本**：全部關閉 → 僅保留純語法高亮（由 VS Code 自動載入 grammar，不需 activate），適合效能敏感或資源受限環境
 - **靈活組合**：構建工具、調試分析、語言支持與各子功能皆可獨立控制
+- **啟動行為**：`vebBuild.outputChannel.revealOnStartup`（預設 `false`）控制是否在啟動時自動彈出 Output 面板，預設關閉
+- 📄 常用組態範本（build + language 全開、debug 精簡）：[docs/vscode-settings.example.json](./docs/vscode-settings.example.json)，複製到專案的 `.vscode/settings.json` 即可套用
 
 ### ⚙️ 全域配置系統 ✨ **v3.4.0 新功能**
 - **動態版本管理**：版本號統一從 package.json 自動讀取，無需手動同步

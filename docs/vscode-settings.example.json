@@ -1,0 +1,51 @@
+{
+  // ==========================================================================
+  // VEB Build Provider - recommended workspace settings
+  //
+  // Tailored for daily development: build + language support always on, the
+  // Enhanced Debug module off by default and slimmed down for the occasional
+  // BIOS boot log analysis.
+  //
+  // Copy this whole file into your VEB project's .vscode/settings.json
+  // (or merge the relevant keys). Changing a module switch requires
+  // "Developer: Reload Window" to take effect.
+  // ==========================================================================
+
+  // --- Level 1: master switches -------------------------------------------
+  "vebBuild.modules.enableBuildTools": true,
+  "vebBuild.modules.enableLanguageSupport": true,
+
+  // Debug is off by default: it is only useful when analysing BIOS boot logs.
+  // When you need it, flip this to true and reload the window.
+  "vebBuild.modules.enableDebugTools": false,
+
+  // --- Level 2: per-feature switches --------------------------------------
+  // Build: Makefile variable expansion (part of the build module).
+  "vebBuild.modules.build.enableMakefileTools": true,
+
+  // Language support: all sub-features on so cross-file Goto/FindRefs (F12 /
+  // Shift+F12), lint, completion and the symbol index are fully available.
+  "vebBuild.modules.language.enableDefinition": true,
+  "vebBuild.modules.language.enableNavigation": true,
+  "vebBuild.modules.language.enableSymbols": true,
+  "vebBuild.modules.language.enableFormatting": true,
+  "vebBuild.modules.language.enableLint": true,
+  "vebBuild.modules.language.enableCompletion": true,
+  "vebBuild.modules.language.enableSymbolIndex": true,
+
+  // Debug sub-features (only evaluated when enableDebugTools is true):
+  // keep the panel + core log analysis, turn off module management and the
+  // automatic Ctrl+Click log links you rarely need.
+  "vebBuild.modules.debug.enableTreeView": true,
+  "vebBuild.modules.debug.enableModuleManagement": false,
+  "vebBuild.modules.debug.enableLogAnalysis": true,
+  "vebBuild.modules.debug.enableLogLinks": false,
+
+  // --- other useful VEB defaults ------------------------------------------
+  // Do not pop the Output panel open at startup (default off).
+  "vebBuild.outputChannel.revealOnStartup": false,
+  // Scan EDK2 modules automatically when the debug module is enabled.
+  "vebBuild.edk2Debug.autoScan": false,
+  // Where to open Enhanced Debug log files.
+  "vebBuild.enhancedDebug.logFileOpenLocation": "beside"
+}
