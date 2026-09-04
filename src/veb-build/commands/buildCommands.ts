@@ -253,8 +253,11 @@ export function buildLinuxTasksJson(veb: string, version: string, docker?: Docke
         const makeArgs = action.replace(/^make\s*/, '');
         return `chmod +x \${workspaceFolder}/.vscode/DockerBuild.sh && \${workspaceFolder}/.vscode/DockerBuild.sh ${makeArgs}`.trimEnd();
       }
+    // set -o pipefail 是必要的：`make | tee` 的退出碼取自 tee，永遠是 0，
+    // 所以在此之前 VS Code 從來看不出宿主 build 失敗過（task 一律顯示成功）。
+    // 容器模式用 PIPESTATUS 拿到的是 make 自己的退出碼，這裡對齊它。
     : (action: string) =>
-        `bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && ${action} 2>&1 | tee \${workspaceFolder}/Build-$VEB-$(date +%Y%m%d-%H%M%S).log'`;
+        `bash -c 'set -o pipefail; source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && ${action} 2>&1 | tee \${workspaceFolder}/Build-$VEB-$(date +%Y%m%d-%H%M%S).log'`;
 
   const hostEnv: Record<string, string> = { VEB: veb };
   // 只有真正交給 DockerBuild.sh 的 task 需要這些變數。Release/Custom 兩個 task

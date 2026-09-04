@@ -228,7 +228,43 @@ describe('docker_build.sh runner', () => {
   });
 
   it('only requests a TTY when one is actually present', () => {
-    assert.ok(script.includes('[[ -t 0 && -t 1 ]]'),
+    assert.ok(/\[\[ -t 1 \]\] && TTY_FLAG=\(-t\)/.test(script),
       'docker run -t without a TTY fails outright, so it must be conditional');
+  });
+
+  it('does not pass -i, which would suspend the backgrounded client on SIGTTIN', () => {
+    assert.ok(!/docker run --rm[^\n]*\s-i\b/.test(script),
+      'the build needs no stdin, and a background process reading the terminal gets SIGTTIN');
+  });
+
+  // 中斷處理有兩個獨立的坑，兩個都必須成立才有效，所以分開釘住。
+  it('runs the container in the background and waits, so the trap can fire', () => {
+    assert.ok(/<\/dev\/null &\s*\nDOCKER_PID=\$!/.test(script),
+      'bash defers traps until a foreground command returns, and docker run never does');
+    assert.ok(script.includes('wait "$DOCKER_PID"'));
+  });
+
+  it('stops the container by name on INT/TERM rather than relying on signal propagation', () => {
+    assert.ok(script.includes('--name "$CONTAINER_NAME"'));
+    assert.ok(/trap '[^']*stop_container' INT TERM/.test(script),
+      'PID 1 in a container drops signals it has no handler for, so the host must docker kill');
+    assert.ok(/docker kill "\$CONTAINER_NAME"/.test(script));
+  });
+
+  it('reports an interrupted build differently from a failed one', () => {
+    assert.ok(script.includes('$RC -gt 128'),
+      'wait returns 128+signum when interrupted; that is not a compile error');
+  });
+});
+
+describe('host-mode task command', () => {
+  // `make | tee` 的退出碼取自 tee，永遠 0 —— 在此之前 VS Code 從來看不出
+  // 宿主 build 失敗過。容器模式用 PIPESTATUS 取到真正的退出碼，這裡對齊。
+  it('sets pipefail so a failed make is not masked by tee', () => {
+    const parsed = JSON.parse(buildLinuxTasksJson('MyProj', '3.13.0'));
+    for (const label of ['VebBuildTask', 'VebReBuildTask', 'VebCleanTask']) {
+      const t = parsed.tasks.find((x: any) => x.label === label);
+      assert.ok(t.command.includes('set -o pipefail'), `${label} must not mask make's exit code`);
+    }
   });
 });

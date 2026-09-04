@@ -141,11 +141,32 @@ LOCALTIME_MOUNT=()
 [[ -e /etc/localtime ]] && LOCALTIME_MOUNT=(-v /etc/localtime:/etc/localtime:ro)
 
 # 有 TTY 時才加 -t：VS Code 的 task 終端機有 pty，加了顏色與行緩衝才正常；
-# 但在背景執行或 CI 沒有 TTY，硬加會直接報 "the input device is not a TTY"。
+# 沒有 TTY 時硬加會直接失敗。不用 -i —— build 不需要 stdin，而且待會要把
+# docker run 放到背景，背景行程去讀終端機 stdin 會收到 SIGTTIN 而被停住。
 TTY_FLAG=()
-[[ -t 0 && -t 1 ]] && TTY_FLAG=(-t)
+[[ -t 1 ]] && TTY_FLAG=(-t)
 
-docker run --rm -i "${TTY_FLAG[@]}" \
+# 具名容器，讓中斷時有辦法精準停掉它（同一專案可能同時有別的容器在跑）。
+CONTAINER_NAME="veb-build-$(id -u)-$$"
+
+stop_container() {
+    docker kill "$CONTAINER_NAME" >/dev/null 2>&1 || true
+}
+
+# 中斷處理。這裡有兩個容易踩的點：
+#
+# 1. 容器內 PID 1 收不到預設訊號動作 —— 核心不對 PID 1 套用預設處理，所以
+#    SIGINT 傳進去會被直接丟掉。實測 `docker run --init`（tini）也沒用：
+#    tini 只把訊號轉給直接子行程 bash，而非互動模式的 bash 不會再往下傳給
+#    它正在等待的 make。唯一可靠的做法是從宿主端 docker kill。
+#
+# 2. bash 在前景指令執行期間不會處理 trap，會延後到指令返回才跑 —— 而
+#    docker run 正是那個不會返回的指令，等於 trap 永遠不觸發。因此把
+#    docker run 丟到背景、用 wait 等待：wait 可被訊號打斷，trap 才會即時執行。
+trap 'echo; warn "收到中斷訊號，正在停止容器 ..."; stop_container' INT TERM
+
+docker run --rm "${TTY_FLAG[@]}" \
+    --name "$CONTAINER_NAME" \
     --user "$(id -u):$(id -g)" \
     "${LOCALTIME_MOUNT[@]}" \
     -v "$PROJECT_DIR:$PROJECT_DIR" \
@@ -170,9 +191,19 @@ docker run --rm -i "${TTY_FLAG[@]}" \
         set -e
         echo \"MAKE_EXIT=\$RC\"
         exit \$RC
-    "
+    " </dev/null &
+DOCKER_PID=$!
+
+wait "$DOCKER_PID"
 RC=$?
-if [[ $RC -eq 0 ]]; then
+trap - INT TERM
+
+# 被訊號打斷時 wait 回傳 128+signum。容器已由 trap 停掉，這裡只是把
+# 「被中斷」與「build 真的失敗」在訊息上分開，不然使用者會以為是編譯錯誤。
+if [[ $RC -gt 128 ]]; then
+    stop_container
+    err "build 已中斷（signal $((RC - 128))）"
+elif [[ $RC -eq 0 ]]; then
     info "build 成功"
 else
     err "build 失敗（exit $RC）"
