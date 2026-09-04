@@ -94,7 +94,14 @@ echo "  MAKEFLAGS: $MAKEFLAGS"
  */
 export function shouldUseDocker(
   settings: DockerSettings,
-  probe: { dockerAvailable: boolean; vebRootResolved: boolean }
+  probe: {
+    dockerAvailable: boolean;
+    /**
+     * VEB 根目錄已定位「而且確實存在」。呼叫端必須真的去確認目錄在不在 ——
+     * env_discovery.py 找不到工具時會回傳寫死的預設路徑，形狀完全合法但指向空氣。
+     */
+    vebRootResolved: boolean;
+  }
 ): boolean {
   if (settings.mode === 'never') { return false; }
   if (settings.mode === 'always') { return true; }

@@ -99,6 +99,28 @@ glibc 直接讀這個檔，所以不必在 image 裡裝 tzdata。
 這兩個跑的是專案自己的腳本（`GB300_Release_Build.sh` / `CustomBuild.sh`），
 內容因專案而異，貿然塞進容器風險較高。需要時再個別評估。
 
+## 模擬新機器上機流程
+
+```bash
+./tools/scripts/simulate_fresh_machine.sh
+```
+
+在乾淨的 `ubuntu:24.04` 容器裡，以一般使用者（有 sudo）跑一遍新人會做的事：
+clone repo → `env_discovery.py` → `docker_install.sh` → 列出還缺什麼。
+
+**它能證明什麼**：clone 流程、`env_discovery` 在沒有 AMI tools 時的行為、
+apt 安裝 docker 的路徑、腳本在缺東西時的錯誤訊息。
+
+**它不能證明什麼**：docker daemon 真的啟動 —— 純容器沒有 systemd，
+`systemctl enable --now docker` 無從驗證，那需要真正的 VM。VS Code 與 extension 的
+UI 流程同理。
+
+這個模擬實際抓到過一個 bug：新機器上 `env_discovery.py` 會回傳 profile 裡寫死的
+預設路徑（`TOOLS_SOURCE=config`），形狀完全合法但目錄不存在。原本的判斷只看路徑
+形狀，於是會選擇容器模式、拿不存在的目錄當 build context、失敗後回落宿主再失敗一次，
+使用者看到兩層互不相關的錯誤。現在 `prepareDockerBuild()` 會實際確認目錄存在，
+不存在時直接說明要把 AMI BuildTools 複製過來。
+
 ## 疑難排解
 
 ### `apt-get install` 說 build-essential 沒有候選版本

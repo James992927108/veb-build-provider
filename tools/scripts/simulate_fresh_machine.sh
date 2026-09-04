@@ -78,15 +78,21 @@ command -v git >/dev/null && ok "git $(git --version | awk '{print $3}')"
 command -v python3 >/dev/null && ok "python3 $(python3 -V | awk '{print $2}')"
 
 step "2. clone extension repo"
-# 掛進來的 repo 屬於別的 UID，git 預設會擋；新機器 clone 內部 GitLab 不會有這問題，
-# 這行只是為了讓模擬能進行。
+# 掛進來的 repo 屬於宿主的 UID，而 ubuntu:24.04 基底映像已佔用 uid 1000（ubuntu 使用者），
+# 新建的 dev 會拿到 1001，於是 git 判定 dubious ownership 而拒絕讀取。
+# 要兩個路徑都加：git 檢查的是 .git 目錄本身。
+# 真實情境是 clone 內部 GitLab/Gerrit，不會有這個問題，這幾行純粹是為了讓模擬跑得動。
 su - dev -c 'git config --global --add safe.directory /mnt/ext-repo'
+su - dev -c 'git config --global --add safe.directory /mnt/ext-repo/.git'
 BR="${CLONE_BRANCH:-}"
+# 失敗時把完整錯誤印出來，不要截斷 —— 截斷過的 git 錯誤訊息會把真正的原因
+# （例如 dubious ownership 那段修正指示）藏掉，反而更難查。
 if [ -n "$BR" ]; then
-    su - dev -c "git clone -q -b '$BR' /mnt/ext-repo ~/veb-build-provider 2>&1 | tail -2" || true
+    su - dev -c "git clone -q -b '$BR' /mnt/ext-repo ~/veb-build-provider" > /tmp/clone.log 2>&1
 else
-    su - dev -c 'git clone -q /mnt/ext-repo ~/veb-build-provider 2>&1 | tail -2' || true
+    su - dev -c 'git clone -q /mnt/ext-repo ~/veb-build-provider' > /tmp/clone.log 2>&1
 fi
+[ -s /tmp/clone.log ] && sed 's/^/        /' /tmp/clone.log
 if su - dev -c 'test -d ~/veb-build-provider/tools/scripts'; then
     ok "clone 成功: ~/veb-build-provider"
     su - dev -c 'cd ~/veb-build-provider && git log --oneline -1' | sed 's/^/        /'

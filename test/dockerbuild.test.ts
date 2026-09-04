@@ -40,6 +40,16 @@ describe('dockerConfig.deriveVebRoot', () => {
     assert.strictEqual(deriveVebRoot('/opt/somewhere/else'), undefined);
     assert.strictEqual(deriveVebRoot(`${HOST_ROOT}/Linux_x64_Aptio_5.x_TOOLS_59`), undefined);
   });
+
+  // 這個行為是刻意的，但很容易被誤用，所以釘住它。
+  // env_discovery.py 在機器上找不到任何 AMI tools 時，會回傳 profile 裡寫死的預設
+  // 路徑（TOOLS_SOURCE=config）。那串路徑形狀完全合法，deriveVebRoot 會照樣解析成功。
+  // 因此呼叫端「必須」另外確認目錄真的存在，不能只靠這個函式的回傳值判斷可用性。
+  it('parses a well-formed path even when nothing exists there (callers must stat)', () => {
+    assert.strictEqual(
+      deriveVebRoot('/home/nobody/Desktop/VEB/Linux_x64_Aptio_5.x_TOOLS_54/Tools'),
+      '/home/nobody/Desktop/VEB');
+  });
 });
 
 describe('dockerConfig.toContainerEnv', () => {

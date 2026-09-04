@@ -339,18 +339,34 @@ async function prepareDockerBuild(
   }
 
   const hostVebRoot = deriveVebRoot(envVars.TOOLS_DIR);
+
+  // 光是路徑「形狀」對還不夠 —— env_discovery.py 在找不到任何 AMI tools 時會回傳
+  // profile 設定裡寫死的預設路徑（TOOLS_SOURCE=config），在全新機器上那個目錄根本
+  // 不存在。若只憑形狀判斷就走容器，會拿不存在的目錄當 build context，失敗後再回落
+  // 宿主又失敗一次，使用者看到兩層互不相關的錯誤。這裡直接確認目錄真的在。
+  const hostVebRootExists = hostVebRoot
+    ? await fs.access(hostVebRoot).then(() => true).catch(() => false)
+    : false;
+
   const dockerAvailable = await probeDocker();
   const use = shouldUseDocker(settings, {
     dockerAvailable,
-    vebRootResolved: hostVebRoot !== undefined,
+    vebRootResolved: hostVebRootExists,
   });
 
   if (!use) {
     // mode=auto 且條件不足：安靜回落，不打擾使用者。
     logInfo(
       `Docker build not used (mode=${settings.mode}, dockerAvailable=${dockerAvailable}, ` +
-      `vebRoot=${hostVebRoot ?? 'unresolved'}); falling back to host build.`
+      `vebRoot=${hostVebRoot ?? 'unresolved'}, exists=${hostVebRootExists}); falling back to host build.`
     );
+    if (hostVebRoot && !hostVebRootExists) {
+      // 這條訊息值得讓使用者看到：宿主 build 接下來也會因為同樣的原因失敗。
+      logWarn(
+        `The VEB tools directory ${hostVebRoot} does not exist. ` +
+        `Copy the AMI BuildTools and the ARM cross toolchain there before building.`
+      );
+    }
     return undefined;
   }
 
