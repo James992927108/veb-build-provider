@@ -191,4 +191,44 @@ describe('buildLinuxTasksJson - docker mode', () => {
     const parsed = JSON.parse(buildLinuxTasksJson('MyProj', '3.12.0', docker));
     assert.strictEqual(parsed.tasks.length, 5);
   });
+
+  // Release/Custom 跑的是專案自己的腳本，仍在宿主執行。給它們 docker 變數不會
+  // 改變行為，只會讓讀 tasks.json 的人誤判它們也走容器。
+  it('does not put docker settings on the tasks that still run on the host', () => {
+    const parsed = JSON.parse(buildLinuxTasksJson('MyProj', '3.12.0', docker));
+    for (const label of ['VebReleaseBuildTask', 'VebCustomBuildTask']) {
+      const t = parsed.tasks.find((x: any) => x.label === label);
+      assert.deepStrictEqual(Object.keys(t.options.env), ['VEB'],
+        `${label} runs on the host, so it should only carry VEB`);
+      assert.ok(t.command.includes('PrepareEnvLinuxScript.sh'));
+    }
+  });
+});
+
+describe('docker_build.sh runner', () => {
+  const fs = require('fs');
+  const path = require('path');
+  // 從 process.cwd() 解析而非 __dirname：測試會被編譯到 out-test/test/，
+  // __dirname 的相對層數與原始碼位置不同。mocha 由專案根執行。
+  const script: string = fs.readFileSync(
+    path.join(process.cwd(), 'tools', 'scripts', 'docker_build.sh'), 'utf8');
+
+  // 曾經寫成 `make > "$LOG" 2>&1` 再 tail 尾段，結果 BIOS build 跑十幾分鐘期間
+  // VS Code 的 task 終端機完全沒有輸出，跟宿主模式的體驗差很多。
+  it('streams build output live through tee instead of redirecting to a file', () => {
+    assert.ok(/make \$MAKE_ARGS 2>&1 \| tee/.test(script),
+      'make output must be piped through tee so the task terminal shows progress');
+    assert.ok(!/make \$MAKE_ARGS >/.test(script),
+      'must not redirect make output straight into the log file');
+  });
+
+  it('takes the exit code from make, not from tee', () => {
+    assert.ok(script.includes('PIPESTATUS[0]'),
+      'a tee pipeline reports tee\'s status, so make\'s must be read explicitly');
+  });
+
+  it('only requests a TTY when one is actually present', () => {
+    assert.ok(script.includes('[[ -t 0 && -t 1 ]]'),
+      'docker run -t without a TTY fails outright, so it must be conditional');
+  });
 });

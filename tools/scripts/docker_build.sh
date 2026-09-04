@@ -140,7 +140,12 @@ info "VEB=$VEB_NAME  make ${MAKE_ARGS:-（增量）}"
 LOCALTIME_MOUNT=()
 [[ -e /etc/localtime ]] && LOCALTIME_MOUNT=(-v /etc/localtime:/etc/localtime:ro)
 
-docker run --rm -i \
+# 有 TTY 時才加 -t：VS Code 的 task 終端機有 pty，加了顏色與行緩衝才正常；
+# 但在背景執行或 CI 沒有 TTY，硬加會直接報 "the input device is not a TTY"。
+TTY_FLAG=()
+[[ -t 0 && -t 1 ]] && TTY_FLAG=(-t)
+
+docker run --rm -i "${TTY_FLAG[@]}" \
     --user "$(id -u):$(id -g)" \
     "${LOCALTIME_MOUNT[@]}" \
     -v "$PROJECT_DIR:$PROJECT_DIR" \
@@ -154,14 +159,16 @@ docker run --rm -i \
         source '$ENV_SCRIPT_REL'
         LOG=\"Build-${VEB_NAME}-\$(date +%Y%m%d-%H%M%S).log\"
         echo \"LOG=\$LOG\"
+        # 用 tee 而非重導向到檔案：BIOS build 動輒十幾分鐘，輸出必須即時顯示在
+        # VS Code 的 task 終端機，否則使用者只能盯著空畫面等。這也與宿主模式的
+        # 行為一致（宿主用的就是 make 2>&1 | tee）。
         # 這裡刻意不讓 set -e 生效於 make：否則 make 失敗時腳本立刻中止，
-        # 跑不到退出碼回報與 log 尾段，失敗原因就被吞掉了。
+        # 跑不到退出碼回報，失敗原因就被吞掉了。
         set +e
-        make $MAKE_ARGS > \"\$LOG\" 2>&1
-        RC=\$?
+        make $MAKE_ARGS 2>&1 | tee \"\$LOG\"
+        RC=\${PIPESTATUS[0]}
         set -e
         echo \"MAKE_EXIT=\$RC\"
-        tail -25 \"\$LOG\"
         exit \$RC
     "
 RC=$?

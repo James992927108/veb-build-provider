@@ -256,7 +256,10 @@ export function buildLinuxTasksJson(veb: string, version: string, docker?: Docke
     : (action: string) =>
         `bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && ${action} 2>&1 | tee \${workspaceFolder}/Build-$VEB-$(date +%Y%m%d-%H%M%S).log'`;
 
-  const env: Record<string, string> = docker
+  const hostEnv: Record<string, string> = { VEB: veb };
+  // 只有真正交給 DockerBuild.sh 的 task 需要這些變數。Release/Custom 兩個 task
+  // 跑的是專案自己的腳本、仍在宿主執行，塞給它們只會讓人誤以為也走了容器。
+  const dockerEnv: Record<string, string> = docker
     ? {
         VEB: veb,
         VEB_DOCKER_IMAGE: docker.image,
@@ -265,7 +268,8 @@ export function buildLinuxTasksJson(veb: string, version: string, docker?: Docke
         VEB_DOCKER_AUTOINSTALL: docker.autoInstallDocker ? '1' : '0',
         VEB_DOCKER_FALLBACK: docker.allowFallback ? '1' : '0',
       }
-    : { VEB: veb };
+    : hostEnv;
+  const env = dockerEnv;
   const tasks = [
     { label: 'VebBuildTask', type: 'shell', command: cmd('make'), options: { env }, group: 'build' },
     { label: 'VebReBuildTask', type: 'shell', command: cmd('make rebuild'), options: { env }, group: 'build' },
@@ -274,13 +278,13 @@ export function buildLinuxTasksJson(veb: string, version: string, docker?: Docke
       label: 'VebReleaseBuildTask',
       type: 'shell',
       command: `chmod +x \${workspaceFolder}/GB300_Release_Build.sh && bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && \${workspaceFolder}/GB300_Release_Build.sh $VEB'`,
-      options: { env },
+      options: { env: hostEnv },
     },
     {
       label: 'VebCustomBuildTask',
       type: 'shell',
       command: `chmod +x \${workspaceFolder}/.vscode/CustomBuild.sh && bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && \${workspaceFolder}/.vscode/CustomBuild.sh'`,
-      options: { env },
+      options: { env: hostEnv },
     },
   ];
   return JSON.stringify({ version: '2.0.0', vebBuildProviderVersion: version, tasks }, null, 2);
