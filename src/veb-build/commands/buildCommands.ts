@@ -49,6 +49,82 @@ interface BuildInfo {
 
 const buildStartTimes = new Map<string, BuildInfo>();
 
+/**
+ * onDidEndTaskProcess 帶得到退出碼，onDidEndTask 才有完整的計時資訊，
+ * 而兩者的先後順序沒有保證。先把退出碼存起來，等 onDidEndTask 一併呈現。
+ */
+const lastExitCodes = new Map<string, number | undefined>();
+
+/**
+ * 找出專案裡最新的 build log，給失敗通知的「開啟 log」用。
+ * 找不到就回傳 undefined —— 通知照樣顯示，只是少一個按鈕。
+ */
+async function findLatestBuildLog(folderPath: string): Promise<string | undefined> {
+  try {
+    const entries = await fs.readdir(folderPath);
+    const logs = entries.filter(n => /^Build-.*\.log$/.test(n));
+    if (logs.length === 0) { return undefined; }
+    const stats = await Promise.all(
+      logs.map(async n => {
+        const p = path.join(folderPath, n);
+        return { p, mtime: (await fs.stat(p)).mtimeMs };
+      })
+    );
+    stats.sort((a, b) => b.mtime - a.mtime);
+    return stats[0].p;
+  } catch (error) {
+    logDebug(`Could not locate a build log in ${folderPath}: ${error}`);
+    return undefined;
+  }
+}
+
+/**
+ * build 結束通知。
+ *
+ * 退出碼在 2026-09 之前是不可信的：宿主的指令是 `make | tee`，退出碼取自 tee，
+ * 永遠是 0，所以「失敗」這個狀態根本表達不出來。宿主補上 pipefail、容器改用
+ * PIPESTATUS 之後才有辦法做出有意義的成功/失敗區分。
+ */
+export async function notifyBuildResult(
+  taskName: string,
+  vebFileName: string,
+  duration: string,
+  exitCode: number | undefined,
+  folderPath: string
+): Promise<void> {
+  const project = vebFileName.replace(/\.veb$/i, '') || taskName;
+
+  if (exitCode === undefined) {
+    vscode.window.showInformationMessage(`Build [${project}] finished in ${duration}.`);
+    return;
+  }
+
+  // wait/shell 對被訊號中止的行程回報 128+signum。那不是編譯錯誤，
+  // 混進失敗通知只會讓人去翻根本不存在的 log 錯誤。
+  if (exitCode > 128) {
+    vscode.window.showWarningMessage(
+      `Build [${project}] was interrupted after ${duration} (signal ${exitCode - 128}).`
+    );
+    return;
+  }
+
+  if (exitCode === 0) {
+    vscode.window.showInformationMessage(`Build [${project}] succeeded in ${duration}.`);
+    return;
+  }
+
+  const openLog = 'Open Log';
+  const logPath = await findLatestBuildLog(folderPath);
+  const choice = await vscode.window.showErrorMessage(
+    `Build [${project}] failed after ${duration} (exit ${exitCode}).`,
+    ...(logPath ? [openLog] : [])
+  );
+  if (choice === openLog && logPath) {
+    const doc = await vscode.workspace.openTextDocument(logPath);
+    await vscode.window.showTextDocument(doc, { preview: false });
+  }
+}
+
 // Utility Functions
 
 
@@ -103,6 +179,9 @@ function setupTaskListener(context: vscode.ExtensionContext): void {
       setBuildState(false);
 
       const folderPath = getFolderPath();
+      const exitCode = lastExitCodes.get(taskName);
+      lastExitCodes.delete(taskName);
+      void notifyBuildResult(taskName, buildInfo.vebFileName, formattedDuration, exitCode, folderPath);
 
       // Log build completion info
       logInfo(`Folder: ${folderPath}`);
@@ -146,6 +225,8 @@ function setupTaskListener(context: vscode.ExtensionContext): void {
     const taskName = e.execution.task.name;
     const buildInfo = buildStartTimes.get(taskName);
     if (buildInfo) {
+      // 退出碼只有這個事件拿得到，先存著讓 onDidEndTask 一併呈現。
+      lastExitCodes.set(taskName, e.exitCode);
       setBuildState(false);
     }
   });

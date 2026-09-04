@@ -7,7 +7,11 @@ import {
   shouldUseDocker,
   toContainerEnv,
 } from '../src/veb-build/core/dockerConfig';
-import { buildLinuxTasksJson, parseToolsDirFromEnvScript } from '../src/veb-build/commands/buildCommands';
+import {
+  buildLinuxTasksJson,
+  notifyBuildResult,
+  parseToolsDirFromEnvScript,
+} from '../src/veb-build/commands/buildCommands';
 
 const HOST_ROOT = '/home/someone/Desktop/VEB';
 
@@ -254,6 +258,58 @@ describe('docker_build.sh runner', () => {
   it('reports an interrupted build differently from a failed one', () => {
     assert.ok(script.includes('$RC -gt 128'),
       'wait returns 128+signum when interrupted; that is not a compile error');
+  });
+});
+
+describe('build result notification', () => {
+  const calls = () => (global as any).__mockedVscode.calls as Array<{ path: string[]; args: any[] }>;
+  const reset = () => { calls().length = 0; };
+  // 取最後一次 window.showXxxMessage 的種類與訊息
+  const lastMessage = () => {
+    const m = calls().filter(c => c.path[0] === 'window' && /^show\w+Message$/.test(c.path[1] ?? ''));
+    const last = m[m.length - 1];
+    return last ? { kind: last.path[1], text: String(last.args[0]) } : undefined;
+  };
+
+  beforeEach(reset);
+
+  it('reports success as an information message with the duration', async () => {
+    await notifyBuildResult('VebBuildTask', 'Standard.veb', '12m 34s', 0, '/nonexistent');
+    const m = lastMessage()!;
+    assert.strictEqual(m.kind, 'showInformationMessage');
+    assert.ok(m.text.includes('Standard'), 'names the project, not the task');
+    assert.ok(m.text.includes('12m 34s'));
+    assert.ok(/succeed/i.test(m.text));
+  });
+
+  it('reports a non-zero exit as an error message carrying the exit code', async () => {
+    await notifyBuildResult('VebBuildTask', 'Standard.veb', '3m 1s', 2, '/nonexistent');
+    const m = lastMessage()!;
+    assert.strictEqual(m.kind, 'showErrorMessage');
+    assert.ok(/fail/i.test(m.text));
+    assert.ok(m.text.includes('exit 2'));
+  });
+
+  // 被 Ctrl+C 中斷時 shell 回報 128+signum。那不是編譯錯誤，報成失敗會害人
+  // 去 log 裡找根本不存在的錯誤。
+  it('reports an interrupted build as a warning, not a failure', async () => {
+    await notifyBuildResult('VebBuildTask', 'Standard.veb', '45s', 130, '/nonexistent');
+    const m = lastMessage()!;
+    assert.strictEqual(m.kind, 'showWarningMessage');
+    assert.ok(/interrupt/i.test(m.text));
+    assert.ok(m.text.includes('signal 2'), '130 - 128 = SIGINT');
+  });
+
+  it('stays neutral when the exit code is unavailable', async () => {
+    await notifyBuildResult('VebBuildTask', 'Standard.veb', '1m', undefined, '/nonexistent');
+    const m = lastMessage()!;
+    assert.strictEqual(m.kind, 'showInformationMessage');
+    assert.ok(/finish/i.test(m.text), 'must not claim success it cannot verify');
+  });
+
+  it('falls back to the task name when no veb file is known', async () => {
+    await notifyBuildResult('VebBuildTask', '', '10s', 0, '/nonexistent');
+    assert.ok(lastMessage()!.text.includes('VebBuildTask'));
   });
 });
 

@@ -99,6 +99,33 @@ glibc 直接讀這個檔，所以不必在 image 裡裝 tzdata。
 這兩個跑的是專案自己的腳本（`GB300_Release_Build.sh` / `CustomBuild.sh`），
 內容因專案而異，貿然塞進容器風險較高。需要時再個別評估。
 
+## 與宿主模式的行為一致性
+
+容器模式刻意做到與原本的宿主 build 同行為，逐項對過：
+
+| 環節 | 說明 |
+|---|---|
+| 環境變數 / 工作目錄 | 容器內 source `PrepareEnvDockerScript.sh`，變數同名同語意；專案掛在相同絕對路徑 |
+| 輸出 | `make 2>&1 \| tee`，即時串流到 task 終端機 |
+| log 位置與命名 | 專案根目錄 `Build-<VEB>-<時間戳>.log`；掛入 `/etc/localtime` 避免時間戳偏移 |
+| 產物擁有者 | `--user $(id -u):$(id -g)` |
+| 退出碼 | 容器取 `PIPESTATUS[0]`；宿主補上 `set -o pipefail` 對齊 |
+| Ctrl+C 中斷 | 具名容器 + trap → `docker kill`（細節見下） |
+| build 結束通知 | 成功 / 失敗 / 中斷三種，兩模式共用同一段程式碼 |
+
+### 中斷為什麼需要特別處理
+
+容器內 PID 1 收不到預設訊號動作 —— 核心不對 PID 1 套用預設處理，沒有 handler 的
+SIGINT 會被直接丟掉。`docker run --init`（tini）也無效：它只轉給直接子行程 bash，
+非互動的 bash 不會再往下傳給正在等待的 make。可靠做法是從宿主端 `docker kill`。
+
+而且 bash 在前景指令執行期間不處理 trap，會延後到指令返回 —— `docker run` 正是
+那個不會返回的指令。因此 runner 把 `docker run` 丟到背景、用 `wait` 等待，
+`wait` 可被訊號打斷，trap 才會即時觸發。
+
+被中斷的 build 回報為「已中斷（signal N）」而非失敗：shell 對被訊號中止的行程
+回報 128+signum，直接顯示成 exit 130 會被誤讀成編譯錯誤。
+
 ## 模擬新機器上機流程
 
 ```bash
