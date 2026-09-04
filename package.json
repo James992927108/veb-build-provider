@@ -410,6 +410,16 @@
         "title": "Locate in Enhanced Debug TreeView",
         "category": "Enhanced Debug",
         "icon": "$(search-view)"
+      },
+      {
+        "command": "vebBuild.buildTool.dockerBuildImage",
+        "title": "Build BIOS Docker Image",
+        "category": "VEB"
+      },
+      {
+        "command": "vebBuild.buildTool.dockerDoctor",
+        "title": "Check BIOS Docker Environment",
+        "category": "VEB"
       }
     ],
     "viewsContainers": {
@@ -699,6 +709,31 @@
           "type": "boolean",
           "default": false,
           "description": "Show the VEB Build output channel in the Output panel on extension startup. Off by default so the panel does not pop open every launch"
+        },
+        "vebBuild.docker.mode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "always",
+            "never"
+          ],
+          "enumDescriptions": [
+            "Use Docker when it is available and the VEB tools root can be located; otherwise fall back to a host build",
+            "Always build inside Docker; fail loudly instead of falling back",
+            "Never use Docker; always build on the host"
+          ],
+          "default": "auto",
+          "description": "How VebBuildTask should run the BIOS build. Docker pins the toolchain so distro upgrades cannot break the build."
+        },
+        "vebBuild.docker.image": {
+          "type": "string",
+          "default": "veb-bios-build:24.04",
+          "description": "Local Docker image tag used for BIOS builds. Intentionally has no registry prefix - the image contains NDA-licensed AMI BuildTools and must never be pushed."
+        },
+        "vebBuild.docker.autoBuildImage": {
+          "type": "boolean",
+          "default": true,
+          "description": "Build the Docker image automatically the first time it is needed (uses the VEB tools root as build context)."
         }
       }
     }

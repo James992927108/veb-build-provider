@@ -1,0 +1,14 @@
+# 由 VEB Build Provider 產生 —— docker build context 排除清單
+# context 是 VEB 根目錄，這裡排除不需要進 image 的大檔（可省下 1GB 以上）。
+archives/
+*_original/
+_archive/
+backup-tony/
+docs/
+docker/
+.veb-docker/
+setup.log
+*.bak-*
+*.tar.gz
+*.7z
+*.zip

@@ -13,6 +13,16 @@ import { PROJECT_CONFIG } from '../../shared/config';
 import { setBuildState } from '../../shared/ui/statusBar';
 import { isModuleFeatureEnabled } from '../../shared/utils/moduleConfig';
 import { extractVebNameFromJson } from '../../shared/utils/taskConfig';
+import {
+  CONTAINER_VEB_ROOT,
+  DiscoveredEnv,
+  DockerMode,
+  DockerSettings,
+  deriveVebRoot,
+  renderEnvScript,
+  shouldUseDocker,
+  toContainerEnv,
+} from '../core/dockerConfig';
 
 // Constants & Enums
 
@@ -218,11 +228,41 @@ export function buildWindowsTasksJson(
   return JSON.stringify({ version: '2.0.0', vebBuildProviderVersion: version, tasks }, null, 2);
 }
 
+/**
+ * 產生 tasks.json 時要嵌入的 docker 設定。undefined 代表走宿主 build。
+ * 這些值會寫進 tasks.json 的 options.env，由 .vscode/DockerBuild.sh 讀取，
+ * 所以 DockerBuild.sh 可以是隨 extension 出貨的靜態檔，不必每個專案各產一份。
+ */
+export interface DockerTaskConfig {
+  image: string;
+  /** 宿主 VEB 根目錄，同時是 docker build 的 context。 */
+  hostVebRoot: string;
+  autoBuildImage: boolean;
+  /** docker 不可用時是否回落到宿主 build（mode=auto 為 true）。 */
+  allowFallback: boolean;
+}
+
 /** Build the Linux tasks.json body from objects instead of %s templates (OPT-12). */
-export function buildLinuxTasksJson(veb: string, version: string): string {
-  const cmd = (action: string) =>
-    `bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && ${action} 2>&1 | tee \${workspaceFolder}/Build-$VEB-$(date +%Y%m%d-%H%M%S).log'`;
-  const env = { VEB: veb };
+export function buildLinuxTasksJson(veb: string, version: string, docker?: DockerTaskConfig): string {
+  // docker 模式下 make 的參數交給 DockerBuild.sh，由它決定在容器內怎麼跑（含 log/tee）。
+  // 宿主模式維持原本的行為，不受影響。
+  const cmd = docker
+    ? (action: string) => {
+        const makeArgs = action.replace(/^make\s*/, '');
+        return `chmod +x \${workspaceFolder}/.vscode/DockerBuild.sh && \${workspaceFolder}/.vscode/DockerBuild.sh ${makeArgs}`.trimEnd();
+      }
+    : (action: string) =>
+        `bash -c 'source \${workspaceFolder}/.vscode/PrepareEnvLinuxScript.sh && ${action} 2>&1 | tee \${workspaceFolder}/Build-$VEB-$(date +%Y%m%d-%H%M%S).log'`;
+
+  const env: Record<string, string> = docker
+    ? {
+        VEB: veb,
+        VEB_DOCKER_IMAGE: docker.image,
+        VEB_HOST_VEB_ROOT: docker.hostVebRoot,
+        VEB_DOCKER_AUTOBUILD: docker.autoBuildImage ? '1' : '0',
+        VEB_DOCKER_FALLBACK: docker.allowFallback ? '1' : '0',
+      }
+    : { VEB: veb };
   const tasks = [
     { label: 'VebBuildTask', type: 'shell', command: cmd('make'), options: { env }, group: 'build' },
     { label: 'VebReBuildTask', type: 'shell', command: cmd('make rebuild'), options: { env }, group: 'build' },
@@ -241,6 +281,124 @@ export function buildLinuxTasksJson(veb: string, version: string): string {
     },
   ];
   return JSON.stringify({ version: '2.0.0', vebBuildProviderVersion: version, tasks }, null, 2);
+}
+
+// Docker Build Support
+
+const PREPARE_ENV_DOCKER_SCRIPT = 'PrepareEnvDockerScript.sh';
+const DOCKER_BUILD_SCRIPT = 'DockerBuild.sh';
+/** 放在宿主 VEB 根目錄底下，存 Dockerfile；build context 就是該根目錄。 */
+const DOCKER_ASSET_DIR = '.veb-docker';
+
+function readDockerSettings(): DockerSettings {
+  const cfg = vscode.workspace.getConfiguration('vebBuild');
+  return {
+    mode: cfg.get<DockerMode>('docker.mode', 'auto'),
+    image: cfg.get<string>('docker.image', 'veb-bios-build:24.04'),
+    autoBuildImage: cfg.get<boolean>('docker.autoBuildImage', true),
+  };
+}
+
+/** docker CLI 是否可用且 daemon 有回應。任何錯誤都視為不可用。 */
+async function probeDocker(): Promise<boolean> {
+  try {
+    const { execFile } = require('child_process');
+    const execFilePromise = util.promisify(execFile);
+    await execFilePromise('docker', ['info', '--format', '{{.ServerVersion}}'], { timeout: 10000 });
+    return true;
+  } catch (error) {
+    logDebug(`Docker probe failed: ${error}`);
+    return false;
+  }
+}
+
+/**
+ * 佈署 docker build 需要的檔案並回傳 tasks.json 用的設定。
+ * 回傳 undefined 代表這次走宿主 build。
+ *
+ * 產生的檔案：
+ *   <專案>/.vscode/PrepareEnvDockerScript.sh   容器內用的環境（路徑指向 /opt/veb）
+ *   <專案>/.vscode/DockerBuild.sh              執行器（隨 extension 出貨的靜態檔）
+ *   <VEB根>/.veb-docker/Dockerfile             image 定義
+ *   <VEB根>/.dockerignore                      context 排除清單（已存在則不覆寫）
+ */
+async function prepareDockerBuild(
+  folderpath: string,
+  envVars: DiscoveredEnv,
+  extensionPath: string
+): Promise<DockerTaskConfig | undefined> {
+  const settings = readDockerSettings();
+  if (settings.mode === 'never') {
+    logDebug('Docker mode = never; using host build.');
+    return undefined;
+  }
+
+  const hostVebRoot = deriveVebRoot(envVars.TOOLS_DIR);
+  const dockerAvailable = await probeDocker();
+  const use = shouldUseDocker(settings, {
+    dockerAvailable,
+    vebRootResolved: hostVebRoot !== undefined,
+  });
+
+  if (!use) {
+    // mode=auto 且條件不足：安靜回落，不打擾使用者。
+    logInfo(
+      `Docker build not used (mode=${settings.mode}, dockerAvailable=${dockerAvailable}, ` +
+      `vebRoot=${hostVebRoot ?? 'unresolved'}); falling back to host build.`
+    );
+    return undefined;
+  }
+
+  if (!hostVebRoot) {
+    // mode=always 但推不出 VEB 根：仍產生設定，讓 DockerBuild.sh 報出明確錯誤，
+    // 而不是在這裡靜靜地變成宿主 build（那會違背 always 的語意）。
+    logWarn(`Docker mode = always but VEB root could not be derived from TOOLS_DIR=${envVars.TOOLS_DIR}`);
+  }
+
+  try {
+    // 1) 容器內的環境腳本：把宿主 VEB 根前綴換成 image 內的固定路徑
+    const containerEnv = hostVebRoot ? toContainerEnv(envVars, hostVebRoot) : envVars;
+    const dockerEnvPath = path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_DOCKER_SCRIPT);
+    await writeFile(dockerEnvPath, renderEnvScript(containerEnv).replace(/\r\n?/g, '\n'));
+    logDebug(`Created container env script at ${dockerEnvPath} (VEB root -> ${CONTAINER_VEB_ROOT})`);
+
+    // 2) 執行器
+    const srcRunner = path.join(extensionPath, 'tools', 'scripts', 'docker_build.sh');
+    const dstRunner = path.join(folderpath, VSCODE_FOLDER, DOCKER_BUILD_SCRIPT);
+    await copyFile(srcRunner, dstRunner);
+    await fs.chmod(dstRunner, 0o755).catch(() => { /* 權限失敗不致命，task 會再 chmod +x */ });
+
+    // 3) Dockerfile 與 .dockerignore 放到 VEB 根（= build context）
+    if (hostVebRoot) {
+      const assetDir = path.join(hostVebRoot, DOCKER_ASSET_DIR);
+      await fs.mkdir(assetDir, { recursive: true });
+      await copyFile(path.join(extensionPath, 'tools', 'docker', 'Dockerfile'), path.join(assetDir, 'Dockerfile'));
+
+      // .dockerignore 已存在就不覆寫 —— 使用者可能有自己的調整。
+      const ignorePath = path.join(hostVebRoot, '.dockerignore');
+      const ignoreExists = await fs.access(ignorePath).then(() => true).catch(() => false);
+      if (!ignoreExists) {
+        await copyFile(path.join(extensionPath, 'tools', 'docker', 'dockerignore.template'), ignorePath);
+        logDebug(`Created ${ignorePath}`);
+      } else {
+        logDebug(`${ignorePath} already exists; left untouched.`);
+      }
+    }
+  } catch (error) {
+    logWarn(`Failed to prepare docker build assets: ${error}`);
+    if (settings.mode === 'auto') {
+      logWarn('Falling back to host build.');
+      return undefined;
+    }
+  }
+
+  logInfo(`Docker build enabled (image=${settings.image}, context=${hostVebRoot ?? 'unresolved'})`);
+  return {
+    image: settings.image,
+    hostVebRoot: hostVebRoot ?? '',
+    autoBuildImage: settings.autoBuildImage,
+    allowFallback: settings.mode === 'auto',
+  };
 }
 
 async function BuildDefaultTask(folderpath: string, selection: string, targetEnvironment: TargetEnvironment): Promise<string> {
@@ -276,6 +434,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
   } else if (targetEnvironment === 'linux') {
     // Linux/WSL handling
     const Veb = selection.split('.')[0];
+    let dockerTaskConfig: DockerTaskConfig | undefined;
     // Create PrepareEnvLinuxScript.sh dynamically for Linux/WSL
     const targetLinuxScriptPath = path.join(folderpath, VSCODE_FOLDER, PREPARE_ENV_LINUX_SCRIPT);
     
@@ -307,27 +466,7 @@ async function BuildDefaultTask(folderpath: string, selection: string, targetEnv
       logWarn(`Failed to run environment discovery script, using defaults: ${error}`);
     }
 
-    const linuxScriptContent = `#!/bin/bash
-# VEB Build Provider - Environment Setup Script
-
-# 1. Set environment variables (automatically detected)
-export VEB_BUILD_PROFILE="${envVars.PROFILE}"
-export TOOLS_DIR="${envVars.TOOLS_DIR}"
-export TOOLS_VERSION="${envVars.TOOLS_VERSION}"
-export AARCH64_TOOLS_DIR="${envVars.AARCH64_TOOLS_DIR}"
-export AARCH64_TOOL_PREFIX="${envVars.AARCH64_TOOL_PREFIX}"
-export JAVA_HOME="${envVars.JAVA_HOME}"
-export PATH="$JAVA_HOME/bin:$PATH"
-export MAKEFLAGS="JAVA=$JAVA_HOME/bin/java"
-
-echo "Environment initialized:"
-echo "  VEB_BUILD_PROFILE: $VEB_BUILD_PROFILE"
-echo "  TOOLS_DIR: $TOOLS_DIR"
-echo "  TOOLS_VERSION: $TOOLS_VERSION (${envVars.TOOLS_SOURCE})"
-echo "  AARCH64_TOOLS_DIR: $AARCH64_TOOLS_DIR"
-echo "  JAVA_HOME: $JAVA_HOME"
-echo "  MAKEFLAGS: $MAKEFLAGS"
-`;
+    const linuxScriptContent = renderEnvScript(envVars);
 
     try {
       // Write file with LF line endings (normalize line endings)
@@ -339,6 +478,9 @@ echo "  MAKEFLAGS: $MAKEFLAGS"
     } catch (error) {
       logWarn(`Failed to create Linux prepare script: ${error}`);
     }
+
+    // Docker 模式準備。即使最後決定走宿主，也不會有副作用 —— 只是不產生這些檔案。
+    dockerTaskConfig = await prepareDockerBuild(folderpath, envVars, vebExtension.extensionPath);
 
 
     // Create CustomBuild.sh — auto-configure if GB300_Release_Build.sh exists
@@ -389,7 +531,7 @@ chmod +x "$PROJECT_ROOT/GB300_Release_Build.sh"
 
     // No wrapper scripts needed - tasks will call commands directly
 
-    result = buildLinuxTasksJson(Veb, PROJECT_CONFIG.VERSION);
+    result = buildLinuxTasksJson(Veb, PROJECT_CONFIG.VERSION, dockerTaskConfig);
   } else {
     throw new Error(`Unsupported target environment: ${targetEnvironment}`);
   }
@@ -515,6 +657,84 @@ async function checkAndExecuteTask(taskName: string, errorMessage: string, track
   }
 }
 
+// Docker Command Handlers
+
+/**
+ * 從已產生的 PrepareEnvLinuxScript.sh 讀回 TOOLS_DIR。
+ * 比重跑一次 env_discovery 便宜，且保證與目前 tasks.json 用的是同一份環境。
+ */
+export function parseToolsDirFromEnvScript(scriptContent: string): string | undefined {
+  const m = scriptContent.match(/^export TOOLS_DIR="([^"]+)"/m);
+  return m ? m[1] : undefined;
+}
+
+/** 兩個 docker 命令共用：定位 VEB 根目錄，找不到就提示先跑 init task。 */
+async function resolveHostVebRoot(): Promise<string | undefined> {
+  const folderPath = getFolderPath();
+  if (!folderPath) { return undefined; }
+  const scriptPath = path.join(folderPath, VSCODE_FOLDER, PREPARE_ENV_LINUX_SCRIPT);
+  try {
+    const content = await readFile(scriptPath);
+    const toolsDir = parseToolsDirFromEnvScript(content);
+    if (!toolsDir) {
+      vscode.window.showErrorMessage(`Could not read TOOLS_DIR from ${PREPARE_ENV_LINUX_SCRIPT}.`);
+      return undefined;
+    }
+    const root = deriveVebRoot(toolsDir);
+    if (!root) {
+      vscode.window.showErrorMessage(`Could not derive the VEB root from TOOLS_DIR=${toolsDir}.`);
+      return undefined;
+    }
+    return root;
+  } catch (error) {
+    vscode.window.showErrorMessage(
+      `Could not read ${PREPARE_ENV_LINUX_SCRIPT}. Run the VEB init task (F8) first. (${error})`
+    );
+    return undefined;
+  }
+}
+
+/** 在終端機建置 image。放終端機而非背景，是因為這一步要好幾分鐘且使用者需要看到進度。 */
+export async function handleDockerBuildImage(): Promise<void> {
+  const root = await resolveHostVebRoot();
+  if (!root) { return; }
+  const settings = readDockerSettings();
+  const dockerfile = path.join(root, DOCKER_ASSET_DIR, 'Dockerfile');
+
+  const terminal = vscode.window.createTerminal({ name: 'VEB Docker Image' });
+  terminal.show();
+  terminal.sendText(`echo "Building ${settings.image} (context: ${root})"`);
+  terminal.sendText('echo "This image contains NDA-licensed AMI BuildTools - do NOT push it."');
+  terminal.sendText(`docker build -f "${dockerfile}" -t "${settings.image}" "${root}"`);
+  logInfo(`Docker image build started: ${settings.image} (context ${root})`);
+}
+
+/** 檢查容器內環境是否完整 —— 對應 build 曾經踩過的那幾個坑。 */
+export async function handleDockerDoctor(): Promise<void> {
+  const settings = readDockerSettings();
+  const terminal = vscode.window.createTerminal({ name: 'VEB Docker Doctor' });
+  terminal.show();
+  const script = [
+    'set -u',
+    'echo "=== OS ==="; . /etc/os-release; echo "$PRETTY_NAME"',
+    'echo "=== required binaries ==="',
+    'for f in /usr/bin/cpp /usr/bin/dtc /usr/bin/gawk /usr/bin/7z /usr/bin/make /usr/bin/python3; do',
+    '  [ -x "$f" ] && echo "  OK  $f" || echo "  MISSING  $f"; done',
+    'echo "=== python modules ==="',
+    'for m in yaml requests; do python3 -c "import $m" 2>/dev/null && echo "  OK  $m" || echo "  MISSING  $m"; done',
+    'echo "=== java ==="',
+    'for j in /usr/lib/jvm/java-8-openjdk-amd64 /usr/lib/jvm/java-21-openjdk-amd64; do',
+    '  [ -x "$j/bin/java" ] && echo "  OK  $j" || echo "  MISSING  $j"; done',
+    'echo "=== AMI tools ==="',
+    'for t in /opt/veb/Linux_x64_Aptio_5.x_TOOLS_*/Tools; do',
+    '  [ -f "$t/BuildToolsVersion.mak" ] && echo "  OK  $t" || echo "  MISSING  $t"; done',
+    'echo "=== cross toolchain ==="',
+    'ls /opt/veb/toolchains/*/bin/aarch64-none-linux-gnu-gcc 2>/dev/null | head -1 | xargs -r -I{} sh -c \'{} --version | head -1\'',
+  ].join('; ');
+  terminal.sendText(`docker run --rm "${settings.image}" bash -c '${script.replace(/'/g, `'"'"'`)}'`);
+  logInfo(`Docker doctor started for image ${settings.image}`);
+}
+
 // Command Registration
 
 export function registerVebBuildCommands(context: vscode.ExtensionContext): void {
@@ -523,6 +743,8 @@ export function registerVebBuildCommands(context: vscode.ExtensionContext): void
   registerCommandWithLog(context, 'vebBuild.buildTool.vebReBuild', handleVebReBuild);
   registerCommandWithLog(context, 'vebBuild.buildTool.vebCustomBuild', handleVebCustomBuild);
   registerCommandWithLog(context, 'vebBuild.buildTool.stopTerminal', handleterminateTerminal);
+  registerCommandWithLog(context, 'vebBuild.buildTool.dockerBuildImage', handleDockerBuildImage);
+  registerCommandWithLog(context, 'vebBuild.buildTool.dockerDoctor', handleDockerDoctor);
 
   // Level-2 build feature switch: Makefile variable expansion tools
   if (isModuleFeatureEnabled('build', 'enableMakefileTools')) {
