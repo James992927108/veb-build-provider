@@ -9,7 +9,8 @@
 #   VEB_DOCKER_IMAGE        image tag
 #   VEB_HOST_VEB_ROOT       宿主 VEB 根目錄，同時是 docker build 的 context
 #   VEB_DOCKER_AUTOBUILD    1 = image 不存在時自動建置
-#   VEB_DOCKER_FALLBACK     1 = docker 不可用時回落到宿主 build（mode=auto）
+#   VEB_DOCKER_AUTOINSTALL  1 = 偵測不到 docker 時自動安裝（需要 sudo）
+#   VEB_DOCKER_FALLBACK     1 = docker 仍不可用時回落到宿主 build（mode=auto）
 #
 # 用法: DockerBuild.sh <make 的參數...>
 #   DockerBuild.sh                # 增量
@@ -17,6 +18,8 @@
 #   DockerBuild.sh clean
 set -uo pipefail
 
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+SCRIPT_ARGS=("$@")
 MAKE_ARGS="$*"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VSCODE_DIR="$PROJECT_DIR/.vscode"
@@ -24,6 +27,7 @@ VSCODE_DIR="$PROJECT_DIR/.vscode"
 IMAGE="${VEB_DOCKER_IMAGE:-veb-bios-build:24.04}"
 HOST_VEB_ROOT="${VEB_HOST_VEB_ROOT:-}"
 AUTOBUILD="${VEB_DOCKER_AUTOBUILD:-1}"
+AUTOINSTALL="${VEB_DOCKER_AUTOINSTALL:-1}"
 FALLBACK="${VEB_DOCKER_FALLBACK:-1}"
 VEB_NAME="${VEB:-Standard}"
 
@@ -52,8 +56,54 @@ fallback_to_host() {
     exit "${PIPESTATUS[0]}"
 }
 
-command -v docker >/dev/null 2>&1 || fallback_to_host "找不到 docker 指令。"
-docker info >/dev/null 2>&1 || fallback_to_host "docker daemon 無法連線（可能未啟動，或使用者不在 docker group）。"
+docker_usable() { command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; }
+
+# 偵測不到可用的 docker 時，先嘗試安裝再說。裝完若只差群組尚未生效，
+# 用 sg 重新執行自己一次 —— 新的群組成員資格不會套用到已存在的 shell，
+# 否則使用者得先登出登入才能 build，那就稱不上「自動」了。
+ensure_docker() {
+    docker_usable && return 0
+
+    if [[ "$AUTOINSTALL" != "1" ]]; then
+        return 1
+    fi
+
+    local installer="$VSCODE_DIR/DockerInstall.sh"
+    if [[ ! -f "$installer" ]]; then
+        warn "找不到 $installer，無法自動安裝。"
+        return 1
+    fi
+
+    info "偵測不到可用的 docker，開始自動安裝（需要 sudo 權限）。"
+    chmod +x "$installer" 2>/dev/null
+    bash "$installer"
+    local rc=$?
+
+    case "$rc" in
+        0) docker_usable && return 0; return 1 ;;
+        2)
+            # 已安裝、使用者也已在 docker group，但當前 shell 還沒套用。
+            # 用 sg 重新執行一次本腳本；guard 變數避免無限遞迴。
+            if [[ -n "${VEB_DOCKER_SG_REEXEC:-}" ]]; then
+                warn "已透過 sg 重試過仍無法使用 docker。"
+                return 1
+            fi
+            if ! command -v sg >/dev/null 2>&1; then
+                warn "找不到 sg 指令，無法在本次 session 套用 docker 群組。"
+                warn "請重新登入後再 build。"
+                return 1
+            fi
+            info "以 docker 群組重新執行本次 build ..."
+            export VEB_DOCKER_SG_REEXEC=1
+            local quoted
+            quoted="$(printf '%q ' "$SCRIPT_PATH" "${SCRIPT_ARGS[@]+"${SCRIPT_ARGS[@]}"}")"
+            exec sg docker -c "$quoted"
+            ;;
+        *) return 1 ;;
+    esac
+}
+
+ensure_docker || fallback_to_host "docker 不可用（未安裝、daemon 未啟動，或自動安裝失敗）。"
 
 # ── image 準備 ───────────────────────────────────────────────────────────────
 if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then

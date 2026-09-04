@@ -64,8 +64,8 @@ describe('dockerConfig.toContainerEnv', () => {
 });
 
 describe('dockerConfig.shouldUseDocker', () => {
-  const s = (mode: 'auto' | 'always' | 'never') =>
-    ({ mode, image: 'img', autoBuildImage: true });
+  const s = (mode: 'auto' | 'always' | 'never', autoInstallDocker = true) =>
+    ({ mode, image: 'img', autoBuildImage: true, autoInstallDocker });
 
   it('never means never', () => {
     assert.strictEqual(
@@ -77,13 +77,27 @@ describe('dockerConfig.shouldUseDocker', () => {
       shouldUseDocker(s('always'), { dockerAvailable: false, vebRootResolved: false }), true);
   });
 
-  it('auto requires both docker and a resolvable VEB root', () => {
+  it('auto uses docker when it is already available', () => {
     assert.strictEqual(
       shouldUseDocker(s('auto'), { dockerAvailable: true, vebRootResolved: true }), true);
+  });
+
+  it('auto still picks docker when it is missing but may be installed', () => {
     assert.strictEqual(
-      shouldUseDocker(s('auto'), { dockerAvailable: false, vebRootResolved: true }), false);
+      shouldUseDocker(s('auto', true), { dockerAvailable: false, vebRootResolved: true }), true,
+      'the runner installs docker before building; it falls back itself if that fails');
+  });
+
+  it('auto falls back to the host when docker is missing and auto-install is off', () => {
     assert.strictEqual(
-      shouldUseDocker(s('auto'), { dockerAvailable: true, vebRootResolved: false }), false);
+      shouldUseDocker(s('auto', false), { dockerAvailable: false, vebRootResolved: true }), false);
+  });
+
+  it('auto always needs a resolvable VEB root, since it is the image build context', () => {
+    assert.strictEqual(
+      shouldUseDocker(s('auto', true), { dockerAvailable: true, vebRootResolved: false }), false);
+    assert.strictEqual(
+      shouldUseDocker(s('auto', true), { dockerAvailable: false, vebRootResolved: false }), false);
   });
 });
 
@@ -117,6 +131,7 @@ describe('buildLinuxTasksJson - docker mode', () => {
     image: 'veb-bios-build:24.04',
     hostVebRoot: HOST_ROOT,
     autoBuildImage: true,
+    autoInstallDocker: true,
     allowFallback: true,
   };
 
@@ -138,7 +153,14 @@ describe('buildLinuxTasksJson - docker mode', () => {
     assert.strictEqual(env.VEB_DOCKER_IMAGE, 'veb-bios-build:24.04');
     assert.strictEqual(env.VEB_HOST_VEB_ROOT, HOST_ROOT);
     assert.strictEqual(env.VEB_DOCKER_AUTOBUILD, '1');
+    assert.strictEqual(env.VEB_DOCKER_AUTOINSTALL, '1');
     assert.strictEqual(env.VEB_DOCKER_FALLBACK, '1');
+  });
+
+  it('encodes auto-install off so the runner does not try to apt-install', () => {
+    const parsed = JSON.parse(buildLinuxTasksJson('MyProj', '3.12.0', { ...docker, autoInstallDocker: false }));
+    const env = parsed.tasks.find((t: any) => t.label === 'VebBuildTask').options.env;
+    assert.strictEqual(env.VEB_DOCKER_AUTOINSTALL, '0');
   });
 
   it('encodes mode=always as no-fallback', () => {

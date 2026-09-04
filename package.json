@@ -718,7 +718,7 @@
             "never"
           ],
           "enumDescriptions": [
-            "Use Docker when it is available and the VEB tools root can be located; otherwise fall back to a host build",
+            "Use Docker whenever the VEB tools root can be located; install Docker automatically if it is missing (see vebBuild.docker.autoInstall), and fall back to a host build only if that fails",
             "Always build inside Docker; fail loudly instead of falling back",
             "Never use Docker; always build on the host"
           ],
@@ -734,6 +734,11 @@
           "type": "boolean",
           "default": true,
           "description": "Build the Docker image automatically the first time it is needed (uses the VEB tools root as build context)."
+        },
+        "vebBuild.docker.autoInstall": {
+          "type": "boolean",
+          "default": true,
+          "description": "Install Docker automatically (apt install docker.io) when it is missing. Requires sudo; the password prompt appears in the build task terminal."
         }
       }
     }

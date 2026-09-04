@@ -10,8 +10,21 @@
 裝好 VS Code 與本 extension，開啟專案，按 **F8** 跑 init task 選 `.veb` 檔，
 然後照常按 build（`VebBuildTask`）。就這樣 —— 沒有額外步驟。
 
-第一次 build 時若 image 不存在，`DockerBuild.sh` 會自動建置（數分鐘），
-之後直接重用。若機器上沒有 docker，會**自動回落到宿主 build**，行為與以前完全相同。
+第一次 build 時若 image 不存在，`DockerBuild.sh` 會自動建置（數分鐘），之後直接重用。
+**若機器上沒有 docker，會自動安裝**（`apt install docker.io`）。
+
+### 自動安裝 docker 的兩個現實限制
+
+**需要 sudo。** 安裝會在 build task 的終端機裡跳出密碼提示。這在互動使用下沒問題，
+但非互動情境（CI、背景執行）若沒設 NOPASSWD 就會失敗 —— 屆時依 `mode` 決定回落或報錯。
+
+**群組成員資格不會套用到已存在的 shell。** 安裝時會把使用者加進 `docker` group，
+但既有的登入 session 不會立刻生效。`DockerBuild.sh` 會用 `sg docker` 重新執行自己一次
+來繞過這點，所以**當次 build 不需要重新登入**；不過建議之後找時間登出登入一次，
+讓後續所有終端機都自然帶有該群組。
+
+安裝失敗時（不支援的發行版、沒有 sudo、daemon 起不來），`mode=auto` 會回落到宿主 build，
+`mode=always` 則明確報錯。
 
 ## 為什麼要做這件事
 
@@ -39,6 +52,7 @@ MB1BCT / pinmux 的 DTS，於是 build 卡在 `CreateSpiImage`，錯誤訊息只
 | `vebBuild.docker.mode` | `auto` | `auto` 有 docker 就用、沒有就回落宿主；`always` 一定走容器、缺條件時明確報錯；`never` 永遠走宿主 |
 | `vebBuild.docker.image` | `veb-bios-build:24.04` | 本機 image tag |
 | `vebBuild.docker.autoBuildImage` | `true` | image 不存在時自動建置 |
+| `vebBuild.docker.autoInstall` | `true` | docker 不存在時自動安裝（`apt install docker.io`，需 sudo） |
 
 ## 命令
 

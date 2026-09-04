@@ -238,7 +238,9 @@ export interface DockerTaskConfig {
   /** 宿主 VEB 根目錄，同時是 docker build 的 context。 */
   hostVebRoot: string;
   autoBuildImage: boolean;
-  /** docker 不可用時是否回落到宿主 build（mode=auto 為 true）。 */
+  /** docker 不存在時是否自動安裝（需要 sudo）。 */
+  autoInstallDocker: boolean;
+  /** docker 仍不可用時是否回落到宿主 build（mode=auto 為 true）。 */
   allowFallback: boolean;
 }
 
@@ -260,6 +262,7 @@ export function buildLinuxTasksJson(veb: string, version: string, docker?: Docke
         VEB_DOCKER_IMAGE: docker.image,
         VEB_HOST_VEB_ROOT: docker.hostVebRoot,
         VEB_DOCKER_AUTOBUILD: docker.autoBuildImage ? '1' : '0',
+        VEB_DOCKER_AUTOINSTALL: docker.autoInstallDocker ? '1' : '0',
         VEB_DOCKER_FALLBACK: docker.allowFallback ? '1' : '0',
       }
     : { VEB: veb };
@@ -287,6 +290,7 @@ export function buildLinuxTasksJson(veb: string, version: string, docker?: Docke
 
 const PREPARE_ENV_DOCKER_SCRIPT = 'PrepareEnvDockerScript.sh';
 const DOCKER_BUILD_SCRIPT = 'DockerBuild.sh';
+const DOCKER_INSTALL_SCRIPT = 'DockerInstall.sh';
 /** 放在宿主 VEB 根目錄底下，存 Dockerfile；build context 就是該根目錄。 */
 const DOCKER_ASSET_DIR = '.veb-docker';
 
@@ -296,6 +300,7 @@ function readDockerSettings(): DockerSettings {
     mode: cfg.get<DockerMode>('docker.mode', 'auto'),
     image: cfg.get<string>('docker.image', 'veb-bios-build:24.04'),
     autoBuildImage: cfg.get<boolean>('docker.autoBuildImage', true),
+    autoInstallDocker: cfg.get<boolean>('docker.autoInstall', true),
   };
 }
 
@@ -362,11 +367,15 @@ async function prepareDockerBuild(
     await writeFile(dockerEnvPath, renderEnvScript(containerEnv).replace(/\r\n?/g, '\n'));
     logDebug(`Created container env script at ${dockerEnvPath} (VEB root -> ${CONTAINER_VEB_ROOT})`);
 
-    // 2) 執行器
-    const srcRunner = path.join(extensionPath, 'tools', 'scripts', 'docker_build.sh');
-    const dstRunner = path.join(folderpath, VSCODE_FOLDER, DOCKER_BUILD_SCRIPT);
-    await copyFile(srcRunner, dstRunner);
-    await fs.chmod(dstRunner, 0o755).catch(() => { /* 權限失敗不致命，task 會再 chmod +x */ });
+    // 2) 執行器與安裝器
+    for (const [src, dst] of [
+      ['docker_build.sh', DOCKER_BUILD_SCRIPT],
+      ['docker_install.sh', DOCKER_INSTALL_SCRIPT],
+    ] as const) {
+      const dstPath = path.join(folderpath, VSCODE_FOLDER, dst);
+      await copyFile(path.join(extensionPath, 'tools', 'scripts', src), dstPath);
+      await fs.chmod(dstPath, 0o755).catch(() => { /* 權限失敗不致命，task 會再 chmod +x */ });
+    }
 
     // 3) Dockerfile 與 .dockerignore 放到 VEB 根（= build context）
     if (hostVebRoot) {
@@ -397,6 +406,7 @@ async function prepareDockerBuild(
     image: settings.image,
     hostVebRoot: hostVebRoot ?? '',
     autoBuildImage: settings.autoBuildImage,
+    autoInstallDocker: settings.autoInstallDocker,
     allowFallback: settings.mode === 'auto',
   };
 }

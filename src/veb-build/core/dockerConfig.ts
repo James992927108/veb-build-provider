@@ -26,6 +26,8 @@ export interface DockerSettings {
   mode: DockerMode;
   image: string;
   autoBuildImage: boolean;
+  /** docker 不存在時，是否讓 DockerBuild.sh 嘗試自動安裝（需要 sudo）。 */
+  autoInstallDocker: boolean;
 }
 
 /**
@@ -82,8 +84,11 @@ echo "  MAKEFLAGS: $MAKEFLAGS"
 
 /**
  * 決定這次 build 要不要走容器。
- * auto   = 有 docker 且能定位 VEB 根就用，否則沉默回落到宿主
- *          （沒裝 docker 的人不該因此不能 build）
+ *
+ * auto   = 能定位 VEB 根（image build context 的必要條件）就走容器。
+ *          docker 當下不存在也沒關係 —— 只要允許自動安裝，DockerBuild.sh
+ *          會先裝好再繼續；真的裝不起來時它自己會回落到宿主。
+ *          不允許自動安裝時，才退回「docker 必須當下可用」的判斷。
  * always = 一定走容器，缺條件時由呼叫端報錯而不是偷偷回落
  * never  = 永遠走宿主
  */
@@ -93,5 +98,6 @@ export function shouldUseDocker(
 ): boolean {
   if (settings.mode === 'never') { return false; }
   if (settings.mode === 'always') { return true; }
-  return probe.dockerAvailable && probe.vebRootResolved;
+  if (!probe.vebRootResolved) { return false; }
+  return probe.dockerAvailable || settings.autoInstallDocker;
 }
