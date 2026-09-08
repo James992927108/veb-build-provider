@@ -39,6 +39,14 @@ VEB Build Provider 是一款專為 [VEB 專案](https://github.com/James99292710
 - **Debug 工具**：內建 Debug Snippet 插入功能，協助開發除錯
 - **模組管理**：EDK2 模組掃描、增強與管理功能
 
+### 模型終端標題（Linux / bash）
+
+命令面板執行 `VEB Build: Set Up Model Terminal Titles`，為既有 `claude-cli` 與 bash 的 `codex` 加入 OSC 標題：`v4-pro: <資料夾>`、`v4-flash: <資料夾>`、`claude: <資料夾>`、`codex: <資料夾>`。也可執行 `VEB Build: Open Model Terminal` 選擇模型並開啟終端。
+
+設定指令會先驗證腳本、備份有變更的檔案，再更新使用者終端設定；安裝或啟動套件本身不會改寫使用者檔案。需先備妥 Linux/bash、Claude/Codex CLI 及含 `launch_pro`、`launch_flash` 的統一入口腳本，不會安裝 CLI 或修改模型端點／金鑰。既有互動選單的 `c` 也會經過 cloud 啟動函式。
+
+標題使用 `${sequence}`，左側原生分頁以 `${process}` 顯示 process 描述。**VS Code 原生 description 位於標題右側，不支援透過 location 設定變成上下兩行。** 新啟動的 CLI 才會寫入模型標題，已執行中的 CLI 不回溯更新。[完整操作與還原說明](docs/model-terminal-titles.md)。
+
 ### 🧭 EDK2 跨檔案語言服務 ✨ **新功能**
 - **跨檔案 Go to Definition**：GUID / PCD / LibraryClass / 模組 BaseName 一鍵跳到宣告位置（如 INF 的 `gTokenSpace.PcdXXX` → 對應 .dec 宣告、LibraryClass → 對應 .inf），與原本的 `!include` / 路徑跳轉合併顯示；沿用 VS Code 內建按鍵 **F12**，無需額外設定
 - **Find References**：跨 .dec / .inf / .dsc 搜尋 symbol 的所有使用位置；沿用 VS Code 內建按鍵 **Shift+F12**

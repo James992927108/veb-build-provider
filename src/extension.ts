@@ -9,10 +9,12 @@ import { isMasterModuleEnabled } from './shared/utils/moduleConfig';
 import { registerVebBuildModule } from './veb-build';
 import { registerEdk2DebugModule } from './edk2-debug';
 import { registerLanguageSupportModule } from './language-support';
+import { registerModelTerminals } from './model-terminal';
 
 export function activate(context: vscode.ExtensionContext): void {
     initLogger(context);
     logDebug(`Extension activated at: ${new Date().toISOString()}`);
+    registerModelTerminals(context);
 
     // Level-1 master switches gate each top-level module. Per-module feature
     // switches are consumed inside each module itself.

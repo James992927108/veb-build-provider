@@ -280,6 +280,18 @@
         "title": "Stop Terminal"
       },
       {
+        "command": "vebBuild.modelTerminal.setup",
+        "title": "Set Up Model Terminal Titles",
+        "enablement": "config.vebBuild.modelTerminal.enabled && isLinux && isWorkspaceTrusted",
+        "category": "VEB Build"
+      },
+      {
+        "command": "vebBuild.modelTerminal.open",
+        "title": "Open Model Terminal",
+        "enablement": "config.vebBuild.modelTerminal.enabled && isLinux && isWorkspaceTrusted",
+        "category": "VEB Build"
+      },
+      {
         "command": "vebBuild.formatter.formatEdk2",
         "title": "Format Document"
       },
@@ -644,6 +656,17 @@
           "type": "boolean",
           "default": true,
           "description": "Master switch: Enable EDK2 language support (navigation, lint, completion, formatting). Sub-switches live under vebBuild.modules.language.*"
+        },
+        "vebBuild.modelTerminal.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable model terminal setup and launch commands (Linux/bash). Reload the window after changing. Disabling does not remove previously installed shell helpers."
+        },
+        "vebBuild.modelTerminal.launcherPath": {
+          "type": "string",
+          "default": "~/.local/bin/claude-cli",
+          "scope": "machine",
+          "description": "Existing bash launcher with launch_pro / launch_flash / launch_cloud functions. Setup preserves endpoint settings and validates scripts before writing."
         },
         "vebBuild.modules.build.enableMakefileTools": {
           "type": "boolean",

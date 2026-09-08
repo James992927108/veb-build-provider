@@ -16,6 +16,7 @@ temp/**
 out-test/**
 test/**
 docs/**
+!docs/model-terminal-titles.md
 .claude/**
 CLAUDE.md
 USAGE_GUIDE.md
