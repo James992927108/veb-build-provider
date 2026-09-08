@@ -282,13 +282,13 @@
       {
         "command": "vebBuild.modelTerminal.setup",
         "title": "Set Up Model Terminal Titles",
-        "enablement": "config.vebBuild.modelTerminal.enabled && isLinux && isWorkspaceTrusted",
+        "enablement": "config.vebBuild.modelTerminal.enabled && isWorkspaceTrusted",
         "category": "VEB Build"
       },
       {
         "command": "vebBuild.modelTerminal.open",
         "title": "Open Model Terminal",
-        "enablement": "config.vebBuild.modelTerminal.enabled && isLinux && isWorkspaceTrusted",
+        "enablement": "config.vebBuild.modelTerminal.enabled && isWorkspaceTrusted",
         "category": "VEB Build"
       },
       {
