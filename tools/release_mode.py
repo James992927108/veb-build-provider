@@ -203,20 +203,33 @@ def create_release_directory(version):
 def copy_release_files(release_dir, version):
     """Copy release files"""
     print("Moving .vsix file to release directory...")
-    
+
     vsix_files = glob.glob(os.path.join(PROJECT_ROOT, '*.vsix'))
     if not vsix_files:
         print("Error: No .vsix file found. vsce package may have failed.")
         return False
-    
+
     vsix_file = vsix_files[0]
-    
+
     package_name = f"veb-build-provider-{version}.vsix"
     dst_path = release_dir / package_name
-    
+
     shutil.move(vsix_file, dst_path)
-    
+
     print(f"✓ {package_name} moved to {release_dir}")
+
+    # Auto-install so the running VS Code picks up the new version
+    # immediately (--force upgrades the same-id extension in place).
+    install_result = subprocess.run(
+        ['code', '--install-extension', str(dst_path), '--force'],
+        capture_output=True, text=True
+    )
+    if install_result.returncode == 0:
+        print(f"✓ Installed {package_name} into VS Code — reload window to activate.")
+    else:
+        print(f"! Could not auto-install into VS Code: {install_result.stderr.strip()}")
+        print(f"  Install manually:  code --install-extension {dst_path}")
+
     return True
 
 def git_operations(version):
